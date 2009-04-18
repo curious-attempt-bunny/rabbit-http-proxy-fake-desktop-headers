@@ -91,4 +91,14 @@ public class MultiSelectorNioHandler implements NioHandler {
 		}
 	    });
     }
+
+    public void close (final SelectableChannel channel) {
+	for (SingleSelectorRunner sr : selectorRunners) {
+	    sr.runSelectorTask (new SelectorRunnable () {
+		    public void run (SingleSelectorRunner ssr) {
+			ssr.close (channel);
+		    }
+		});
+	}
+    }
 }

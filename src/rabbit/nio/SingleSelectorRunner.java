@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /** A selector handler.
@@ -24,26 +25,28 @@ class SingleSelectorRunner implements Runnable {
 
     /** The queue to get back on the main thread. */
     private final Object returnedTasksLock = new Object ();
-    private List<SelectorRunnable> returnedTasks1 = 
+    private List<SelectorRunnable> returnedTasks1 =
 	new ArrayList<SelectorRunnable> ();
-    private List<SelectorRunnable> returnedTasks2 = 
+    private List<SelectorRunnable> returnedTasks2 =
 	new ArrayList<SelectorRunnable> ();
 
-    private static int id = 0;
+    private int id = 0;
+    private static int idSequence = 0;
 
-    public SingleSelectorRunner (ExecutorService executorService) 
+    public SingleSelectorRunner (ExecutorService executorService)
 	throws IOException {
 	selector = Selector.open ();
 	logger = Logger.getLogger (getClass ().getName ());
 	this.executorService = executorService;
+	id = idSequence++;
     }
 
-    private static synchronized int getId () {
-	return id++;
+    @Override public String toString () {
+	return getClass ().getSimpleName () + "{id: " + id + "}";
     }
 
     public void start () {
-	Thread t = new Thread (this, getClass ().getName () + " " + getId ());
+	Thread t = new Thread (this, getClass ().getName () + " " + id);
 	running.set (true);
 	t.start ();
     }
@@ -57,7 +60,7 @@ class SingleSelectorRunner implements Runnable {
 	} catch (IOException e) {
 	    logger.warning ("Got exception while closing selector: " + e);
 	    e.printStackTrace ();
-	} 
+	}
     }
 
     private interface ChannelOpsUpdater {
@@ -65,8 +68,8 @@ class SingleSelectorRunner implements Runnable {
 	void addHandler (ChannelOpsHandler coh);
     }
 
-    private void updateSelectionKey (SelectableChannel channel, 
-				     ChannelOpsUpdater updater) 
+    private void updateSelectionKey (SelectableChannel channel,
+				     ChannelOpsUpdater updater)
 	throws IOException {
 	SelectionKey sk = channel.keyFor (selector);
 	if (sk == null) {
@@ -81,8 +84,8 @@ class SingleSelectorRunner implements Runnable {
 
     }
 
-    public void waitForRead (SelectableChannel channel, 
-			     final ReadHandler handler) 
+    public void waitForRead (SelectableChannel channel,
+			     final ReadHandler handler)
 	throws IOException {
 	updateSelectionKey (channel, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
@@ -91,8 +94,8 @@ class SingleSelectorRunner implements Runnable {
 	    });
     }
 
-    public void waitForWrite (SelectableChannel channel, 
-			      final WriteHandler handler) 
+    public void waitForWrite (SelectableChannel channel,
+			      final WriteHandler handler)
 	throws IOException {
 	updateSelectionKey (channel, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
@@ -101,7 +104,7 @@ class SingleSelectorRunner implements Runnable {
 	    });
     }
 
-    public void waitForAccept (SelectableChannel channel, 
+    public void waitForAccept (SelectableChannel channel,
 			       final AcceptHandler handler)
 	throws IOException {
 	updateSelectionKey (channel, new ChannelOpsUpdater () {
@@ -111,7 +114,7 @@ class SingleSelectorRunner implements Runnable {
 	    });
     }
 
-    public void waitForConnect (SelectableChannel channel, 
+    public void waitForConnect (SelectableChannel channel,
 				final ConnectHandler handler)
 	throws IOException {
 	updateSelectionKey (channel, new ChannelOpsUpdater () {
@@ -127,13 +130,16 @@ class SingleSelectorRunner implements Runnable {
 	long sleepTime = 100 * 1000; // 100 seconds
 	while (running.get ()) {
 	    try {
+		if (logger.isLoggable (Level.FINEST))
+		    logger.finest (id + ": going into select: " + sleepTime);
 		selector.select (sleepTime);
 		long now = System.currentTimeMillis ();
 		long diff = now - lastRun;
-		if (diff > 100) 
+		if (diff > 100)
 		    counter = 0;
 
-		logger.finest ("selector selected or woken up");
+		if (logger.isLoggable (Level.FINEST))
+		    logger.finest (id + ":after select");
 		cancelTimeouts (now);
 		int num = handleSelects ();
 		int rt = 0;
@@ -143,27 +149,27 @@ class SingleSelectorRunner implements Runnable {
 		} while (rt > 0);
 		if (num == 0)
 		    counter++;
-		
+
 		if (counter > 100000) {
 		    tryAvoidSpinning (counter, now, diff);
 		    counter = 0;
 		}
-		
+
 		Long nextTimeout = findNextTimeout ();
-		if (nextTimeout != null) 
+		if (nextTimeout != null)
 		    sleepTime = nextTimeout - now;
-		else 
+		else
 		    sleepTime = 100 * 1000;
-		
+
 		lastRun = now;
 	    } catch (IOException e) {
-		logger.warning ("Failed to accept, " + 
+		logger.warning (id + ": Failed to accept, " +
 				"shutting down selector: " + e +
 				"\n" + getStackTrace (e));
 		shutdown ();
 	    } catch (Exception e) {
-		logger.warning ("Unknown error: " + e + 
-				" attemting to ignore\n" + 
+		logger.warning (id + ": Unknown error: " + e +
+				" attemting to ignore\n" +
 				 getStackTrace (e));
 	    }
 	}
@@ -178,7 +184,7 @@ class SingleSelectorRunner implements Runnable {
 	    Long timeout = coh.getMinimumTimeout ();
 	    if (timeout != null) {
 		if (min != null) {
-		    min = min.longValue () < timeout.longValue () ? 
+		    min = min.longValue () < timeout.longValue () ?
 			min : timeout;
 		} else {
 		    min = timeout;
@@ -189,7 +195,7 @@ class SingleSelectorRunner implements Runnable {
     }
 
     private String getStackTrace (Throwable t) {
-    	StringWriter sw = new StringWriter ();
+	StringWriter sw = new StringWriter ();
 	PrintWriter ps = new PrintWriter (sw);
 	t.printStackTrace (ps);
 	return sw.toString ();
@@ -200,16 +206,16 @@ class SingleSelectorRunner implements Runnable {
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
      *
      * Try to figure out the key that ought to be closed and cancel it.
-     * 
-     * This bug above is fixed in 6u1, but keep the code in case of 
+     *
+     * This bug above is fixed in 6u1, but keep the code in case of
      * other systems and possibly other bugs.
      */
-    private void tryAvoidSpinning (int counter, long now, long diff) 
+    private void tryAvoidSpinning (int counter, long now, long diff)
 	throws IOException {
-	logger.warning ("Trying to avoid spinning, may close some channels: " +
-			"counter: " + counter + ", now: " + now +
+	logger.warning (id + ": Trying to avoid spinning, may close some " +
+			"channels: counter: " + counter + ", now: " + now +
 			", diff: " + diff);
-	// Keys are generally writable, try to flip OP_WRITE 
+	// Keys are generally writable, try to flip OP_WRITE
 	// so that the selector will remove the bad keys.
 	Set<SelectionKey> triedKeys = new HashSet<SelectionKey> ();
 	for (SelectionKey sk : selector.keys ()) {
@@ -227,20 +233,20 @@ class SingleSelectorRunner implements Runnable {
 	    }
 	    sk.interestOps (0);
 	}
-	
+
 	// If we have any keys left here they are in an unknown state
 	// cancel them and hope for the best.
 	if (!triedKeys.isEmpty ()) {
-	    logger.warning ("Some keys did not get writable, " + 
-			     "trying to close them");
+	    logger.warning (id + ": Some keys did not get writable, " +
+			    "trying to close them");
 	    for (SelectionKey sk : triedKeys) {
-		logger.warning ("Non writable key: " + sk + 
+		logger.warning (id + ": Non writable key: " + sk +
 				", attachment: " + sk.attachment ());
 		sk.cancel ();
 	    }
-	    selector.selectNow (); 
+	    selector.selectNow ();
 	}
- 	logger.info ("Spin evasion complete, " + 
+	logger.info (id + ": Spin evasion complete, " +
 		     "hopefully system is ok again.");
     }
 
@@ -253,7 +259,7 @@ class SingleSelectorRunner implements Runnable {
 	}
     }
 
-    /** Close down a client that has timed out. 
+    /** Close down a client that has timed out.
      */
     private void cancelKeyAndCloseChannel (SelectionKey sk) {
 	sk.cancel ();
@@ -261,15 +267,21 @@ class SingleSelectorRunner implements Runnable {
 	    SelectableChannel sc = sk.channel ();
 	    sc.close ();
 	} catch (IOException e) {
-	    logger.warning ("Failed to shutdown and close socket: " + e);
+	    logger.log (Level.WARNING,
+			id + ": Failed to shutdown and close socket",
+			e);
 	}
     }
 
     private int handleSelects () throws IOException {
 	Set<SelectionKey> selected = selector.selectedKeys ();
 	int ret = selected.size ();
+	if (logger.isLoggable (Level.FINEST))
+	    logger.finest (id + ": Selector handling " + ret + " selected keys");
 	for (SelectionKey sk : selected) {
 	    ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
+	    if (logger.isLoggable (Level.FINEST))
+		logger.finest (id + ": ChanneOpsHandler " + coh);
 	    if (sk.isValid ()) {
 		coh.handle (executorService, sk);
 	    } else {
@@ -288,12 +300,18 @@ class SingleSelectorRunner implements Runnable {
 	    returnedTasks2 = toRun;
 	}
 	int s = returnedTasks2.size ();
+	if (s > 0 && logger.isLoggable (Level.FINEST))
+	    logger.finest (id + ": Selector running " + s + " returned tasks");
 	for (int i = 0; i < s; i++) {
 	    try {
-		returnedTasks2.get (i).run (this);
+		SelectorRunnable sr = returnedTasks2.get (i);
+		if (logger.isLoggable (Level.FINEST))
+		    logger.finest (id + ": Selector running task " + sr);
+		sr.run (this);
 	    } catch (IOException e) {
-		logger.warning ("Got exception when running returned task: " + 
-				e + ", " + getStackTrace (e));
+		logger.log (Level.WARNING,
+			    "Got exception when running returned task",
+			    e);
 	    }
 	}
 	returnedTasks2.clear ();
@@ -310,6 +328,21 @@ class SingleSelectorRunner implements Runnable {
 
 	synchronized (this) {
 	    selector.wakeup ();
+	}
+    }
+
+    public void close (SelectableChannel channel) {
+	SelectionKey sk = channel.keyFor (selector);
+	if (sk == null)
+	    return;
+	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
+	coh.closed ();
+	try {
+	    channel.close ();
+	} catch (IOException e) {
+	    logger.log (Level.WARNING,
+			id + ": Failed to close channel: " + channel,
+			e);
 	}
     }
 }

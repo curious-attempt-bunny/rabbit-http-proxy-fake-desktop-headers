@@ -43,4 +43,11 @@ public interface NioHandler {
      *  be called and connect selection will be turned off for the channel.
      */ 
     void waitForConnect (SelectableChannel channel, ConnectHandler handler);
+
+    /** Close the given channel.
+     *  Closing a channel will cause SocketChannelHandler.close () to be
+     *  raised on any listeners for this channel and will then cancel
+     *  all selector interaction.
+     */
+    void close (SelectableChannel channel);
 }
