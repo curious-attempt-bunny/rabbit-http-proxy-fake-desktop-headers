@@ -59,7 +59,7 @@ public class SimpleWebServer {
 	    throw new IOException (dir + " is not an existing directory");
 	dir = dir.getCanonicalFile ();
 	ExecutorService es = Executors.newCachedThreadPool ();
-	nioHandler = new MultiSelectorNioHandler (es, 8);
+	nioHandler = new MultiSelectorNioHandler (es, 4);
     }
 
     /** Start serving requests. 

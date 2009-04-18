@@ -1,8 +1,8 @@
 package rabbit.io;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /** A ByteBuffer handler that keeps re uses returned buffers.
  *
@@ -13,33 +13,30 @@ import java.util.List;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class CachingBufferHandler implements BufferHandler {
-    private List<BufferHolder> cache = new ArrayList<BufferHolder> ();
-    private List<BufferHolder> largeCache = new ArrayList<BufferHolder> ();
+    private Queue<BufferHolder> cache = 
+	new ConcurrentLinkedQueue<BufferHolder> ();
+    private Queue<BufferHolder> largeCache = 
+	new ConcurrentLinkedQueue<BufferHolder> ();
     private int count = 0;
     
-    private ByteBuffer getBuffer (List<BufferHolder> bufs, int size) {
+    private ByteBuffer getBuffer (Queue<BufferHolder> bufs, int size) {
 	count++;
-	ByteBuffer r = null;
-	int s = 0; 
-	synchronized (bufs) {
-	    s = bufs.size ();
-	    if (s > 0)
-		r = bufs.remove (s - 1).getBuffer ();
-	}
-	if (s == 0)
-	    r = ByteBuffer.allocateDirect (size);
-	r.clear ();
-	return r;
+	BufferHolder r = bufs.poll ();
+	ByteBuffer b = null;
+	if (r != null)
+	    b = r.getBuffer ();
+	else
+	    b = ByteBuffer.allocateDirect (size);
+	b.clear ();
+	return b;
     }
 
     public ByteBuffer getBuffer () {
 	return getBuffer (cache, 4096);
     }
     
-    private void addCache (List<BufferHolder> bufs, BufferHolder bh) {
-	synchronized (bufs) {
-	    bufs.add (bh);
-	}
+    private void addCache (Queue<BufferHolder> bufs, BufferHolder bh) {
+	bufs.add (bh);
     }
 
     public void putBuffer (ByteBuffer buffer) {

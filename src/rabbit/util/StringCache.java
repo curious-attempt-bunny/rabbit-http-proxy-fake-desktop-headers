@@ -27,15 +27,17 @@ public class StringCache extends WeakHashMap<String, WeakReference<String>> {
      *  entry with the same value as the given string after this method has completed.
      * @param s the string to get a shared string for.
      */
-    public synchronized String getCachedString (String s) {
+    public String getCachedString (String s) {
 	if (s == null)
 	    return null;
-	WeakReference<String> wr = get (s);
-	String k; 
-	if (wr != null && ((k = wr.get ()) != null))
-	    return k;
-	wr = new WeakReference<String> (s);
-	put (s, wr);  
-	return s;
+	synchronized (this) {
+	    WeakReference<String> wr = get (s);
+	    String k; 
+	    if (wr != null && ((k = wr.get ()) != null))
+		return k;
+	    wr = new WeakReference<String> (s);
+	    put (s, wr);  
+	    return s;
+	}
     }
 }

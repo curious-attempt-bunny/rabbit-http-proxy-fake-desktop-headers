@@ -5,6 +5,7 @@ import java.nio.channels.SelectableChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** An implementation of NioHandler that runs several 
  *  selector threads. 
@@ -13,7 +14,7 @@ public class MultiSelectorNioHandler implements NioHandler {
      /** The executor service. */
     private final ExecutorService executorService;
     private final List<SingleSelectorRunner> selectorRunners;
-    private int nextIndex;
+    private AtomicInteger nextIndex = new AtomicInteger (0);
 
     public MultiSelectorNioHandler (ExecutorService executorService, 
 				    int numSelectors) 
@@ -39,11 +40,8 @@ public class MultiSelectorNioHandler implements NioHandler {
     }
 
     private SingleSelectorRunner getSelectorRunner () {
-	int index;
-	synchronized (this) {
-	    index = nextIndex++;
-	    nextIndex %= selectorRunners.size ();
-	}
+	int index = nextIndex.getAndIncrement ();
+	index %= selectorRunners.size ();
 	return selectorRunners.get (index);
     }
 

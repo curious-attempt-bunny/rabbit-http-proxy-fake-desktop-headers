@@ -199,11 +199,9 @@ public class Connection {
 	
     private class RequestListener extends AsyncBaseListener 
 	implements HttpHeaderListener {
-	public void httpHeaderRead (HttpHeader header, BufferHandle bh, 
+	public void httpHeaderRead (final HttpHeader header, BufferHandle bh, 
 				    boolean keepalive, boolean isChunked, 
 				    long dataSize) {
-	    if (logger.isLoggable (Level.FINEST))
-		logger.finest ("Connection; read http header: " + header);
 	    bh.possiblyFlush ();
 	    if (isChunked || dataSize > 0)
 		notImplemented ();
