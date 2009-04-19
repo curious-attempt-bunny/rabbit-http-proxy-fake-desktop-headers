@@ -44,6 +44,10 @@ public interface NioHandler {
      */ 
     void waitForConnect (SelectableChannel channel, ConnectHandler handler);
 
+    /** Remove an event listener.
+     */
+    void cancel (SelectableChannel channel, SocketChannelHandler handler);
+
     /** Close the given channel.
      *  Closing a channel will cause SocketChannelHandler.close () to be
      *  raised on any listeners for this channel and will then cancel

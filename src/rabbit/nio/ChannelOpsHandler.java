@@ -186,6 +186,17 @@ class ChannelOpsHandler {
 	return t;
     }
 
+    public void cancel (SocketChannelHandler sch) {
+	if (readHandler == sch)
+	    readHandler = null;
+	if (writeHandler == sch) 
+	    writeHandler = null;
+	if (acceptHandler == sch) 
+	    acceptHandler = null;
+	if (connectHandler == sch) 
+	    connectHandler = null;
+    }
+
     private void closedIfSet (SocketChannelHandler sch) {
 	if (sch != null)
 	    sch.closed ();

@@ -31,8 +31,14 @@ public class MultiSelectorNioHandler implements NioHandler {
     }
 
     public void shutdown () {
-	for (SingleSelectorRunner ssr : selectorRunners)
-	    ssr.shutdown ();
+	Thread t = new Thread (new Runnable () {
+		public void run () {
+		    executorService.shutdown ();
+		    for (SingleSelectorRunner ssr : selectorRunners)
+			ssr.shutdown ();
+		}
+	    });
+	t.start ();
     }
 
     public void runThreadTask (Runnable r) {
@@ -88,6 +94,17 @@ public class MultiSelectorNioHandler implements NioHandler {
 		    ssr.waitForConnect (channel, handler);
 		}
 	    });
+    }
+
+    public void cancel (final SelectableChannel channel, 
+			final SocketChannelHandler handler) {
+	for (SingleSelectorRunner sr : selectorRunners) {
+	    sr.runSelectorTask (new SelectorRunnable () {
+		    public void run (SingleSelectorRunner ssr) {
+			ssr.cancel (channel, handler);
+		    }
+		});
+	}	
     }
 
     public void close (final SelectableChannel channel) {

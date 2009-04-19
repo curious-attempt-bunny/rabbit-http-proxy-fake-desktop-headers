@@ -30,6 +30,8 @@ class SingleSelectorRunner implements Runnable {
     private List<SelectorRunnable> returnedTasks2 =
 	new ArrayList<SelectorRunnable> ();
 
+    private Thread selectorThread;
+
     private int id = 0;
     private static int idSequence = 0;
 
@@ -46,20 +48,26 @@ class SingleSelectorRunner implements Runnable {
     }
 
     public void start () {
-	Thread t = new Thread (this, getClass ().getName () + " " + id);
+	selectorThread = new Thread (this, getClass ().getName () + " " + id);
 	running.set (true);
-	t.start ();
+	selectorThread.start ();
     }
 
     public void shutdown () {
 	running.set (false);
 	try {
-	    if (selector != null) {
+	    selector.wakeup ();
+	    selectorThread.join (10000);
+	    if (selector != null) 
 		selector.close ();
-	    }
+	} catch (InterruptedException e) {
+	    logger.log (Level.WARNING,
+			"Got exception while closing selector",
+			e);
 	} catch (IOException e) {
-	    logger.warning ("Got exception while closing selector: " + e);
-	    e.printStackTrace ();
+	    logger.log (Level.WARNING,
+			"Got exception while closing selector",
+			e);
 	}
     }
 
@@ -329,6 +337,16 @@ class SingleSelectorRunner implements Runnable {
 	synchronized (this) {
 	    selector.wakeup ();
 	}
+    }
+
+    public void cancel (SelectableChannel channel, 
+			SocketChannelHandler handler) {
+	SelectionKey sk = channel.keyFor (selector);
+	if (sk == null)
+	    return;
+	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
+	coh.cancel (handler);
+	sk.interestOps (coh.getInterestOps ());
     }
 
     public void close (SelectableChannel channel) {
