@@ -1,7 +1,6 @@
 package rabbit.httpio;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Logger;
 import rabbit.io.BufferHandle;

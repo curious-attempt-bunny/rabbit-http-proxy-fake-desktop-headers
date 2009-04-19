@@ -69,7 +69,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    parseBuffer (buffer);
 	} else {
 	    releaseBuffer ();
-	    nioHandler.waitForRead (channel, this);
+	    read (false);
 	}
     }
 
@@ -92,6 +92,14 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
     
     public void read () {
+	read (true);
+    }
+
+    /** 
+     * @param closeOnZero if true close down on a read of zero bytes, 
+     *        if false try to read and wait for read ready on zero byte read.
+     */
+    private void read (boolean closeOnZero) {
 	Logger logger = getLogger ();
 	logger.finest ("HttpHeaderReader reading data");
 	try {
@@ -101,8 +109,6 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    int pos = buffer.position ();
 	    buffer.limit (buffer.capacity ());
 	    int read = channel.read (buffer);
-	    if (logger.isLoggable (Level.FINEST))
-		logger.finest ("HttpHeaderReader read " + read + " bytes");
 	    if (read == -1) {
 		buffer.position (buffer.limit ());
 		closeDown ();
@@ -110,9 +116,13 @@ public class HttpHeaderReader extends BaseSocketHandler
 		return;
 	    } 
 	    if (read == 0) {
-		closeDown ();
-		reader.failed (new IOException ("read 0 bytes, shutting " + 
-						"down connection"));
+		if (closeOnZero) {
+		    closeDown ();
+		    reader.failed (new IOException ("read 0 bytes, shutting " + 
+						    "down connection"));
+		} else {
+		    nioHandler.waitForRead (channel, this);
+		}
 		return;
 	    }
 	    tl.read (read);
@@ -120,7 +130,6 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    buffer.limit (read + pos);
 	    parseBuffer (buffer);
 	} catch (IOException e) {
-	    getLogger ().warning ("Failed to handle connection: " + e);
 	    closeDown ();
 	    reader.failed (e);
 	}
