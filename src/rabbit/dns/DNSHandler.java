@@ -11,7 +11,6 @@ import rabbit.util.SProperties;
 public interface DNSHandler {
     /** Do any neccessary setup. 
      * @param config the properties for this handler
-     * @param logger the Logger to use.
      */
     public void setup (SProperties config);
     

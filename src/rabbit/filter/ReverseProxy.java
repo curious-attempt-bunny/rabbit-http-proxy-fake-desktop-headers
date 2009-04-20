@@ -59,7 +59,6 @@ public class ReverseProxy implements HttpFilter {
     }
 
     /** Setup this class with the given properties.
-     * @param logger the Logger to output errors/warnings on.
      * @param properties the new configuration of this class.
      */
     public void setup (SProperties properties) {

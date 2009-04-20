@@ -29,7 +29,6 @@ public class SimpleUserHandler {  // TODO: implements interface.
     /** Set the file to use for users, will read the files. 
      *  Will discard any previous loaded users.
      * @param userFile the filename to read the users from.
-     * @param logger the logger to write errors to.
      */
     public void setFile (String userFile) {
 	this.userFile = userFile;

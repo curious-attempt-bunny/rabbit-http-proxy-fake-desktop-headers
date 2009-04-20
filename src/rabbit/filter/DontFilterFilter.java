@@ -64,7 +64,6 @@ public class DontFilterFilter implements HttpFilter {
     }
 
     /** Setup this class with the given properties.
-     * @param logger the Logger for errors/warnings.
      * @param properties the new configuration of this class.
      */
     public void setup (SProperties properties) {

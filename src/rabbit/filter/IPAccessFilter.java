@@ -20,7 +20,6 @@ public interface IPAccessFilter {
     boolean doIPFiltering (SocketChannel s);
 
     /** Setup this filter.
-     * @param logger the Logger to use in case of errors/warnings.
      * @param properties the SProperties to get the settings from.
      */
     void setup (SProperties properties);

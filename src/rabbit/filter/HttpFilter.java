@@ -34,7 +34,6 @@ public interface HttpFilter {
 				   Connection con);
 
     /** Setup this filter.
-     * @param logger the Logger to output errors/warnings on.
      * @param properties the SProperties to get the settings from.
      */
     void setup (SProperties properties);
