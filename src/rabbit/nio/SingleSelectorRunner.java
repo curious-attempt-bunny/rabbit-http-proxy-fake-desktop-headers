@@ -88,10 +88,14 @@ class SingleSelectorRunner implements Runnable {
 	    sk = channel.register (selector, coh.getInterestOps (), coh);
 	} else {
 	    ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
-	    updater.addHandler (coh);
-	    sk.interestOps (coh.getInterestOps ());
+	    if (sk.isValid ()) {
+		updater.addHandler (coh);
+		sk.interestOps (coh.getInterestOps ());
+	    } else {
+		coh.closed ();
+	    }
 	}
-	if (logger.isLoggable (Level.FINEST))
+	if (logger.isLoggable (Level.FINEST) && sk != null && sk.isValid ())
 	    logger.fine ("SingleSelectorRunner." + id + ": sk.interestOps " + 
 			 sk.interestOps ());
     }
