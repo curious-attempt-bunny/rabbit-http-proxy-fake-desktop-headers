@@ -13,6 +13,11 @@ public interface NioHandler {
     /** Shutdown this task runner. 
      */
     void shutdown ();
+
+    /** Get the default timeout time for an operations started at 
+     *  this point in time. 
+     */
+    Long getDefaultTimeout ();
     
     /** Run a task in a background thread. 
      *  The task will be run sometime in the future.

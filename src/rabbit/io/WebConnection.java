@@ -79,12 +79,14 @@ public class WebConnection implements Closeable {
 
     private class ConnectListener implements ConnectHandler {
 	private WebConnectionListener wcl;
+	private Long timeout;
 
 	public ConnectListener (WebConnectionListener wcl) {
 	    this.wcl = wcl;
 	}
 
 	public void waitForConnection (NioHandler nioHandler) throws IOException {
+	    timeout = nioHandler.getDefaultTimeout ();
 	    nioHandler.waitForConnect (channel, this);
 	}
 
@@ -105,7 +107,7 @@ public class WebConnection implements Closeable {
 	}
 
 	public Long getTimeout () {
-	    return null;
+	    return timeout;
 	}
 
 	public void connect () {

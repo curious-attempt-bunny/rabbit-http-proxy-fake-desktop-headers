@@ -65,6 +65,8 @@ public class TransferHandler implements Runnable {
     }
 
     private class WriteWaiter implements WriteHandler {
+	private Long timeout = nioHandler.getDefaultTimeout ();
+
 	public void closed () {
 	    listener.failed (new IOException ("channel closed"));
 	}
@@ -84,7 +86,7 @@ public class TransferHandler implements Runnable {
 	}
 
 	public Long getTimeout () {
-	    return null;
+	    return timeout;
 	}
 
 	public void write () {

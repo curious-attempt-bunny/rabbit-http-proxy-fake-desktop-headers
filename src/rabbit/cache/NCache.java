@@ -52,8 +52,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private File tempdir = null;
     private final Object dirLock = new Object ();
 
-    private final Logger logger =
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock ();
     private final Lock r = rwl.readLock ();

@@ -13,8 +13,7 @@ import rabbit.httpio.WebConnectionResourceSource;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ClientListenerAdapter implements ClientListener {
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     /** Create the redirected url and calls redirectedTo() and requestDone().
      */

@@ -13,7 +13,7 @@ endif
 
 # to allow compile with "computr> JCFLAGS=-O make dist"
 ifndef JCFLAGS
-JCFLAGS := -source 1.6 -encoding ISO-8859-1 -Xlint:all -Xlint:-fallthrough -deprecation
+JCFLAGS := -source 1.6 -encoding ISO-8859-1 -Xlint:all -Xlint:-fallthrough -deprecation -Xmaxerrs 10000
 endif
 
 ifndef JAVADOC

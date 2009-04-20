@@ -21,6 +21,8 @@ public class ChunkEnder {
 	throws IOException {
 	ByteBuffer bb = ByteBuffer.wrap (CHUNK_ENDING);
 	BufferHandle bh = new SimpleBufferHandle (bb);
-	new BlockSender (channel, nioHandler, tl, bh, false, bsl);
+	BlockSender bs = 
+	    new BlockSender (channel, nioHandler, tl, bh, false, bsl);
+	bs.write ();
     }
 }

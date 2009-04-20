@@ -15,8 +15,7 @@ import rabbit.util.SProperties;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class DNSJavaHandler implements DNSHandler {
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());    
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     /** Do any neccessary setup. */
     public void setup (SProperties config) {

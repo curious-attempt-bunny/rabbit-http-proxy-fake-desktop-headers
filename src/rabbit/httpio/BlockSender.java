@@ -73,7 +73,6 @@ public class BlockSender extends BaseSocketHandler implements WriteHandler {
 	try {
 	    writeBuffer ();
 	} catch (IOException e) {
-	    clear ();
 	    releaseBuffer ();
 	    sender.failed (e);
 	}
@@ -82,16 +81,15 @@ public class BlockSender extends BaseSocketHandler implements WriteHandler {
     private void writeBuffer () throws IOException {
 	long written;
 	do {
-	    written = channel.write (buffers);
+	    written = getChannel ().write (buffers);
 	    tl.write (written);
 	} while (written > 0 && end.remaining () > 0);
 
 	if (end.remaining () == 0) {
-	    clear ();
 	    releaseBuffer ();
 	    sender.blockSent ();
 	} else {
-	    nioHandler.waitForWrite (channel, this);
+	    waitForWrite (this);
 	}
     }
 }    

@@ -28,8 +28,7 @@ import rabbit.util.TrafficLogger;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ClientBase {
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
     private final ConnectionHandler connectionHandler;
     private final Counter counter = new Counter ();
     private final NioHandler nioHandler;

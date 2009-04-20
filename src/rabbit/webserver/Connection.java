@@ -35,8 +35,7 @@ public class Connection {
     private boolean timeToClose = false;
     private ResourceSource resourceSource = null;
 
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     /** Create a new Connection for the given web server and socket channel. */
     public Connection (SimpleWebServer sws, SocketChannel sc) {

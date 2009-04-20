@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** An implementation of NioHandler that runs several 
  *  selector threads. 
@@ -14,6 +16,7 @@ public class MultiSelectorNioHandler implements NioHandler {
      /** The executor service. */
     private final ExecutorService executorService;
     private final List<SingleSelectorRunner> selectorRunners;
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
     private AtomicInteger nextIndex = new AtomicInteger (0);
 
     public MultiSelectorNioHandler (ExecutorService executorService, 
@@ -39,6 +42,10 @@ public class MultiSelectorNioHandler implements NioHandler {
 		}
 	    });
 	t.start ();
+    }
+
+    public Long getDefaultTimeout () {
+	return new Long (System.currentTimeMillis () + 15000);
     }
 
     public void runThreadTask (Runnable r) {
@@ -71,6 +78,9 @@ public class MultiSelectorNioHandler implements NioHandler {
 
     public void waitForWrite (final SelectableChannel channel, 
 			      final WriteHandler handler) {
+	if (logger.isLoggable (Level.FINEST))
+	    logger.fine ("Waiting for read for: channel: " + channel + 
+			 ", handler: " + handler);
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
 		    ssr.waitForWrite (channel, handler);
@@ -80,6 +90,9 @@ public class MultiSelectorNioHandler implements NioHandler {
 
     public void waitForAccept (final SelectableChannel channel, 
 			       final AcceptHandler handler) {
+	if (logger.isLoggable (Level.FINEST))
+	    logger.fine ("Waiting for accept for: channel: " + channel + 
+			 ", handler: " + handler);
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
 		    ssr.waitForAccept (channel, handler);

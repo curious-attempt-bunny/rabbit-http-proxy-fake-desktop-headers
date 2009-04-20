@@ -63,7 +63,7 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
 
     public void readRequest () throws IOException {
-	if (!bh.isEmpty ()) {
+	if (!getBufferHandle ().isEmpty ()) {
 	    ByteBuffer buffer = getBuffer ();
 	    startParseAt = buffer.position ();
 	    parseBuffer (buffer);
@@ -74,7 +74,7 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
 
     @Override public String getDescription () {
-	return "HttpHeaderReader: channel: " + channel + 
+	return "HttpHeaderReader: channel: " + getChannel () + 
 	    ", current header lines: " + 
 	    (header == null ? 0 : header.size ());
     }
@@ -108,7 +108,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    ByteBuffer buffer = getBuffer ();
 	    int pos = buffer.position ();
 	    buffer.limit (buffer.capacity ());
-	    int read = channel.read (buffer);
+	    int read = getChannel ().read (buffer);
 	    if (read == -1) {
 		buffer.position (buffer.limit ());
 		closeDown ();
@@ -121,7 +121,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 		    reader.failed (new IOException ("read 0 bytes, shutting " + 
 						    "down connection"));
 		} else {
-		    nioHandler.waitForRead (channel, this);
+		    waitForRead (this);
 		}
 		return;
 	    }
@@ -161,12 +161,12 @@ public class HttpHeaderReader extends BaseSocketHandler
 		buffer.compact ();
 		startParseAt = 0;
 	    }
-	    nioHandler.waitForRead (channel, this); 
+	    waitForRead (this);
 	} else {
 	    setState ();
-	    clear ();
 	    releaseBuffer ();
-	    reader.httpHeaderRead (header, bh, keepalive, ischunked, dataSize);
+	    reader.httpHeaderRead (header, getBufferHandle (), 
+				   keepalive, ischunked, dataSize);
 	}
     }
 
@@ -332,8 +332,9 @@ public class HttpHeaderReader extends BaseSocketHandler
 		head.append (msg);
 		append = checkQuotes (head.getValue ());
 	    } else {
+		SocketChannel channel = getChannel ();
 		throw (new IOException ("Malformed header from: " + 
-					channel.socket ().getInetAddress () + 
+					channel.socket ().getInetAddress () +
 					", msg: " + msg));
 	    }
 	    return;

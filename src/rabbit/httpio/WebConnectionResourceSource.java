@@ -27,6 +27,7 @@ public class WebConnectionResourceSource
     private long totalRead = 0;    
     private int currentMark = 0;
     private ChunkHandler chunkHandler;
+    private Long timeout;
     
     public WebConnectionResourceSource (ConnectionHandler con, 
 					NioHandler nioHandler, WebConnection wc, 
@@ -89,6 +90,7 @@ public class WebConnectionResourceSource
     }
 
     public void register () {
+	timeout = nioHandler.getDefaultTimeout ();
 	nioHandler.waitForRead (wc.getChannel (), this);
     }
 
@@ -154,7 +156,7 @@ public class WebConnectionResourceSource
     }
 
     public Long getTimeout () {
-	return null;
+	return timeout;
     }
 
     public void release () {

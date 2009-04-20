@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 class SingleSelectorRunner implements Runnable {
     private final Selector selector;
     private final AtomicBoolean running = new AtomicBoolean (false);
-    private final Logger logger;
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
     private final ExecutorService executorService;
 
     /** The queue to get back on the main thread. */
@@ -38,7 +38,6 @@ class SingleSelectorRunner implements Runnable {
     public SingleSelectorRunner (ExecutorService executorService)
 	throws IOException {
 	selector = Selector.open ();
-	logger = Logger.getLogger (getClass ().getName ());
 	this.executorService = executorService;
 	id = idSequence++;
     }
@@ -78,8 +77,11 @@ class SingleSelectorRunner implements Runnable {
 
     private void updateSelectionKey (SelectableChannel channel,
 				     ChannelOpsUpdater updater)
-	throws IOException {
+	throws IOException {			 
 	SelectionKey sk = channel.keyFor (selector);
+	if (logger.isLoggable (Level.FINEST))
+	    logger.fine ("SingleSelectorRunner." + id + ": updating " + 
+			 "selection key for: " + sk);
 	if (sk == null) {
 	    ChannelOpsHandler coh = new ChannelOpsHandler ();
 	    updater.addHandler (coh);
@@ -89,7 +91,9 @@ class SingleSelectorRunner implements Runnable {
 	    updater.addHandler (coh);
 	    sk.interestOps (coh.getInterestOps ());
 	}
-
+	if (logger.isLoggable (Level.FINEST))
+	    logger.fine ("SingleSelectorRunner." + id + ": sk.interestOps " + 
+			 sk.interestOps ());
     }
 
     public void waitForRead (SelectableChannel channel,
@@ -136,6 +140,7 @@ class SingleSelectorRunner implements Runnable {
 	long lastRun = System.currentTimeMillis ();
 	int counter = 0;
 	long sleepTime = 100 * 1000; // 100 seconds
+	runReturnedTasks ();
 	while (running.get ()) {
 	    try {
 		if (logger.isLoggable (Level.FINEST))
@@ -327,8 +332,11 @@ class SingleSelectorRunner implements Runnable {
     }
 
     public void runSelectorTask (SelectorRunnable sr) {
-	if (!running.get ())
+	if (!running.get () && selectorThread != null) {
+	    logger.finest ("Trying to add selector task while not running; " +
+			   sr);
 	    return;
+	}
 
 	synchronized (returnedTasksLock) {
 	    returnedTasks1.add (sr);

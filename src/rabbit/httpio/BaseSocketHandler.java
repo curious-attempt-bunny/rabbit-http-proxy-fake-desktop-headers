@@ -5,7 +5,9 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Logger;
 import rabbit.io.BufferHandle;
 import rabbit.nio.NioHandler;
+import rabbit.nio.ReadHandler;
 import rabbit.nio.SocketChannelHandler;
+import rabbit.nio.WriteHandler;
 
 /** A base class for socket handlers.
  *
@@ -13,18 +15,20 @@ import rabbit.nio.SocketChannelHandler;
  */
 public abstract class BaseSocketHandler implements SocketChannelHandler {
     /** The client channel. */
-    protected SocketChannel channel; 
+    private final SocketChannel channel; 
     
     /** The nio handler we are using. */
-    protected NioHandler nioHandler;
+    private final NioHandler nioHandler;
 
     /** The logger to use. */
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
     
     /** The buffer handle. */
-    protected BufferHandle bh;
+    private final BufferHandle bh;
     
+    /** The timeout value set by the previous channel registration */
+    private Long timeout;
+
     public BaseSocketHandler (SocketChannel channel, BufferHandle bh, 
 			      NioHandler nioHandler) {
 	this.channel = channel;
@@ -52,6 +56,7 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
     public void timeout () {
     }
 
+    /** Runs on the selector thread by default */
     public boolean useSeparateThread () {
 	return false;
     }
@@ -61,8 +66,7 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
     }
 
     public Long getTimeout () {
-	// TODO: implement 
-	return null;
+	return timeout;
     }
 
     protected Logger getLogger () {
@@ -72,11 +76,23 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
     protected void closeDown () {
 	releaseBuffer ();
 	nioHandler.close (channel);
-	clear ();
     }
 
-    public void clear () {
-	nioHandler = null;
-	channel = null;
+    public SocketChannel getChannel () {
+	return channel;
+    }
+
+    public BufferHandle getBufferHandle () {
+	return bh;
+    }
+
+    public void waitForRead (ReadHandler rh) {
+	this.timeout = nioHandler.getDefaultTimeout ();
+	nioHandler.waitForRead (channel, rh);
+    }
+
+    public void waitForWrite (WriteHandler rh) {
+	this.timeout = nioHandler.getDefaultTimeout ();
+	nioHandler.waitForWrite (channel, rh);
     }
 }

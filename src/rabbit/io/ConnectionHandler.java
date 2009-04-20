@@ -24,8 +24,7 @@ import rabbit.util.SProperties;
  */
 public class ConnectionHandler {
     // The logger to use
-    private final Logger logger =
-	Logger.getLogger (Logger.class.getName ());
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
     
     // The counter to use.
     private final Counter counter;
@@ -230,12 +229,14 @@ public class ConnectionHandler {
     
     private class CloseListener implements ReadHandler {
 	private WebConnection wc;
+	private Long timeout;
 
 	public CloseListener (WebConnection wc) throws IOException {
 	    this.wc = wc;
 	}
 
 	public void register () {
+	    timeout = nioHandler.getDefaultTimeout ();
 	    nioHandler.waitForRead (wc.getChannel (), this);
 	}
 
@@ -252,7 +253,7 @@ public class ConnectionHandler {
 	}
 
 	public Long getTimeout () {
-	    return null;
+	    return timeout;
 	}
 
 	private void closeChannel () {

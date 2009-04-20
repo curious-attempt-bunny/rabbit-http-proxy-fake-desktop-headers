@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;

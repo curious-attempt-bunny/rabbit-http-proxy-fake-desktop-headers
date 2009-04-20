@@ -17,8 +17,7 @@ public class Acceptor implements AcceptHandler {
     private NioHandler nioHandler;
     private AcceptorListener listener;
 
-    private final Logger logger = 
-	Logger.getLogger (Logger.class.getName ());	
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     public Acceptor (ServerSocketChannel ssc, 
 		     NioHandler nioHandler,
