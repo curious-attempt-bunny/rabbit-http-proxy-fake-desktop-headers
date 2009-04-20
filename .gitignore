@@ -5,3 +5,4 @@ classes/*
 .packagelist
 jars/rabbit4.jar
 htdocs/javadoc/*
+logs/*
