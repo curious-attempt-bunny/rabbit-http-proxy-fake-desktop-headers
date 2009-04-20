@@ -137,9 +137,8 @@ public class HttpProxy implements Resolver {
     }
 
     private void setupLogging () {
-	// qwerty 
-	// TODO: fix this 
-	//logger.setup (config.getProperties ("logging"));
+	accessLogger.setup (config.getProperties ("logging"));
+	// TODO: what about java.util.loggin handling?
     }
 
     private void setupDateParsing () {
