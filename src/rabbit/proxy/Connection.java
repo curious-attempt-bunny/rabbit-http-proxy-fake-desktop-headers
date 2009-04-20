@@ -534,7 +534,7 @@ public class Connection {
 		}
 	    }
 	    if (rh.getHandlerFactory () == null) {              // still null
-		logger.info ("Using BaseHandler for " + ct);
+		logger.fine ("Using BaseHandler for " + ct);
 		rh.setHandlerFactory (new BaseHandler ());   // fallback...
 	    }
 	}
