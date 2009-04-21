@@ -76,6 +76,7 @@ class SingleSelectorRunner implements Runnable {
     }
 
     private void updateSelectionKey (SelectableChannel channel,
+				     SocketChannelHandler handler,
 				     ChannelOpsUpdater updater)
 	throws IOException {			 
 	SelectionKey sk = channel.keyFor (selector);
@@ -92,7 +93,11 @@ class SingleSelectorRunner implements Runnable {
 		updater.addHandler (coh);
 		sk.interestOps (coh.getInterestOps ());
 	    } else {
+		if (logger.isLoggable (Level.FINEST))
+		    logger.fine ("SingleSelectorRunner." + id + 
+				 ": sk not valid, calling closed ()");
 		coh.closed ();
+		handler.closed ();
 	    }
 	}
 	if (logger.isLoggable (Level.FINEST) && sk != null && sk.isValid ())
@@ -103,7 +108,7 @@ class SingleSelectorRunner implements Runnable {
     public void waitForRead (SelectableChannel channel,
 			     final ReadHandler handler)
 	throws IOException {
-	updateSelectionKey (channel, new ChannelOpsUpdater () {
+	updateSelectionKey (channel, handler, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
 		    coh.setReadHandler (handler);
 		}
@@ -113,7 +118,7 @@ class SingleSelectorRunner implements Runnable {
     public void waitForWrite (SelectableChannel channel,
 			      final WriteHandler handler)
 	throws IOException {
-	updateSelectionKey (channel, new ChannelOpsUpdater () {
+	updateSelectionKey (channel, handler, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
 		    coh.setWriteHandler (handler);
 		}
@@ -123,7 +128,7 @@ class SingleSelectorRunner implements Runnable {
     public void waitForAccept (SelectableChannel channel,
 			       final AcceptHandler handler)
 	throws IOException {
-	updateSelectionKey (channel, new ChannelOpsUpdater () {
+	updateSelectionKey (channel, handler, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
 		    coh.setAcceptHandler (handler);
 		}
@@ -133,7 +138,7 @@ class SingleSelectorRunner implements Runnable {
     public void waitForConnect (SelectableChannel channel,
 				final ConnectHandler handler)
 	throws IOException {
-	updateSelectionKey (channel, new ChannelOpsUpdater () {
+	updateSelectionKey (channel, handler, new ChannelOpsUpdater () {
 		public void addHandler (ChannelOpsHandler coh) {
 		    coh.setConnectHandler (handler);
 		}

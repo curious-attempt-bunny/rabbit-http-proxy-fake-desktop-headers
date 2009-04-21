@@ -69,7 +69,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    parseBuffer (buffer);
 	} else {
 	    releaseBuffer ();
-	    read (false);
+	    waitForRead (this);
 	}
     }
 
@@ -92,14 +92,6 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
     
     public void read () {
-	read (true);
-    }
-
-    /** 
-     * @param closeOnZero if true close down on a read of zero bytes, 
-     *        if false try to read and wait for read ready on zero byte read.
-     */
-    private void read (boolean closeOnZero) {
 	Logger logger = getLogger ();
 	logger.finest ("HttpHeaderReader reading data");
 	try {
@@ -116,13 +108,9 @@ public class HttpHeaderReader extends BaseSocketHandler
 		return;
 	    } 
 	    if (read == 0) {
-		if (closeOnZero) {
-		    closeDown ();
-		    reader.failed (new IOException ("read 0 bytes, shutting " + 
-						    "down connection"));
-		} else {
-		    waitForRead (this);
-		}
+		closeDown ();
+		reader.failed (new IOException ("read 0 bytes, shutting " + 
+						"down connection"));
 		return;
 	    }
 	    tl.read (read);
