@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
@@ -17,7 +17,7 @@ import rabbit.nio.ReadHandler;
 import rabbit.util.Counter;
 import rabbit.util.SProperties;
 
-/** A class to handle the connections to the net. 
+/** A class to handle the connections to the net.
  *  Tries to reuse connections whenever possible.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -25,10 +25,10 @@ import rabbit.util.SProperties;
 public class ConnectionHandler {
     // The logger to use
     private final Logger logger = Logger.getLogger (getClass ().getName ());
-    
+
     // The counter to use.
     private final Counter counter;
-    
+
     // The resolver to use
     private final Resolver resolver;
 
@@ -47,16 +47,16 @@ public class ConnectionHandler {
     // the nio handler
     private final NioHandler nioHandler;
 
-    public ConnectionHandler (Counter counter, Resolver resolver, 
+    public ConnectionHandler (Counter counter, Resolver resolver,
 			      NioHandler nioHandler) {
 	this.counter = counter;
 	this.resolver = resolver;
 	this.nioHandler = nioHandler;
 
-	activeConnections = 
-	    new ConcurrentHashMap<Address, List<WebConnection>> ();
-	wc2closer = 
-	    new ConcurrentHashMap<WebConnection, CloseListener> ();
+	activeConnections =
+	    new HashMap<Address, List<WebConnection>> ();
+	wc2closer =
+	    new HashMap<WebConnection, CloseListener> ();
     }
 
     /** Set the keep alive time for this handler.
@@ -65,7 +65,7 @@ public class ConnectionHandler {
     public void setKeepaliveTime (long milis) {
 	keepaliveTime = milis;
     }
-    
+
     /** Get the current keep alive time.
      * @return the keep alive time in miliseconds.
      */
@@ -81,8 +81,8 @@ public class ConnectionHandler {
      * @param header the HttpHeader containing the URL to connect to.
      * @param wcl the Listener that wants the connection.
      */
-    public void getConnection (final HttpHeader header, 
-			       final WebConnectionListener wcl) {	
+    public void getConnection (final HttpHeader header,
+			       final WebConnectionListener wcl) {
 	// TODO: should we use the Host: header if its available? probably...
 	String requri = header.getRequestURI ();
 	URL url = null;
@@ -94,7 +94,7 @@ public class ConnectionHandler {
 	}
 	int port = url.getPort () > 0 ? url.getPort () : 80;
 	final int rport = resolver.getConnectPort (port);
-	
+
 	resolver.getInetAddress (url, new InetAddressListener () {
 		public void lookupDone (InetAddress ia) {
 		    Address a = new Address (ia, rport);
@@ -103,24 +103,24 @@ public class ConnectionHandler {
 
 		public void unknownHost (Exception e) {
 		    wcl.failed (e);
-		}		
+		}
 	    });
     }
-    
-    private void getConnection (HttpHeader header, 
-				WebConnectionListener wcl, 
+
+    private void getConnection (HttpHeader header,
+				WebConnectionListener wcl,
 				Address a) {
 	WebConnection wc = null;
 	counter.inc ("WebConnections used");
 	String method = header.getMethod ();
-	
+
 	if (method != null) {
-	    // since we should not retry POST (and other) we 
+	    // since we should not retry POST (and other) we
 	    // have to get a fresh connection for them..
 	    method = method.trim ();
 	    if (!(method.equals ("GET") || method.equals ("HEAD"))) {
 		wc = new WebConnection (a, counter);
-	    } else {	
+	    } else {
 		wc = getPooledConnection (a, activeConnections);
 		if (wc == null)
 		    wc = new WebConnection (a, counter);
@@ -135,15 +135,17 @@ public class ConnectionHandler {
 						      header));
 	}
     }
-    
-    private WebConnection 
+
+    private WebConnection
     getPooledConnection (Address a, Map<Address, List<WebConnection>> conns) {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (a);
 	    if (pool != null) {
 		synchronized (pool) {
-		    if (pool.size () > 0) 
-			return unregister (pool.remove (pool.size () - 1));
+		    if (pool.size () > 0) {
+			WebConnection wc = pool.remove (pool.size () - 1);
+			return unregister (wc);
+		    }
 		}
 	    }
 	}
@@ -159,8 +161,8 @@ public class ConnectionHandler {
 	    nioHandler.cancel (wc.getChannel (), closer);
 	return wc;
     }
-    
-    private void removeFromPool (WebConnection wc, 
+
+    private void removeFromPool (WebConnection wc,
 				 Map<Address, List<WebConnection>> conns) {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (wc.getAddress ());
@@ -182,7 +184,7 @@ public class ConnectionHandler {
 	if (!wc.getChannel ().isOpen ()) {
 	    return;
 	}
-	
+
 	Address a = wc.getAddress ();
 	if (!wc.getKeepalive ()) {
 	    closeWebConnection (wc);
@@ -193,11 +195,19 @@ public class ConnectionHandler {
 	    wc.setReleased ();
 	}
 	synchronized (activeConnections) {
-	    List<WebConnection> pool = 
+	    List<WebConnection> pool =
 		activeConnections.get (a);
 	    if (pool == null) {
 		pool = new ArrayList<WebConnection> ();
 		activeConnections.put (a, pool);
+	    } else {
+		for (WebConnection ac : pool) {
+		    if (wc == ac) {
+			String err =
+			    "web connection already added to pool: " + wc;
+			throw new IllegalStateException (err);
+		    }
+		}
 	    }
 	    try {
 		CloseListener cl = new CloseListener (wc);
@@ -207,12 +217,12 @@ public class ConnectionHandler {
 		}
 		pool.add (wc);
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
+		logger.log (Level.WARNING,
 			    "Get IOException when setting up a CloseListener: ",
 			    e);
 		closeWebConnection (wc);
 	    }
-	}	
+	}
     }
 
     private void closeWebConnection (WebConnection wc) {
@@ -226,7 +236,7 @@ public class ConnectionHandler {
 	    logger.warning ("Failed to close WebConnection: " + wc);
 	}
     }
-    
+
     private class CloseListener implements ReadHandler {
 	private WebConnection wc;
 	private Long timeout;
@@ -243,11 +253,11 @@ public class ConnectionHandler {
 	public void read () {
 	    closeChannel ();
 	}
-	
+
 	public void closed () {
 	    closeChannel ();
 	}
-	
+
 	public void timeout () {
 	    closeChannel ();
 	}
@@ -264,7 +274,7 @@ public class ConnectionHandler {
 		removeFromPool (wc, activeConnections);
 		wc.close ();
 	    } catch (IOException e) {
-		String err = 
+		String err =
 		    "CloseListener: Failed to close web connection: " + e;
 		logger.warning (err);
 	    }
@@ -275,7 +285,13 @@ public class ConnectionHandler {
 	}
 
 	public String getDescription () {
-	    return "ConnectionHandler$CloseListener: address: " + wc.getAddress ();
+	    return "ConnectionHandler$CloseListener: address: " +
+		wc.getAddress ();
+	}
+
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{wc: " + wc + "}@" +
+		Integer.toString (hashCode (), 16);
 	}
     }
 
@@ -291,15 +307,15 @@ public class ConnectionHandler {
 	    wc.setMayPipeline (true);
 	}
     }
-    
+
     public void setup (SProperties config) {
 	if (config == null)
 	    return;
-	String kat = config.getProperty ("keepalivetime", "1000"); 
+	String kat = config.getProperty ("keepalivetime", "1000");
 	try {
-	    setKeepaliveTime (Long.parseLong (kat)); 
-	} catch (NumberFormatException e) { 
-	    String err = 
+	    setKeepaliveTime (Long.parseLong (kat));
+	} catch (NumberFormatException e) {
+	    String err =
 		"Bad number for ConnectionHandler keepalivetime: '" + kat + "'";
 	    logger.warning (err);
 	}
