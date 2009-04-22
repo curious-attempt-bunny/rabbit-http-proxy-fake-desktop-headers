@@ -57,7 +57,7 @@ class SingleSelectorRunner implements Runnable {
 	try {
 	    selector.wakeup ();
 	    selectorThread.join (10000);
-	    if (selector != null) 
+	    if (selector != null)
 		selector.close ();
 	} catch (InterruptedException e) {
 	    logger.log (Level.WARNING,
@@ -78,10 +78,19 @@ class SingleSelectorRunner implements Runnable {
     private void updateSelectionKey (SelectableChannel channel,
 				     SocketChannelHandler handler,
 				     ChannelOpsUpdater updater)
-	throws IOException {			 
+	throws IOException {
 	SelectionKey sk = channel.keyFor (selector);
+	if (!channel.isOpen ()) {
+	    logger.warning ("channel: " + channel + " is closed, wont register: " +
+			    "handler: " + handler + ", updater: " + updater);
+	    if (sk != null && sk.isValid ())
+		sk.cancel ();
+	    handler.closed ();
+	    return;
+	}
+
 	if (logger.isLoggable (Level.FINEST))
-	    logger.fine ("SingleSelectorRunner." + id + ": updating " + 
+	    logger.fine ("SingleSelectorRunner." + id + ": updating " +
 			 "selection key for: " + sk);
 	if (sk == null) {
 	    ChannelOpsHandler coh = new ChannelOpsHandler ();
@@ -94,14 +103,14 @@ class SingleSelectorRunner implements Runnable {
 		sk.interestOps (coh.getInterestOps ());
 	    } else {
 		if (logger.isLoggable (Level.FINEST))
-		    logger.fine ("SingleSelectorRunner." + id + 
+		    logger.fine ("SingleSelectorRunner." + id +
 				 ": sk not valid, calling closed ()");
 		coh.closed ();
 		handler.closed ();
 	    }
 	}
 	if (logger.isLoggable (Level.FINEST) && sk != null && sk.isValid ())
-	    logger.fine ("SingleSelectorRunner." + id + ": sk.interestOps " + 
+	    logger.fine ("SingleSelectorRunner." + id + ": sk.interestOps " +
 			 sk.interestOps ());
     }
 
@@ -356,7 +365,7 @@ class SingleSelectorRunner implements Runnable {
 	}
     }
 
-    public void cancel (SelectableChannel channel, 
+    public void cancel (SelectableChannel channel,
 			SocketChannelHandler handler) {
 	SelectionKey sk = channel.keyFor (selector);
 	if (sk == null)
