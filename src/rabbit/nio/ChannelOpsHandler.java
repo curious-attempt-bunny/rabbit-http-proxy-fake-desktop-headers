@@ -3,7 +3,7 @@ package rabbit.nio;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.ExecutorService;
 
-/** The handler of channel operations. 
+/** The handler of channel operations.
  */
 class ChannelOpsHandler {
     private ReadHandler readHandler;
@@ -12,10 +12,10 @@ class ChannelOpsHandler {
     private ConnectHandler connectHandler;
 
     @Override public String toString () {
-	return getClass ().getSimpleName () + "{" + 
-	    "r: " + readHandler + 
-	    ", w: " + writeHandler + 
-	    ", a: " + acceptHandler + 
+	return getClass ().getSimpleName () + "{" +
+	    "r: " + readHandler +
+	    ", w: " + writeHandler +
+	    ", a: " + acceptHandler +
 	    ", c: " + connectHandler + "}";
     }
 
@@ -32,38 +32,47 @@ class ChannelOpsHandler {
 	return ret;
     }
 
-    private void checkNullHandler (SocketChannelHandler handler, 
+    private void checkNullHandler (SocketChannelHandler handler,
 				   SocketChannelHandler newHandler,
 				   String type) {
 	if (handler != null) {
-	    String msg = "Trying to overwrite the existing " + type + ": " + 
-		handler + ", new " + type + ": " + readHandler;
+	    String msg = "Trying to overwrite the existing " + type + ": " +
+		handler + ", new " + type + ": " + readHandler +
+		", coh: " + this;
 	    throw new IllegalStateException (msg);
 	}
     }
 
-    public void setReadHandler (ReadHandler readHandler) {
-	checkNullHandler (this.readHandler, readHandler, "readHandler");
-	this.readHandler = readHandler;
+    public void setReadHandler (ReadHandler rh) {
+	if (rh == null)
+	    throw new IllegalArgumentException ("read handler may not be null");
+	checkNullHandler (this.readHandler, rh, "readHandler");
+	this.readHandler = rh;
     }
 
     public void setWriteHandler (WriteHandler writeHandler) {
+	if (writeHandler == null)
+	    throw new IllegalArgumentException ("write handler may not be null");
 	checkNullHandler (this.writeHandler, writeHandler, "writeHandler");
 	this.writeHandler = writeHandler;
     }
 
     public void setAcceptHandler (AcceptHandler acceptHandler) {
+	if (acceptHandler == null)
+	    throw new IllegalArgumentException ("accept handler may not be null");
 	checkNullHandler (this.acceptHandler, acceptHandler, "acceptHandler");
 	this.acceptHandler = acceptHandler;
     }
 
     public void setConnectHandler (ConnectHandler connectHandler) {
-	checkNullHandler (this.connectHandler, connectHandler, 
+	if (connectHandler == null)
+	    throw new IllegalArgumentException ("connect handler may not be null");
+	checkNullHandler (this.connectHandler, connectHandler,
 			  "connectHandler");
 	this.connectHandler = connectHandler;
     }
 
-    private void handleRead (ExecutorService executorService, 
+    private void handleRead (ExecutorService executorService,
 			     final ReadHandler rh) {
 	if (rh.useSeparateThread ()) {
 	    executorService.execute (new Runnable () {
@@ -72,11 +81,11 @@ class ChannelOpsHandler {
 		    }
 		});
 	} else {
-	    rh.read ();	    
+	    rh.read ();
 	}
     }
 
-    private void handleWrite (ExecutorService executorService, 
+    private void handleWrite (ExecutorService executorService,
 			      final WriteHandler wh) {
 	if (wh.useSeparateThread ()) {
 	    executorService.execute (new Runnable () {
@@ -85,11 +94,11 @@ class ChannelOpsHandler {
 		    }
 		});
 	} else {
-	    wh.write (); 
+	    wh.write ();
 	}
     }
 
-    private void handleAccept (ExecutorService executorService, 
+    private void handleAccept (ExecutorService executorService,
 			       final AcceptHandler ah) {
 	if (ah.useSeparateThread ()) {
 	    executorService.execute (new Runnable () {
@@ -98,11 +107,11 @@ class ChannelOpsHandler {
 		    }
 		});
 	} else {
-	    ah.accept ();	    
+	    ah.accept ();
 	}
     }
 
-    private void handleConnect (ExecutorService executorService, 
+    private void handleConnect (ExecutorService executorService,
 				final ConnectHandler ch) {
 	if (ch.useSeparateThread ()) {
 	    executorService.execute (new Runnable () {
@@ -111,7 +120,7 @@ class ChannelOpsHandler {
 		    }
 		});
 	} else {
-	    ch.connect ();	    
+	    ch.connect ();
 	}
     }
 
@@ -125,22 +134,25 @@ class ChannelOpsHandler {
 	writeHandler = null;
 	acceptHandler = null;
 	connectHandler = null;
-	
+
 	if (sk.isReadable ())
 	    handleRead (executorService, rh);
-	else
+	else if (rh != null)
 	    setReadHandler (rh);
+
 	if (sk.isValid () && sk.isWritable ())
 	    handleWrite (executorService, wh);
-	else 
+	else if (wh != null)
 	    setWriteHandler (wh);
+
 	if (sk.isValid () && sk.isAcceptable ())
 	    handleAccept (executorService, ah);
-	else 
+	else if (ah != null)
 	    setAcceptHandler (ah);
+
 	if (sk.isValid () && sk.isConnectable ())
 	    handleConnect (executorService, ch);
-	else 
+	else if (ch != null)
 	    setConnectHandler (ch);
     }
 
@@ -189,11 +201,11 @@ class ChannelOpsHandler {
     public void cancel (SocketChannelHandler sch) {
 	if (readHandler == sch)
 	    readHandler = null;
-	if (writeHandler == sch) 
+	if (writeHandler == sch)
 	    writeHandler = null;
-	if (acceptHandler == sch) 
+	if (acceptHandler == sch)
 	    acceptHandler = null;
-	if (connectHandler == sch) 
+	if (connectHandler == sch)
 	    connectHandler = null;
     }
 
