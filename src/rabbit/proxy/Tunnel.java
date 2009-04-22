@@ -50,7 +50,6 @@ class Tunnel {
 	private final SocketChannel to;
 	private final BufferHandle bh;
 	private final TrafficLogger tl;
-	private Long timeout;
 	
 	public OneWayTunnel (SocketChannel from, SocketChannel to, 
 			     BufferHandle bh, TrafficLogger tl) {
@@ -71,23 +70,31 @@ class Tunnel {
 	}
 
 	private void waitForRead () {
-	    timeout = nioHandler.getDefaultTimeout ();
 	    nioHandler.waitForRead (from, this);
 	}
 
 	private void waitForWrite () {
 	    bh.possiblyFlush ();
-	    timeout = nioHandler.getDefaultTimeout ();
 	    nioHandler.waitForWrite (to, this);
 	}
 
 	public void unregister () {
 	    nioHandler.cancel (from, this);
 	    nioHandler.cancel (to, this);
+
+	    // clear buffer and return it.
+	    ByteBuffer buf = bh.getBuffer ();
+	    buf.position (buf.limit ());
+	    bh.possiblyFlush ();
 	}
 
 	private void writeData () {
 	    try {
+		if (!to.isOpen ()) {
+		    logger.warning ("Tunnel to is closed, not writing data");
+		    closeDown ();
+		    return;
+		}
 		ByteBuffer buf = bh.getBuffer ();
 		int written = 0;
 		do {
@@ -124,7 +131,7 @@ class Tunnel {
 	}
 
 	public Long getTimeout () {
-	    return timeout;
+	    return null;
 	}
 
 	public void read () {
@@ -137,10 +144,11 @@ class Tunnel {
 		if (read == -1) {
 		    buffer.position (buffer.limit ());
 		    closeDown ();
-		} 
-		buffer.flip ();
-		tl.read (read);
-		writeData ();
+		} else { 
+		    buffer.flip ();
+		    tl.read (read);
+		    writeData ();
+		}
 	    } catch (IOException e) {
 		logger.log (Level.WARNING, 
 			    "Got exception reading from tunnel", e);
