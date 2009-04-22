@@ -363,7 +363,8 @@ class SingleSelectorRunner implements Runnable {
 	    return;
 	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
 	coh.cancel (handler);
-	if (sk.isValid ())
+	int ops = coh.getInterestOps ();
+	if (sk.isValid () && ops == 0)
 	    sk.cancel ();
     }
 
