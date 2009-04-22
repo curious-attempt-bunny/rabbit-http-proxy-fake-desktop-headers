@@ -352,7 +352,7 @@ public class Connection {
 	    // do we really want this in the log?
 	    logger.warning (cause.toString ());
 	else
-	    logger.log (Level.WARNING, 
+	    logger.log (Level.WARNING,
 			"strange error setting up web connection", cause);
 	tryStaleEntry (rh, cause);
     }
@@ -394,8 +394,8 @@ public class Connection {
 	try {
 	    TunnelDoneListener tdl = new TDL (rh);
 	    SocketChannel webChannel = rh.getWebConnection ().getChannel ();
-	    Tunnel tunnel = 
-		new Tunnel (getNioHandler (), channel, requestHandle, 
+	    Tunnel tunnel =
+		new Tunnel (getNioHandler (), channel, requestHandle,
 			    tlh.getClient (), webChannel,
 			    rh.getWebHandle (), tlh.getNetwork (), tdl);
 	    tunnel.start ();
@@ -542,7 +542,8 @@ public class Connection {
 
     private boolean handleConditional (RequestHandler rh) throws IOException {
 	HttpHeader cachedHeader = rh.getDataHook ();
-	proxy.releaseWebConnection (rh.getWebConnection ());
+	rh.getContent ().release ();
+
 	if (addedINM)
 	    request.removeHeader ("If-None-Match");
 	if (addedIMS)
@@ -558,13 +559,11 @@ public class Connection {
 		    sendAndClose (res304);
 		    return true;
 		}
-		if (rh.getContent () != null)
-		    rh.getContent ().release ();
 		// Try to setup a resource from the cache
 		setupCachedEntry (rh);
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
-			    "Conditional request: IOException (" + 
+		logger.log (Level.WARNING,
+			    "Conditional request: IOException (" +
 			    request.getRequestURI (),
 			    e);
 	    }
@@ -1016,13 +1015,13 @@ public class Connection {
 	} else {
 	    HttpHeaderSentListener sar = new SendAndRestartListener ();
 	    try {
-		HttpHeaderSender hhs = 
-		    new HttpHeaderSender (channel, getNioHandler (), 
+		HttpHeaderSender hhs =
+		    new HttpHeaderSender (channel, getNioHandler (),
 					  tlh.getClient (),
 					  header, false, sar);
 		hhs.sendHeader ();
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
+		logger.log (Level.WARNING,
 			    "IOException when sending header", e);
 		closeDown ();
 	    }
@@ -1058,7 +1057,7 @@ public class Connection {
 	keepalive = false;
 	HttpHeaderSentListener scl = new SendAndCloseListener ();
 	try {
-	    HttpHeaderSender hhs = 
+	    HttpHeaderSender hhs =
 		new HttpHeaderSender (channel, getNioHandler (),
 				      tlh.getClient (), header, false, scl);
 	    hhs.sendHeader ();
