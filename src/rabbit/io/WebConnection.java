@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 import rabbit.nio.ConnectHandler;
 import rabbit.nio.NioHandler;
 import rabbit.util.Counter;
@@ -21,24 +22,24 @@ public class WebConnection implements Closeable {
     private long releasedAt = -1;
     private boolean keepalive = true;
     private boolean mayPipeline = false;
-    
-    private static int idCounter;
+
+    private static AtomicInteger idCounter = new AtomicInteger (0);
 
     /** Create a new WebConnection to the given InetAddress and port.
      * @param address the computer to connect to.
      * @param counter the Counter to used to collect statistics
      */
     public WebConnection (Address address, Counter counter) {
-	this.id = idCounter++;
+	this.id = idCounter.getAndIncrement ();
 	this.address = address;
 	this.counter = counter;
 	counter.inc ("WebConnections created");
     }
 
     @Override public String toString () {
-	return "WebConnection(id: " + id + 
-	    ", address: "  + address + 
-	    ", keepalive: " + keepalive + 
+	return "WebConnection(id: " + id +
+	    ", address: "  + address +
+	    ", keepalive: " + keepalive +
 	    ", releasedAt: " + releasedAt + ")";
     }
 
@@ -55,7 +56,7 @@ public class WebConnection implements Closeable {
 	channel.close ();
     }
 
-    public void connect (NioHandler nioHandler, WebConnectionListener wcl) 
+    public void connect (NioHandler nioHandler, WebConnectionListener wcl)
 	throws IOException {
 	// if we are a keepalive connection then just say so..
 	if (channel != null && channel.isConnected ()) {
@@ -64,7 +65,7 @@ public class WebConnection implements Closeable {
 	    // ok, open the connection....
 	    channel = SocketChannel.open ();
 	    channel.configureBlocking (false);
-	    SocketAddress addr = 
+	    SocketAddress addr =
 		new InetSocketAddress (address.getInetAddress (),
 				       address.getPort ());
 	    boolean connected = channel.connect (addr);
@@ -93,7 +94,7 @@ public class WebConnection implements Closeable {
 	public void closed () {
 	    wcl.failed (new IOException ("channel closed before connect"));
 	}
-	
+
 	public void timeout () {
 	    wcl.timeout ();
 	}
@@ -101,7 +102,7 @@ public class WebConnection implements Closeable {
 	public boolean useSeparateThread () {
 	    return false;
 	}
-	
+
 	public String getDescription () {
 	    return "WebConnection$ConnectListener: address: " + address;
 	}
@@ -119,10 +120,15 @@ public class WebConnection implements Closeable {
 		wcl.failed (e);
 	    }
 	}
+
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{" + address + "}@" +
+		Integer.toString (hashCode (), 16);
+	}
     }
-    
-    /** Set the keepalive value for this WebConnection, 
-     *  Can only be turned off. 
+
+    /** Set the keepalive value for this WebConnection,
+     *  Can only be turned off.
      * @param b the new keepalive value.
      */
     public void setKeepalive (boolean b) {
