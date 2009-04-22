@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** An implementation of NioHandler that runs several 
- *  selector threads. 
+/** An implementation of NioHandler that runs several
+ *  selector threads.
  */
 public class MultiSelectorNioHandler implements NioHandler {
      /** The executor service. */
@@ -19,8 +19,8 @@ public class MultiSelectorNioHandler implements NioHandler {
     private final Logger logger = Logger.getLogger (getClass ().getName ());
     private AtomicInteger nextIndex = new AtomicInteger (0);
 
-    public MultiSelectorNioHandler (ExecutorService executorService, 
-				    int numSelectors) 
+    public MultiSelectorNioHandler (ExecutorService executorService,
+				    int numSelectors)
 	throws IOException {
 	this.executorService = executorService;
 	selectorRunners = new ArrayList<SingleSelectorRunner> (numSelectors);
@@ -61,14 +61,17 @@ public class MultiSelectorNioHandler implements NioHandler {
     /** Run a task on one of the selector threads.
      *  The task will be run sometime in the future.
      * @param sr the task to run on the main thread.
-     */ 
+     */
     private void runSelectorTask (SelectorRunnable sr) {
 	SingleSelectorRunner ssr = getSelectorRunner ();
 	ssr.runSelectorTask (sr);
     }
-    
-    public void waitForRead (final SelectableChannel channel, 
+
+    public void waitForRead (final SelectableChannel channel,
 			     final ReadHandler handler) {
+	if (logger.isLoggable (Level.FINEST))
+	    logger.fine ("Waiting for read for: channel: " + channel +
+			 ", handler: " + handler);
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
 		    ssr.waitForRead (channel, handler);
@@ -76,10 +79,10 @@ public class MultiSelectorNioHandler implements NioHandler {
 	    });
     }
 
-    public void waitForWrite (final SelectableChannel channel, 
+    public void waitForWrite (final SelectableChannel channel,
 			      final WriteHandler handler) {
 	if (logger.isLoggable (Level.FINEST))
-	    logger.fine ("Waiting for read for: channel: " + channel + 
+	    logger.fine ("Waiting for write for: channel: " + channel +
 			 ", handler: " + handler);
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
@@ -88,10 +91,10 @@ public class MultiSelectorNioHandler implements NioHandler {
 	    });
     }
 
-    public void waitForAccept (final SelectableChannel channel, 
+    public void waitForAccept (final SelectableChannel channel,
 			       final AcceptHandler handler) {
 	if (logger.isLoggable (Level.FINEST))
-	    logger.fine ("Waiting for accept for: channel: " + channel + 
+	    logger.fine ("Waiting for accept for: channel: " + channel +
 			 ", handler: " + handler);
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
@@ -100,7 +103,7 @@ public class MultiSelectorNioHandler implements NioHandler {
 	    });
     }
 
-    public void waitForConnect (final SelectableChannel channel, 
+    public void waitForConnect (final SelectableChannel channel,
 				final ConnectHandler handler) {
 	runSelectorTask (new SelectorRunnable () {
 		public void run (SingleSelectorRunner ssr) throws IOException {
@@ -109,7 +112,7 @@ public class MultiSelectorNioHandler implements NioHandler {
 	    });
     }
 
-    public void cancel (final SelectableChannel channel, 
+    public void cancel (final SelectableChannel channel,
 			final SocketChannelHandler handler) {
 	for (SingleSelectorRunner sr : selectorRunners) {
 	    sr.runSelectorTask (new SelectorRunnable () {
@@ -117,7 +120,7 @@ public class MultiSelectorNioHandler implements NioHandler {
 			ssr.cancel (channel, handler);
 		    }
 		});
-	}	
+	}
     }
 
     public void close (final SelectableChannel channel) {
