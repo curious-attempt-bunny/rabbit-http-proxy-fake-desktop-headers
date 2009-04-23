@@ -83,8 +83,11 @@ class SingleSelectorRunner implements Runnable {
 	if (!channel.isOpen ()) {
 	    logger.warning ("channel: " + channel + " is closed, wont register: " +
 			    "handler: " + handler + ", updater: " + updater);
-	    if (sk != null && sk.isValid ())
-		sk.cancel ();
+	    if (sk != null && sk.isValid ()) {
+		ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
+		cancelKeyAndCloseChannel (sk);
+		coh.closed ();
+	    }
 	    handler.closed ();
 	    return;
 	}
@@ -105,6 +108,7 @@ class SingleSelectorRunner implements Runnable {
 		if (logger.isLoggable (Level.FINEST))
 		    logger.fine ("SingleSelectorRunner." + id +
 				 ": sk not valid, calling closed ()");
+		cancelKeyAndCloseChannel (sk);
 		coh.closed ();
 		handler.closed ();
 	    }
@@ -382,13 +386,7 @@ class SingleSelectorRunner implements Runnable {
 	if (sk == null)
 	    return;
 	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
+	cancelKeyAndCloseChannel (sk);
 	coh.closed ();
-	try {
-	    channel.close ();
-	} catch (IOException e) {
-	    logger.log (Level.WARNING,
-			id + ": Failed to close channel: " + channel,
-			e);
-	}
     }
 }
