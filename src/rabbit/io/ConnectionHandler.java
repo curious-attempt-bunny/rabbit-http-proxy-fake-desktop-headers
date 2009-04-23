@@ -201,12 +201,10 @@ public class ConnectionHandler {
 		pool = new ArrayList<WebConnection> ();
 		activeConnections.put (a, pool);
 	    } else {
-		for (WebConnection ac : pool) {
-		    if (wc == ac) {
-			String err =
-			    "web connection already added to pool: " + wc;
-			throw new IllegalStateException (err);
-		    }
+		if (pool.contains (wc)) {
+		    String err =
+			"web connection already added to pool: " + wc;
+		    throw new IllegalStateException (err);
 		}
 	    }
 	    try {
