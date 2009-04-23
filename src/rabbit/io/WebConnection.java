@@ -37,10 +37,12 @@ public class WebConnection implements Closeable {
     }
 
     @Override public String toString () {
+	int port = channel != null ? channel.socket ().getLocalPort () : -1;
 	return "WebConnection(id: " + id +
 	    ", address: "  + address +
 	    ", keepalive: " + keepalive +
-	    ", releasedAt: " + releasedAt + ")";
+	    ", releasedAt: " + releasedAt + 
+	    ", local port: " + port + ")";
     }
 
     public Address getAddress () {
