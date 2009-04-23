@@ -189,6 +189,7 @@ public class SWC implements HttpHeaderSentListener,
     }
 
     public void closed () {
+	con.getProxy ().releaseWebConnection (rh.getWebConnection ());
 	lastException = new IOException ("closed");
 	establish ();
     }
