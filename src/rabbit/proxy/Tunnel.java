@@ -96,13 +96,16 @@ class Tunnel {
 		    return;
 		}
 		ByteBuffer buf = bh.getBuffer ();
-		int written = 0;
-		do {
-		    written = to.write (buf);
-		    if (logger.isLoggable (Level.FINEST))
-			logger.finest ("OneWayTunnel wrote: " + written);
-		    tl.write (written);
-		} while (written > 0 && buf.hasRemaining ());
+		if (buf.hasRemaining ()) {
+		    int written = 0;
+		    do {
+			written = to.write (buf);
+			if (logger.isLoggable (Level.FINEST))
+			    logger.finest ("OneWayTunnel wrote: " + written);
+			tl.write (written);
+		    } while (written > 0 && buf.hasRemaining ());
+		}
+		
 		if (buf.hasRemaining ())
 		    waitForWrite ();
 		else
@@ -116,10 +119,12 @@ class Tunnel {
 
 	public void closed () {
 	    logger.info ("Tunnel closed");
+	    closeDown ();
 	}
 	
 	public void timeout () {
 	    logger.warning ("Tunnel got timeout");
+	    closeDown ();
 	}
 
 	public boolean useSeparateThread () {
