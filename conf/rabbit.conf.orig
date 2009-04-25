@@ -43,7 +43,9 @@ StrictHTTP=false
 # This is where RabbIT logs its errors and accesses
 # quite usefull if you want statistics.
 accesslog=logs/access_log
-errorlog=logs/error_log
+errorlog=logs/error_log%g
+size_limit=1000000
+num_files=10
 
 # This is how many things RabbIT will log in the errorlog.
 # one of DEBUG, ALL, INFO, WARN, MSG, ERROR, FATAL (in that order)

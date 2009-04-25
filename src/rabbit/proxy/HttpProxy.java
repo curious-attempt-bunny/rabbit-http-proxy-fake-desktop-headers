@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import rabbit.cache.Cache;
 import rabbit.cache.NCache;
 import rabbit.dns.DNSHandler;
@@ -137,8 +139,24 @@ public class HttpProxy implements Resolver {
     }
 
     private void setupLogging () {
-	accessLogger.setup (config.getProperties ("logging"));
-	// TODO: what about java.util.loggin handling?
+	SProperties logProps = config.getProperties ("logging");
+	accessLogger.setup (logProps);
+	String errorLog = logProps.get ("errorlog");
+	String sl = logProps.get ("size_limit");
+	sl = sl == null ? Integer.toString (1024 * 1024) : sl;
+	int limit = Integer.parseInt (sl);
+	int numFiles = Integer.parseInt (logProps.get ("num_files"), 10);
+	try {
+	    FileHandler fh = new FileHandler (errorLog, limit, numFiles, true);
+	    fh.setFormatter (new SimpleFormatter ());
+	    Logger logger = Logger.getLogger("rabbit");
+	    logger.addHandler (fh);
+	    logger.setUseParentHandlers (false);
+	} catch (IOException e) {
+	    logger.log (Level.SEVERE, 
+			"Failed to configure logging",
+			e);
+	}
     }
 
     private void setupDateParsing () {
