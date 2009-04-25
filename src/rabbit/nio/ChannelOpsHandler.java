@@ -168,15 +168,17 @@ class ChannelOpsHandler {
 	return ret;
     }
 
-    public void doTimeouts (long now) {
-	if (doTimeout (now, readHandler))
+    public boolean doTimeouts (long now) {
+	boolean ret = false;
+	if (ret |= doTimeout (now, readHandler))
 	    readHandler = null;
-	if (doTimeout (now, writeHandler))
+	if (ret |= doTimeout (now, writeHandler))
 	    writeHandler = null;
-	if (doTimeout (now, acceptHandler))
+	if (ret |= doTimeout (now, acceptHandler))
 	    acceptHandler = null;
-	if (doTimeout (now, connectHandler))
+	if (ret |= doTimeout (now, connectHandler))
 	    connectHandler = null;
+	return ret;
     }
 
     private Long minTimeout (Long t, SocketChannelHandler sch) {

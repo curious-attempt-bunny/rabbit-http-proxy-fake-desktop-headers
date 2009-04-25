@@ -2,10 +2,10 @@ package rabbit.meta;
 
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import rabbit.proxy.HtmlPage;
+import rabbit.nio.SelectorVisitor;
 
 /** A status page for the proxy.
  *
@@ -23,31 +23,37 @@ public class SelectorStatus extends BaseMetaHandler {
 	return PageCompletion.PAGE_DONE;
     }    
 
-    private void addStatus (StringBuilder sb) {
+    private void addStatus (final StringBuilder sb) {
 	sb.append ("Status of selector at: ");
 	sb.append (new Date ());
 	sb.append ("<p>\n");
-	/*
-	Selector sel = con.getSelector ();
-	appendKeys (sb, sel.selectedKeys (), "Selected key");
-	appendKeys (sb, sel.keys (), "Registered key");
-	*/
+	
+	con.getNioHandler ().visitSelectors (new SelectorVisitor () {
+		public void selector (Selector selector) {
+		    appendKeys (sb, selector.selectedKeys (), "Selected key");
+		    appendKeys (sb, selector.keys (), "Registered key");
+		}
+		public void end () {
+		}
+	    });
     }
+
 
     private void appendKeys (StringBuilder sb, 
 			     Set<SelectionKey> sks, String header) {
-	SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
 	sb.append (HtmlPage.getTableHeader (100, 1));
 	sb.append (HtmlPage.getTableTopicRow ());
 	sb.append ("<th width=\"20%\">").append (header).append ("</th>");
+	sb.append ("<th>channel</th>");
 	sb.append ("<th width=\"50%\">Attachment</th>");
 	sb.append ("<th>Interest</th>");
 	sb.append ("<th>Ready</th>");
-	sb.append ("<th>Registered</th>");
 	sb.append ("</tr>\n");
 	for (SelectionKey sk : sks) {
 	    sb.append ("<tr><td>");
 	    sb.append (sk.toString ());
+	    sb.append ("</td><td>");
+	    sb.append (sk.channel ());
 	    sb.append ("</td><td>");
 	    sb.append (sk.attachment ());
 	    sb.append ("</td><td>");
@@ -55,16 +61,6 @@ public class SelectorStatus extends BaseMetaHandler {
 	    appendOpString (sb, valid ? sk.interestOps () : 0);
 	    sb.append ("</td><td>");
 	    appendOpString (sb, valid ? sk.readyOps () : 0);
-	    sb.append ("</td><td>");
-	    Object a = sk.attachment ();
-	    /*
-	    if (a instanceof HandlerRegistration) {
-		HandlerRegistration hr = (HandlerRegistration)a;
-		long when = hr.getRegistrationTime ();
-		if (when < Long.MAX_VALUE)
-		    sb.append (sdf.format (when));
-	    }
-	    */
 	    sb.append ("</td></tr>\n");
 	}
 	sb.append ("</table>\n<br>\n");

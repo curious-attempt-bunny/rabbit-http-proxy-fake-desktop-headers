@@ -290,7 +290,10 @@ class SingleSelectorRunner implements Runnable {
 	    ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
 	    if (coh == null)
 		continue;
-	    coh.doTimeouts (now);
+	    if (coh.doTimeouts (now)) {
+		if (sk.isValid ())
+		    sk.interestOps (coh.getInterestOps ());
+	    }
 	}
     }
 
@@ -377,8 +380,9 @@ class SingleSelectorRunner implements Runnable {
 	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
 	coh.cancel (handler);
 	int ops = coh.getInterestOps ();
-	if (sk.isValid () && ops == 0)
+	if (sk.isValid () && ops == 0) {
 	    sk.cancel ();
+	}
     }
 
     public void close (SelectableChannel channel) {
@@ -388,5 +392,9 @@ class SingleSelectorRunner implements Runnable {
 	ChannelOpsHandler coh = (ChannelOpsHandler)sk.attachment ();
 	cancelKeyAndCloseChannel (sk);
 	coh.closed ();
+    }
+
+    public void visit (SelectorVisitor visitor) {
+	visitor.selector (selector);
     }
 }

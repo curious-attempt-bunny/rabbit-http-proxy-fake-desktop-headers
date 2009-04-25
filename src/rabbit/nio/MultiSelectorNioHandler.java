@@ -132,4 +132,10 @@ public class MultiSelectorNioHandler implements NioHandler {
 		});
 	}
     }
+
+    public void visitSelectors (SelectorVisitor visitor) {
+	for (SingleSelectorRunner sr : selectorRunners)
+	    sr.visit (visitor);
+	visitor.end ();
+    }
 }

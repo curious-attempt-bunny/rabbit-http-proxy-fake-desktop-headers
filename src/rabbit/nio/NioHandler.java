@@ -59,4 +59,10 @@ public interface NioHandler {
      *  all selector interaction.
      */
     void close (SelectableChannel channel);
+
+    /** Visit all the selectors. 
+     *  This should really only be used for status handling and/or 
+     *  debugging. 
+     */
+    void visitSelectors (SelectorVisitor visitor);
 }
