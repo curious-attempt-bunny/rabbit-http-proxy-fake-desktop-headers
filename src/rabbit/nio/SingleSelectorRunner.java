@@ -372,6 +372,11 @@ class SingleSelectorRunner implements Runnable {
 	}
     }
 
+    public boolean handlesChannel (SelectableChannel channel) {
+	SelectionKey sk = channel.keyFor (selector);
+	return sk != null;
+    }
+
     public void cancel (SelectableChannel channel,
 			SocketChannelHandler handler) {
 	SelectionKey sk = channel.keyFor (selector);
