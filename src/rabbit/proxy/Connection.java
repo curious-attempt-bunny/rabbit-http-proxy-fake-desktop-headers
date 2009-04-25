@@ -150,7 +150,6 @@ public class Connection {
 	}
 
 	public void timeout () {
-	    logger.info ("Timeout when reading client request");
 	    closeDown ();
 	}
 
