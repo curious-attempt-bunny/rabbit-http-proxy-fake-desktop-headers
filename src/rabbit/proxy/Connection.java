@@ -349,7 +349,7 @@ public class Connection {
     void webConnectionSetupFailed (RequestHandler rh, Exception cause) {
 	if (cause instanceof UnknownHostException)
 	    // do we really want this in the log?
-	    logger.warning (cause.toString ());
+	    logger.warning (cause.toString () + ": " + request.getRequestURI ());
 	else
 	    logger.log (Level.WARNING,
 			"strange error setting up web connection", cause);
