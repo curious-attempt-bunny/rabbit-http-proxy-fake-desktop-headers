@@ -303,16 +303,16 @@ public class BaseHandler
 	    if (exp != null) {
 		long now = System.currentTimeMillis ();
 		if (now > exp.getTime ()) {
-		    getLogger ().info ("expire date in the past: '" + 
-					  expires + "'");
+		    getLogger ().config ("expire date in the past: '" + 
+					 expires + "'");
 		    entry = null;
 		    return;
 		}
 		entry.setExpires (exp.getTime ());
 	    } else {
-		getLogger ().info ("unable to parse expire date: '" + 
-				   expires + "' for URI: '" + 
-				   request.getRequestURI () + "'");
+		getLogger ().config ("unable to parse expire date: '" + 
+				     expires + "' for URI: '" + 
+				     request.getRequestURI () + "'");
 		entry = null;
 		return;
 	    }
