@@ -5,7 +5,6 @@ import java.nio.channels.SelectableChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,12 +16,19 @@ public class MultiSelectorNioHandler implements NioHandler {
     private final ExecutorService executorService;
     private final List<SingleSelectorRunner> selectorRunners;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
-    private AtomicInteger nextIndex = new AtomicInteger (0);
+    private int nextIndex = 0;
 
+    /** Create a new MultiSelectorNioHandler that runs background tasks on 
+     *  the given executor and has a specified number of selectors.
+     */
     public MultiSelectorNioHandler (ExecutorService executorService,
 				    int numSelectors)
 	throws IOException {
 	this.executorService = executorService;
+	if (numSelectors < 1) {
+	    String err = "Must have at least one selector: " + numSelectors;
+	    throw new IllegalArgumentException (err);
+	}
 	selectorRunners = new ArrayList<SingleSelectorRunner> (numSelectors);
 	for (int i = 0; i < numSelectors; i++)
 	    selectorRunners.add (new SingleSelectorRunner (executorService));
@@ -53,8 +59,11 @@ public class MultiSelectorNioHandler implements NioHandler {
     }
 
     private SingleSelectorRunner getSelectorRunner () {
-	int index = nextIndex.getAndIncrement ();
-	index %= selectorRunners.size ();
+	int index;
+	synchronized (this) {
+	    index = nextIndex++;
+	    nextIndex %= selectorRunners.size ();
+	}
 	return selectorRunners.get (index);
     }
 
