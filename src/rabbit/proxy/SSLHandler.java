@@ -29,8 +29,8 @@ class SSLHandler implements TunnelDoneListener {
     private BufferHandle sbh;
     private WebConnection wc;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
-    
-    public SSLHandler (HttpProxy proxy, Connection con, 
+
+    public SSLHandler (HttpProxy proxy, Connection con,
 		       HttpHeader request, TrafficLoggerHandler tlh) {
 	this.proxy = proxy;
 	this.con = con;
@@ -40,8 +40,8 @@ class SSLHandler implements TunnelDoneListener {
 
     /** Are we allowed to proxy ssl-type connections ?
      * @return true if we allow the CONNECT &lt;port&gt; command.
-     */	
-    public boolean isAllowed () {	
+     */
+    public boolean isAllowed () {
 	String hp = request.getRequestURI ();
 	int c = hp.indexOf (':');
 	Integer port = 443;
@@ -67,7 +67,7 @@ class SSLHandler implements TunnelDoneListener {
     /** handle the tunnel.
      * @param channel the client channel
      * @param selector the proxy selector
-     * @param bh the buffer handle used, may contain data from client. 
+     * @param bh the buffer handle used, may contain data from client.
      */
     public void handle (SocketChannel channel, BufferHandle bh) {
 	this.channel = channel;
@@ -77,7 +77,7 @@ class SSLHandler implements TunnelDoneListener {
 	    // it should look like this (using RabbIT:RabbIT):
 	    // Proxy-authorization: Basic UmFiYklUOlJhYmJJVA==
 	    if (auth != null && !auth.equals (""))
-		request.setHeader ("Proxy-authorization", 
+		request.setHeader ("Proxy-authorization",
 				   "Basic " + Coder.uuencode (auth));
 	}
 	WebConnectionListener wcl = new WebConnector ();
@@ -86,13 +86,13 @@ class SSLHandler implements TunnelDoneListener {
 
     private class WebConnector implements WebConnectionListener {
 	private String uri;
-	
+
 	public WebConnector () {
 	    uri = request.getRequestURI ();
 	    // java needs protocoll to build URL
 	    request.setRequestURI ("http://" + uri);
 	}
-	
+
 	public void connectionEstablished (WebConnection wce) {
 	    wc = wce;
 	    if (proxy.isProxyConnected ()) {
@@ -103,10 +103,10 @@ class SSLHandler implements TunnelDoneListener {
 		sendOkReplyAndTunnel (bh);
 	    }
 	}
-	
+
 	public void timeout () {
 	    String err = "SSLHandler: Timeout waiting for web connection";
-	    logger.warning (err);	    
+	    logger.warning (err);
 	    closeDown ();
 	}
 
@@ -135,16 +135,16 @@ class SSLHandler implements TunnelDoneListener {
     private void warn (String err, Exception e) {
 	logger.log (Level.WARNING, err, e);
     }
-    
+
     private void setupChain () {
 	HttpResponseListener cr = new ChainResponseHandler ();
 	try {
-	    HttpResponseReader hrr = 
-		new HttpResponseReader (wc.getChannel (), 
-					proxy.getNioHandler (), 
+	    HttpResponseReader hrr =
+		new HttpResponseReader (wc.getChannel (),
+					proxy.getNioHandler (),
 					tlh.getNetwork (),
-					con.getBufferHandler (), request, 
-					proxy.getStrictHttp (), 
+					con.getBufferHandler (), request,
+					proxy.getStrictHttp (),
 					proxy.isProxyConnected (), cr);
 	    hrr.sendRequestAndWaitForResponse ();
 	} catch (IOException e) {
@@ -154,10 +154,10 @@ class SSLHandler implements TunnelDoneListener {
     }
 
     private class ChainResponseHandler implements HttpResponseListener {
-	public void httpResponse (HttpHeader response, BufferHandle rbh, 
-				  boolean keepalive, boolean isChunked, 
+	public void httpResponse (HttpHeader response, BufferHandle rbh,
+				  boolean keepalive, boolean isChunked,
 				  long dataSize) {
-	    String status = response.getStatusCode (); 
+	    String status = response.getStatusCode ();
 	    if (!"200".equals (status)) {
 		closeDown ();
 	    } else {
@@ -167,43 +167,43 @@ class SSLHandler implements TunnelDoneListener {
 
 	public void failed (Exception cause) {
 	    warn ("SSLHandler: failed to get chained response", cause);
-	    closeDown ();	    
+	    closeDown ();
 	}
-	
+
 	public void timeout () {
 	    logger.warning ("SSLHandler: Timeout waiting for chained response");
 	    closeDown ();
-	}	
+	}
     }
 
     private void sendOkReplyAndTunnel (BufferHandle server2client) {
 	HttpHeader reply = new HttpHeader ();
 	reply.setStatusLine ("HTTP/1.0 200 Connection established");
 	reply.setHeader ("Proxy-agent", proxy.getServerIdentity ());
-	
+
 	HttpHeaderSentListener tc = new TunnelConnected (server2client);
 	try {
-	    HttpHeaderSender hhs = 
-		new HttpHeaderSender (channel, proxy.getNioHandler (), 
+	    HttpHeaderSender hhs =
+		new HttpHeaderSender (channel, proxy.getNioHandler (),
 				      tlh.getClient (), reply, false, tc);
 	    hhs.sendHeader ();
 	} catch (IOException e) {
 	    warn ("IOException when sending header", e);
 	    closeDown ();
-	}	
+	}
     }
 
     private class TunnelConnected implements HttpHeaderSentListener {
 	private BufferHandle server2client;
-	
+
 	public TunnelConnected (BufferHandle server2client) {
 	    this.server2client = server2client;
 	}
-	
+
 	public void httpHeaderSent () {
 	    tunnelData (server2client);
 	}
-	
+
 	public void timeout () {
 	    logger.warning ("SSLHandler: Timeout when sending http header");
 	    closeDown ();
@@ -219,9 +219,9 @@ class SSLHandler implements TunnelDoneListener {
 	sbh = server2client;
 	SocketChannel sc = wc.getChannel ();
 	try {
-	    Tunnel tunnel = 
-		new Tunnel (proxy.getNioHandler (), channel, bh, 
-			    tlh.getClient (), sc, server2client, 
+	    Tunnel tunnel =
+		new Tunnel (proxy.getNioHandler (), channel, bh,
+			    tlh.getClient (), sc, server2client,
 			    tlh.getNetwork (), this);
 	    tunnel.start ();
 	} catch (IOException e) {
