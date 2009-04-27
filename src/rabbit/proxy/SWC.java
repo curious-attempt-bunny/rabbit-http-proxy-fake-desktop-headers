@@ -241,6 +241,8 @@ public class SWC implements HttpHeaderSentListener,
     public void timeout () {
 	// retry
 	lastException = new IOException ("timeout");
+	Closer.close (rh.getWebConnection (), logger);
+	rh.setWebConnection (null);
 	establish ();
     }
     
