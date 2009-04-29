@@ -111,8 +111,7 @@ class Tunnel {
 		else
 		    waitForRead ();
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
-			    "Got exception writing to tunnel", e);
+		logger.warning ("Got exception writing to tunnel: " + e);
 		closeDown ();
 	    }
 	}
@@ -138,9 +137,13 @@ class Tunnel {
 	public Long getTimeout () {
 	    return null;
 	}
-
+	
 	public void read () {
 	    try {
+		if (!from.isOpen ()) {
+		    logger.warning ("Tunnel to is closed, not reading data");
+		    return;
+		}
 		ByteBuffer buffer = bh.getBuffer ();
 		buffer.clear ();
 		int read = from.read (buffer);
@@ -155,8 +158,7 @@ class Tunnel {
 		    writeData ();
 		}
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
-			    "Got exception reading from tunnel", e);
+		logger.warning ("Got exception reading from tunnel: " + e);
 	    }
 	}
 
