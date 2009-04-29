@@ -131,8 +131,8 @@ public class ConnectionHandler {
 		wcl.failed (e);
 	    }
 	} else {
-	    wcl.failed (new IllegalArgumentException ("No method specified: " +
-						      header));
+	    String err = "No method specified: " + header;
+	    wcl.failed (new IllegalArgumentException (err));
 	}
     }
 

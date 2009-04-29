@@ -61,7 +61,7 @@ public class SWC implements HttpHeaderSentListener,
 	} else {
 	    con.getProxy ().getWebConnection (header, this);
 	}
-    } 
+    }
 
     public void connectionEstablished (WebConnection wc) {
 	con.getCounter ().inc ("WebConnection established: " + 
@@ -189,9 +189,11 @@ public class SWC implements HttpHeaderSentListener,
     }
 
     public void closed () {
-	con.getProxy ().releaseWebConnection (rh.getWebConnection ());
-	lastException = new IOException ("closed");
-	establish ();
+	if (rh.getWebConnection () != null) {
+	    closeDownWebConnection ();
+	    lastException = new IOException ("closed");
+	    establish ();
+	}
     }
     
     /** Calculate the age of the resource, needs ntp to be accurate. 
@@ -237,22 +239,28 @@ public class SWC implements HttpHeaderSentListener,
 	    SWC.this.failed (e);	    
 	}
     }
-    
+
+    private void closeDownWebConnection () {
+	WebConnection wc = rh.getWebConnection ();
+	rh.setWebConnection (null);
+	if (wc != null) {
+	    con.getNioHandler ().close (wc.getChannel ());
+	    Closer.close (wc, logger);
+	}
+    }
+
     public void timeout () {
 	// retry
 	lastException = new IOException ("timeout");
-	Closer.close (rh.getWebConnection (), logger);
-	rh.setWebConnection (null);
+	closeDownWebConnection ();
 	establish ();
     }
-    
+
     public void failed (Exception e) {
 	lastException = e;
 	con.getCounter ().inc ("WebConnections failed: " + 
 			       attempts + ": " + e);
-	Closer.close (rh.getWebConnection (), logger);
-	rh.setWebConnection (null);
-
+	closeDownWebConnection ();
 	// retry
 	establish ();
     }

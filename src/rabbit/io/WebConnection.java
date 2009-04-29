@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rabbit.nio.ConnectHandler;
 import rabbit.nio.NioHandler;
 import rabbit.util.Counter;
@@ -15,13 +17,14 @@ import rabbit.util.Counter;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class WebConnection implements Closeable {
-    private int id;
-    private Address address;
-    private Counter counter;
+    private final int id;
+    private final Address address;
+    private final Counter counter;
     private SocketChannel channel;
     private long releasedAt = -1;
     private boolean keepalive = true;
     private boolean mayPipeline = false;
+    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     private static AtomicInteger idCounter = new AtomicInteger (0);
 
@@ -81,6 +84,7 @@ public class WebConnection implements Closeable {
     }
 
     private class ConnectListener implements ConnectHandler {
+	private NioHandler nioHandler;
 	private WebConnectionListener wcl;
 	private Long timeout;
 
@@ -88,7 +92,9 @@ public class WebConnection implements Closeable {
 	    this.wcl = wcl;
 	}
 
-	public void waitForConnection (NioHandler nioHandler) throws IOException {
+	public void waitForConnection (NioHandler nioHandler) 
+	    throws IOException {
+	    this.nioHandler = nioHandler;
 	    timeout = nioHandler.getDefaultTimeout ();
 	    nioHandler.waitForConnect (channel, this);
 	}
@@ -98,6 +104,7 @@ public class WebConnection implements Closeable {
 	}
 
 	public void timeout () {
+	    closeDown ();
 	    wcl.timeout ();
 	}
 
@@ -119,7 +126,19 @@ public class WebConnection implements Closeable {
 		channel.socket ().setTcpNoDelay (true);
 		wcl.connectionEstablished (WebConnection.this);
 	    } catch (IOException e) {
+		closeDown ();
 		wcl.failed (e);
+	    }
+	}
+
+	private void closeDown () {
+	    try {
+		close ();
+		nioHandler.close (channel);
+	    } catch (IOException e) {
+		logger.log (Level.WARNING, 
+			    "Failed to close down WebConnection", 
+			    e);
 	    }
 	}
 
