@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import rabbit.cache.Cache;
 import rabbit.cache.NCache;
 import rabbit.dns.DNSHandler;
@@ -140,23 +138,11 @@ public class HttpProxy implements Resolver {
 
     private void setupLogging () {
 	SProperties logProps = config.getProperties ("logging");
-	accessLogger.setup (logProps);
-	String errorLog = logProps.get ("errorlog");
-	String sl = logProps.get ("size_limit");
-	sl = sl == null ? Integer.toString (1024 * 1024) : sl;
-	int limit = Integer.parseInt (sl);
-	int numFiles = Integer.parseInt (logProps.get ("num_files"), 10);
-	sl = logProps.get ("loglevel");
-	sl = sl != null ? sl : "INFO";
-	Level level = Level.parse (sl);
 	try {
-	    FileHandler fh = new FileHandler (errorLog, limit, numFiles, true);
-	    fh.setFormatter (new SimpleFormatter ());
-	    Logger logger = Logger.getLogger("rabbit");
-	    logger.setLevel (level);
-	    this.logger.setLevel (level);
-	    logger.addHandler (fh);
-	    logger.setUseParentHandlers (false);
+	    accessLogger.setup (logProps);
+	    ProxyLogger.LoggerAndHandler lah = 
+		ProxyLogger.getLogger (logProps, "error", "rabbit");
+	    this.logger.setLevel (lah.logger.getLevel ());
 	} catch (IOException e) {
 	    logger.log (Level.SEVERE, 
 			"Failed to configure logging",

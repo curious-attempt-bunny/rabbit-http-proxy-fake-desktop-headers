@@ -1,5 +1,5 @@
 version 4.0 (200x-yy-zz) Reworked nio layer so that rabbit uses multiple
-	selector threads. 
-
-
-
+	selector threads. Reworked logging to use java.util.logging. Fixed
+	a problem where web connections could be put into the connection
+	pools multiple times. 
+	
