@@ -165,7 +165,7 @@ cond_compile:
 realclean:
 	@rm -rf $(CLASSDIR)/*
 	@rm -rf $(JARDIR)/*
-	@rm -rf logs/*log
+	@rm -rf logs/*
 	@rm -rf $(DOCDIR)/*
 
 everything:
