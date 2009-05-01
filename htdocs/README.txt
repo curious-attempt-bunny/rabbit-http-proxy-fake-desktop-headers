@@ -1,4 +1,4 @@
-                     README for RabbIT version 3.x
+                     README for RabbIT version 4.x
 
    Introduction: RabbIT is a proxy for HTTP, it is intended to be
    HTTP/1.1 compliant. RabbIT is also a package of tools useful for the
@@ -47,12 +47,12 @@
    Running: Before you run RabbIT you should configure it, The default
    configuration is probably ok for testing under linux. RabbIT is packed
    in a state that allows you to run the proxy directly after unpacking
-   it. After unpacking the file RabbIT3-bin.tar.gz cd into the directory
-   named RabbIT3 and start the proxy with a command: 
-   java -jar jars/rabbit3.jar -f conf/rabbit.conf
+   it. After unpacking the file RabbIT4-bin.tar.gz cd into the directory
+   named RabbIT4 and start the proxy with a command: 
+   java -jar jars/rabbit4.jar -f conf/rabbit.conf
 
    For some more help try the following: 
-   java -jar jars/rabbit3.jar --help
+   java -jar jars/rabbit4.jar --help
 
    Configuration: RabbIT is very configurable.Read the file
    conf/rabbit.conf (or conf/rabbit.conf.orig if you have change the

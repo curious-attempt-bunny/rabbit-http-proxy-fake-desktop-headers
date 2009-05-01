@@ -1,4 +1,4 @@
-RabbIT3 proxy Help.
+RabbIT4 proxy Help.
 
 This file is only a very short description of the available command
 line switches to RabbIT. For more info check out the file

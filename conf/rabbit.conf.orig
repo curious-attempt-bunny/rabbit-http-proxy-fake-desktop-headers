@@ -25,7 +25,7 @@ proxyauth=
 # This is the small logo to use.
 # It is used in meta pages and other places.
 # Use $proxy to have RabbIT serve the image.
-logo=http://$proxy/FileSender/public/smallRabbIT3.png
+logo=http://$proxy/FileSender/public/smallRabbIT4.png
 
 # What do you want your proxy to identify itself as?
 # Server identy can be seen in HTTP header responses

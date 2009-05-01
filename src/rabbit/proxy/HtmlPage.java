@@ -11,7 +11,7 @@ import rabbit.util.SProperties;
 public class HtmlPage {
 
     private static String BASICLOGO = 
-	"http://www.khelekore.org/rabbit/images/smallRabbIT3.png";
+	"http://www.khelekore.org/rabbit/images/smallRabbIT4.png";
 
     private static SProperties config = setup ();
     
