@@ -140,9 +140,6 @@ public class HttpProxy implements Resolver {
 	SProperties logProps = config.getProperties ("logging");
 	try {
 	    accessLogger.setup (logProps);
-	    ProxyLogger.LoggerAndHandler lah = 
-		ProxyLogger.getLogger (logProps, "error", "rabbit");
-	    this.logger.setLevel (lah.logger.getLevel ());
 	} catch (IOException e) {
 	    logger.log (Level.SEVERE, 
 			"Failed to configure logging",

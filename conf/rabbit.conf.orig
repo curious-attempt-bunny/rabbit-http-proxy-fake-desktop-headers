@@ -54,7 +54,8 @@ error_num_files=10
 # chose one of 
 # SEVERE (highest value), WARNING, INFO, CONFIG, FINE, FINER, 
 # and FINEST (lowest value)
-loglevel=INFO
+access_log_level=INFO
+error_log_level=INFO
 
 
 [dns]

@@ -10,7 +10,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -55,19 +54,8 @@ public class ProxyLogger implements ConnectionLogger {
 	return offset;
     }
 
-    public static class LoggerAndHandler {
-	public final Handler handler;
-	public final Logger logger;
-	
-	public LoggerAndHandler (Handler handler, Logger logger) {
-	    this.handler = handler;
-	    this.logger = logger;
-	}
-    }
-
-    public static LoggerAndHandler getLogger (SProperties config, 
-					      String prefix,
-					      String logDomain) 
+    private Logger getLogger (SProperties config, String prefix,
+			      String logDomain, Formatter format) 
 	throws IOException {
 	String log = config.get (prefix + "_log");
 	String sl = config.get (prefix + "_size_limit");
@@ -85,13 +73,24 @@ public class ProxyLogger implements ConnectionLogger {
 	logger.addHandler (fh);
 	logger.setUseParentHandlers (false);
 	
-	return new LoggerAndHandler (fh, logger);
+	if (format != null)
+	    fh.setFormatter (format);
+	
+	return logger;
     }
 
     public void setup (SProperties config) throws IOException {
-	LoggerAndHandler lah = getLogger (config, "access", "rabbit.access");
-	accessLog = lah.logger;
-	lah.handler.setFormatter (new AccessFormatter ());
+	String sysLogging = 
+	    System.getProperty ("java.util.logging.config.file");
+	if (sysLogging != null) {
+	    System.out.println ("Logging configure by system property");
+	} else {
+	    Logger eh = getLogger (config, "error", "rabbit", null);
+	    eh.info ("Log level set to: " + eh.getLevel ());
+	}
+	Logger ah = getLogger (config, "access", "rabbit_access", 
+			       new AccessFormatter ());
+	accessLog = ah;
     }
 
     private static class AccessFormatter extends Formatter {
