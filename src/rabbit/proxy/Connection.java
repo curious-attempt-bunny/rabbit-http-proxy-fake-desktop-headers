@@ -1084,15 +1084,19 @@ public class Connection {
 
     private class SendAndCloseListener implements HttpHeaderSentListener {
 	public void httpHeaderSent () {
+	    status = "Response sent, logging and closing.";
 	    logAndClose (null);
 	}
 
 	public void timeout () {
+	    status = "Response sending timed out, logging and closing.";
 	    logger.info ("Timeout when sending http header");
 	    logAndClose (null);
 	}
 
 	public void failed (Exception e) {
+	    status = 
+		"Response sending failed: " + e + ", logging and closing.";
 	    logger.log (Level.INFO, "Exception when sending http header", e);
 	    logAndClose (null);
 	}
