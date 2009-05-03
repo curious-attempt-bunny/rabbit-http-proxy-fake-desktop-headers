@@ -45,10 +45,10 @@ StrictHTTP=false
 # is used or you can set the system property 
 # "java.util.logging.config.file" to configure your own loggers/handlers.
 #
-access_log=logs/access_log
+access_log=logs/access_log.%g
 access_size_limit=10 # in MB
 access_num_files=100
-error_log=logs/error_log%g
+error_log=logs/error_log.%g
 error_size_limit=1 # in MB
 error_num_files=10
 
