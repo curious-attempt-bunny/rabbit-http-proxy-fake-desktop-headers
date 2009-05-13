@@ -1,3 +1,6 @@
+version 4.1 (200x-yy-zz) Increased the default keepalive timeout to 30
+	seconds.
+
 version 4.0 (2009-05-03) Reworked nio layer so that rabbit uses multiple
 	selector threads. Reworked logging to use java.util.logging and
 	made it possible to use either rabbit.conf or the system property
