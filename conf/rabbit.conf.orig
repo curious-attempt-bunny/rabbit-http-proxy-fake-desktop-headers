@@ -11,6 +11,10 @@
 # Use any port available (over 1024 unless you run as root).
 port=9666
 
+# The number of selector threads to run
+# If not specified will use the same as the number of processors
+#num_selector_threads=4
+
 # This is the proxy that RabbIT should use when getting its files.
 # Leave it blank to dont have a proxy.
 # Both of these need to be set, or they will be ignored.
@@ -83,7 +87,7 @@ dnscachetime=8
 # Note! if we fail to write to a connection, we retry so 
 # It should be safe to have a high value. 
 # Time is in miliseconds.
-keepalivetime=15000
+keepalivetime=30000
 
 # Should RabbIT try to pipeline requests to external hosts.
 # Pipelining to external hosts will pipeline requests to the same 

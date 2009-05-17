@@ -284,13 +284,20 @@ public class HttpProxy implements Resolver {
 	logger.info ("Configuration loaded: ready for action.");
     }
 
+    private int getInt (String section, String key, int defaultValue) {
+	String defVal = Integer.toString (defaultValue);
+	String configValue = config.getProperty (section, key, defVal).trim ();
+	return Integer.parseInt (configValue);
+    }
+
     /** Open a socket on the specified port 
      *  also make the proxy continue accepting connections.
      */
     private void openSocket () {
-	int tport = 
-	    Integer.parseInt (config.getProperty (getClass ().getName (), 
-						  "port", "9666").trim ());
+	String section = getClass ().getName ();
+	int tport = getInt (section, "port", 9666);
+	int cpus = Runtime.getRuntime ().availableProcessors ();
+	int selectorThreads = getInt (section, "num_selector_threads", cpus);
 	if (tport != port) {
 	    try {
 		closeSocket (); 
@@ -299,7 +306,7 @@ public class HttpProxy implements Resolver {
 		ssc.configureBlocking (false);
 		ssc.socket ().bind (new InetSocketAddress (port));
 		ExecutorService es = Executors.newCachedThreadPool ();
-		nioHandler = new MultiSelectorNioHandler (es, 4);
+		nioHandler = new MultiSelectorNioHandler (es, selectorThreads);
 		AcceptorListener listener = 
 		    new ProxyConnectionAcceptor (acceptorId++, this);
 		Acceptor acceptor = new Acceptor (ssc, nioHandler, listener);
