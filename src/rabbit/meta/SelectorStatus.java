@@ -29,9 +29,16 @@ public class SelectorStatus extends BaseMetaHandler {
 	sb.append ("<p>\n");
 	
 	con.getNioHandler ().visitSelectors (new SelectorVisitor () {
+		int count = 0;
 		public void selector (Selector selector) {
-		    appendKeys (sb, selector.selectedKeys (), "Selected key");
-		    appendKeys (sb, selector.keys (), "Registered key");
+		    boolean odd = (count & 1) == 1;
+		    String trColor = odd ? "#EE8888" : "#DD6666";
+		    String tdColor = odd ? "#EEFFFF" : "#DDDDFF";
+		    appendKeys (sb, selector.selectedKeys (), "Selected key", 
+				trColor, tdColor);
+		    appendKeys (sb, selector.keys (), "Registered key", 
+				trColor, tdColor);
+		    count++;
 		}
 		public void end () {
 		}
@@ -39,18 +46,18 @@ public class SelectorStatus extends BaseMetaHandler {
     }
 
 
-    private void appendKeys (StringBuilder sb, 
-			     Set<SelectionKey> sks, String header) {
+    private void appendKeys (StringBuilder sb, Set<SelectionKey> sks, 
+			     String header, String thColor, String trColor) {
 	sb.append (HtmlPage.getTableHeader (100, 1));
-	sb.append (HtmlPage.getTableTopicRow ());
+	sb.append ("<tr bgcolor=\"").append (thColor).append ("\">");
 	sb.append ("<th width=\"20%\">").append (header).append ("</th>");
-	sb.append ("<th>channel</th>");
-	sb.append ("<th width=\"50%\">Attachment</th>");
-	sb.append ("<th>Interest</th>");
-	sb.append ("<th>Ready</th>");
-	sb.append ("</tr>\n");
+	sb.append ("<th>channel</th>" + 
+		   "<th width=\"50%\">Attachment</th>" + 
+		   "<th>Interest</th>" + 
+		   "<th>Ready</th>" +
+		   "</tr>\n");
 	for (SelectionKey sk : sks) {
-	    sb.append ("<tr><td>");
+	    sb.append ("<tr bgcolor=\"").append (trColor).append ("\"><td>");
 	    sb.append (sk.toString ());
 	    sb.append ("</td><td>");
 	    sb.append (sk.channel ());
