@@ -52,8 +52,10 @@ public class CachingBufferHandler implements BufferHandler {
     
     public ByteBuffer growBuffer (ByteBuffer buffer) {
 	ByteBuffer lb = getBuffer (largeCache, 128 * 1024);
-	lb.put (buffer);
-	putBuffer (buffer);
+	if (buffer != null) {
+	    lb.put (buffer);
+	    putBuffer (buffer);
+	}
 	return lb;
     }
 

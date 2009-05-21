@@ -21,7 +21,7 @@ public class SimpleBufferHandle implements BufferHandle {
 	return buffer;
     }
 
-    public void growBuffer () {
+    public ByteBuffer getLargeBuffer () {
 	throw new RuntimeException ("Not implemented");
     }
 

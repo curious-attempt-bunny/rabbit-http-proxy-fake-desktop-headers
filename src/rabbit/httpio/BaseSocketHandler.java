@@ -40,10 +40,6 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
 	return bh.getBuffer ();
     }
 
-    protected void growBuffer () {
-	bh.growBuffer ();
-    }
-
     protected void releaseBuffer () {
 	bh.possiblyFlush ();
     }

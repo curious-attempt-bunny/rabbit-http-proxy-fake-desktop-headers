@@ -15,8 +15,8 @@ public interface BufferHandle {
     /** Get a byte buffer of reasonable size, the buffer will have been cleared. */
     ByteBuffer getBuffer ();
 
-    /** Grow the buffer.*/
-    void growBuffer ();
+    /** Get a byte buffer of reasonable size, the buffer will have been cleared. */
+    ByteBuffer getLargeBuffer ();
 
     /** release a buffer if possible. */
     void possiblyFlush ();

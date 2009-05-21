@@ -23,11 +23,10 @@ public class CacheBufferHandle implements BufferHandle {
 	    buffer = bh.getBuffer ();
 	return buffer;
     }
-
-    public void growBuffer () {
-	if (buffer == null)
-	    buffer = getBuffer ();
+    
+    public ByteBuffer getLargeBuffer () {
 	buffer = bh.growBuffer (buffer);
+	return buffer;
     }
 
     public void possiblyFlush () {

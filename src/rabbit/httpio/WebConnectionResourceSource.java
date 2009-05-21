@@ -28,6 +28,7 @@ public class WebConnectionResourceSource
     private int currentMark = 0;
     private ChunkHandler chunkHandler;
     private Long timeout;
+    private int fullReads = 0;
     
     public WebConnectionResourceSource (ConnectionHandler con, 
 					NioHandler nioHandler, WebConnection wc, 
@@ -116,7 +117,10 @@ public class WebConnectionResourceSource
     }
 
     public void read () {
-	ByteBuffer buffer = bufHandle.getBuffer ();
+	boolean useBig = fullReads > 4;
+	ByteBuffer buffer = 
+	    useBig ? bufHandle.getLargeBuffer () : bufHandle.getBuffer ();
+
 	buffer.position (currentMark); // keep our saved data.
 	int limit = buffer.capacity ();
 	if (dataSize > 0  && !isChunked) {
@@ -135,6 +139,8 @@ public class WebConnectionResourceSource
 		cleanupAndFinish ();
 	    } else {
 		tl.read (read);
+		if (read == buffer.capacity ())
+		    fullReads++;
 		buffer.flip ();
 		handleBlock ();
 	    }
