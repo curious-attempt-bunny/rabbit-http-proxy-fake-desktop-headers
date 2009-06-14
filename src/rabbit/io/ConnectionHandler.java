@@ -140,11 +140,11 @@ public class ConnectionHandler {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (a);
 	    if (pool != null) {
-		synchronized (pool) {
-		    if (pool.size () > 0) {
-			WebConnection wc = pool.remove (pool.size () - 1);
-			return unregister (wc);
-		    }
+		if (pool.size () > 0) {
+		    WebConnection wc = pool.remove (pool.size () - 1);
+		    if (pool.isEmpty ())
+			conns.remove (a);
+		    return unregister (wc);
 		}
 	    }
 	}
@@ -164,11 +164,9 @@ public class ConnectionHandler {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (wc.getAddress ());
 	    if (pool != null) {
-		synchronized (pool) {
-		    pool.remove (wc);
-		    if (pool.size () == 0)
-			conns.remove (wc.getAddress ());
-		}
+		pool.remove (wc);
+		if (pool.isEmpty ())
+		    conns.remove (wc.getAddress ());
 	    }
 	}
     }
@@ -204,10 +202,10 @@ public class ConnectionHandler {
 		}
 	    }
 	    try {
-		CloseListener cl = new CloseListener (wc);
-		cl.register ();
-		wc2closer.put (wc, cl);
 		pool.add (wc);
+		CloseListener cl = new CloseListener (wc);
+		wc2closer.put (wc, cl);
+		cl.register ();
 	    } catch (IOException e) {
 		logger.log (Level.WARNING,
 			    "Get IOException when setting up a CloseListener: ",
