@@ -6,3 +6,4 @@ classes/*
 jars/rabbit4.jar
 htdocs/javadoc/*
 logs/*
+run_rabbit
