@@ -290,9 +290,8 @@ public class ConnectionHandler {
 	if (!usePipelining)
 	    return;
 	synchronized (wc) {
-	    if (!wc.getKeepalive ())
-		return;
-	    wc.setMayPipeline (true);
+	    if (wc.getKeepalive ())
+		wc.setMayPipeline (true);
 	}
     }
 
