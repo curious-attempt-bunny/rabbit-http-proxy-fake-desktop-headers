@@ -5,7 +5,8 @@ version 4.1 (200x-yy-zz) Increased the default keepalive timeout to 30
 	WebConnectionResourceSource actually grow the download buffer when
 	it has read full chunks a few times. Made ConnectionHandler use
 	concurrent collections for better scalability. ConnectionHandler
-	now removes all empty pools.
+	now removes all empty pools. Tried to fix a NPE in the selector
+	code.
 
 version 4.0 (2009-05-03) Reworked nio layer so that rabbit uses multiple
 	selector threads. Reworked logging to use java.util.logging and
