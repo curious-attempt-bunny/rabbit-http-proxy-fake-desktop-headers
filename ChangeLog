@@ -1,3 +1,5 @@
+version 4.2 (200x-yy-zz)
+
 version 4.1 (2009-07-01) Increased the default keepalive timeout to 30
 	seconds. Made number of selector threads configurable, with a
 	default value of the number of cpu cores. Made selector status
