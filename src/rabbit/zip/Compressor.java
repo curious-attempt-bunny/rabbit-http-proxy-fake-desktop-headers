@@ -35,6 +35,7 @@ class Compressor implements GZipPackState {
 				   def.getTotalIn ());
 	    packer.setState (t);
 	    t.handleCurrentData (packer);
+	    def.end ();
 	    return;
 	}
 	if (!finished && def.needsInput ())

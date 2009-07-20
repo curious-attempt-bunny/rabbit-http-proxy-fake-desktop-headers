@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
@@ -53,10 +54,8 @@ public class ConnectionHandler {
 	this.resolver = resolver;
 	this.nioHandler = nioHandler;
 
-	activeConnections =
-	    new HashMap<Address, List<WebConnection>> ();
-	wc2closer =
-	    new HashMap<WebConnection, CloseListener> ();
+	activeConnections = new HashMap<Address, List<WebConnection>> ();
+	wc2closer = new ConcurrentHashMap<WebConnection, CloseListener> ();
     }
 
     /** Set the keep alive time for this handler.
@@ -141,11 +140,11 @@ public class ConnectionHandler {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (a);
 	    if (pool != null) {
-		synchronized (pool) {
-		    if (pool.size () > 0) {
-			WebConnection wc = pool.remove (pool.size () - 1);
-			return unregister (wc);
-		    }
+		if (pool.size () > 0) {
+		    WebConnection wc = pool.remove (pool.size () - 1);
+		    if (pool.isEmpty ())
+			conns.remove (a);
+		    return unregister (wc);
 		}
 	    }
 	}
@@ -154,9 +153,7 @@ public class ConnectionHandler {
 
     private WebConnection unregister (WebConnection wc) {
 	CloseListener closer = null;
-	synchronized (wc2closer) {
-	    closer = wc2closer.remove (wc);
-	}
+	closer = wc2closer.remove (wc);
 	if (closer != null)
 	    nioHandler.cancel (wc.getChannel (), closer);
 	return wc;
@@ -167,11 +164,9 @@ public class ConnectionHandler {
 	synchronized (conns) {
 	    List<WebConnection> pool = conns.get (wc.getAddress ());
 	    if (pool != null) {
-		synchronized (pool) {
-		    pool.remove (wc);
-		    if (pool.size () == 0)
-			conns.remove (wc.getAddress ());
-		}
+		pool.remove (wc);
+		if (pool.isEmpty ())
+		    conns.remove (wc.getAddress ());
 	    }
 	}
     }
@@ -195,8 +190,7 @@ public class ConnectionHandler {
 	    wc.setReleased ();
 	}
 	synchronized (activeConnections) {
-	    List<WebConnection> pool =
-		activeConnections.get (a);
+	    List<WebConnection> pool = activeConnections.get (a);
 	    if (pool == null) {
 		pool = new ArrayList<WebConnection> ();
 		activeConnections.put (a, pool);
@@ -208,12 +202,10 @@ public class ConnectionHandler {
 		}
 	    }
 	    try {
-		CloseListener cl = new CloseListener (wc);
-		cl.register ();
-		synchronized (wc2closer) {
-		    wc2closer.put (wc, cl);
-		}
 		pool.add (wc);
+		CloseListener cl = new CloseListener (wc);
+		wc2closer.put (wc, cl);
+		cl.register ();
 	    } catch (IOException e) {
 		logger.log (Level.WARNING,
 			    "Get IOException when setting up a CloseListener: ",
@@ -266,9 +258,7 @@ public class ConnectionHandler {
 
 	private void closeChannel () {
 	    try {
-		synchronized (wc2closer) {
-		    wc2closer.remove (wc);
-		}
+		wc2closer.remove (wc);
 		removeFromPool (wc, activeConnections);
 		wc.close ();
 	    } catch (IOException e) {
@@ -300,9 +290,8 @@ public class ConnectionHandler {
 	if (!usePipelining)
 	    return;
 	synchronized (wc) {
-	    if (!wc.getKeepalive ())
-		return;
-	    wc.setMayPipeline (true);
+	    if (wc.getKeepalive ())
+		wc.setMayPipeline (true);
 	}
     }
 

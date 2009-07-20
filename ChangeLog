@@ -1,9 +1,14 @@
-version 4.1 (200x-yy-zz) Increased the default keepalive timeout to 30
+version 4.2 (200x-yy-zz)
+
+version 4.1 (2009-07-01) Increased the default keepalive timeout to 30
 	seconds. Made number of selector threads configurable, with a
 	default value of the number of cpu cores. Made selector status
 	page easer to read by altering colors between selectors. Made
 	WebConnectionResourceSource actually grow the download buffer when
-	it has read full chunks a few times.
+	it has read full chunks a few times. Made ConnectionHandler use
+	concurrent collections for better scalability. ConnectionHandler
+	now removes all empty pools. Tried to fix a NPE in the selector
+	code. Call Deflater.end to release native zip resources earlier.
 
 version 4.0 (2009-05-03) Reworked nio layer so that rabbit uses multiple
 	selector threads. Reworked logging to use java.util.logging and

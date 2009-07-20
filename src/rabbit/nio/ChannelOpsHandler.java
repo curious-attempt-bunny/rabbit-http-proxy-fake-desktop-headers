@@ -6,10 +6,25 @@ import java.util.concurrent.ExecutorService;
 /** The handler of channel operations.
  */
 class ChannelOpsHandler {
-    private ReadHandler readHandler;
-    private WriteHandler writeHandler;
-    private AcceptHandler acceptHandler;
-    private ConnectHandler connectHandler;
+    private static class NullHandler 
+	implements ReadHandler, WriteHandler, AcceptHandler, ConnectHandler {
+	public void closed () {}
+	public void timeout () {}
+	public boolean useSeparateThread () { return false; }
+	public String getDescription () { return "NullHandler"; }
+	public Long getTimeout () { return null; }
+	public void read () {}
+	public void write () {}
+	public void accept () {}
+	public void connect () {}
+    }
+
+    private static final NullHandler NULL_HANDLER = new NullHandler ();
+
+    private ReadHandler readHandler = NULL_HANDLER;
+    private WriteHandler writeHandler = NULL_HANDLER;
+    private AcceptHandler acceptHandler = NULL_HANDLER;
+    private ConnectHandler connectHandler = NULL_HANDLER;
 
     @Override public String toString () {
 	return getClass ().getSimpleName () + "{" +
@@ -21,13 +36,13 @@ class ChannelOpsHandler {
 
     public int getInterestOps () {
 	int ret = 0;
-	if (readHandler != null)
+	if (readHandler != NULL_HANDLER)
 	    ret |= SelectionKey.OP_READ;
-	if (writeHandler != null)
+	if (writeHandler != NULL_HANDLER)
 	    ret |= SelectionKey.OP_WRITE;
-	if (acceptHandler != null)
+	if (acceptHandler != NULL_HANDLER)
 	    ret |= SelectionKey.OP_ACCEPT;
-	if (connectHandler != null)
+	if (connectHandler != NULL_HANDLER)
 	    ret |= SelectionKey.OP_CONNECT;
 	return ret;
     }
@@ -35,7 +50,7 @@ class ChannelOpsHandler {
     private void checkNullHandler (SocketChannelHandler handler,
 				   SocketChannelHandler newHandler,
 				   String type) {
-	if (handler != null) {
+	if (handler != NULL_HANDLER) {
 	    String msg = "Trying to overwrite the existing " + type + ": " +
 		handler + ", new " + type + ": " + readHandler +
 		", coh: " + this;
@@ -130,29 +145,29 @@ class ChannelOpsHandler {
 	WriteHandler wh = writeHandler;
 	AcceptHandler ah = acceptHandler;
 	ConnectHandler ch = connectHandler;
-	readHandler = null;
-	writeHandler = null;
-	acceptHandler = null;
-	connectHandler = null;
+	readHandler = NULL_HANDLER;
+	writeHandler = NULL_HANDLER;
+	acceptHandler = NULL_HANDLER;
+	connectHandler = NULL_HANDLER;
 
 	if (sk.isReadable ())
 	    handleRead (executorService, rh);
-	else if (rh != null)
+	else if (rh != NULL_HANDLER)
 	    setReadHandler (rh);
 
 	if (sk.isValid () && sk.isWritable ())
 	    handleWrite (executorService, wh);
-	else if (wh != null)
+	else if (wh != NULL_HANDLER)
 	    setWriteHandler (wh);
 
 	if (sk.isValid () && sk.isAcceptable ())
 	    handleAccept (executorService, ah);
-	else if (ah != null)
+	else if (ah != NULL_HANDLER)
 	    setAcceptHandler (ah);
 
 	if (sk.isValid () && sk.isConnectable ())
 	    handleConnect (executorService, ch);
-	else if (ch != null)
+	else if (ch != NULL_HANDLER)
 	    setConnectHandler (ch);
     }
 
@@ -171,13 +186,13 @@ class ChannelOpsHandler {
     public boolean doTimeouts (long now) {
 	boolean ret = false;
 	if (ret |= doTimeout (now, readHandler))
-	    readHandler = null;
+	    readHandler = NULL_HANDLER;
 	if (ret |= doTimeout (now, writeHandler))
-	    writeHandler = null;
+	    writeHandler = NULL_HANDLER;
 	if (ret |= doTimeout (now, acceptHandler))
-	    acceptHandler = null;
+	    acceptHandler = NULL_HANDLER;
 	if (ret |= doTimeout (now, connectHandler))
-	    connectHandler = null;
+	    connectHandler =  NULL_HANDLER;
 	return ret;
     }
 
@@ -193,7 +208,7 @@ class ChannelOpsHandler {
     }
 
     public Long getMinimumTimeout () {
-	Long t = readHandler != null ? readHandler.getTimeout () : null;
+	Long t = readHandler.getTimeout ();
 	t = minTimeout (t, writeHandler);
 	t = minTimeout (t, acceptHandler);
 	t = minTimeout (t, connectHandler);
@@ -202,13 +217,13 @@ class ChannelOpsHandler {
 
     public void cancel (SocketChannelHandler sch) {
 	if (readHandler == sch)
-	    readHandler = null;
+	    readHandler = NULL_HANDLER;
 	if (writeHandler == sch)
-	    writeHandler = null;
+	    writeHandler = NULL_HANDLER;
 	if (acceptHandler == sch)
-	    acceptHandler = null;
+	    acceptHandler = NULL_HANDLER;
 	if (connectHandler == sch)
-	    connectHandler = null;
+	    connectHandler = NULL_HANDLER;
     }
 
     private void closedIfSet (SocketChannelHandler sch) {
