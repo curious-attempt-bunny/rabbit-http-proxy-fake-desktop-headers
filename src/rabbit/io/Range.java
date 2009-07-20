@@ -5,8 +5,8 @@ package rabbit.io;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class Range {
-    private long start;
-    private long end;
+    private final long start;
+    private final long end;
     public Range (long start, long end) {
 	this.start = start; 
 	this.end = end;
