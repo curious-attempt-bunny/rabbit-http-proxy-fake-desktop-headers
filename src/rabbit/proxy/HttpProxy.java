@@ -2,8 +2,6 @@ package rabbit.proxy;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -37,6 +35,7 @@ import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
+import rabbit.nio.InetAddressHelper;
 import rabbit.nio.MultiSelectorNioHandler;
 import rabbit.nio.NioHandler;
 import rabbit.util.Config;
@@ -292,32 +291,6 @@ public class HttpProxy implements Resolver {
 	return Integer.parseInt (configValue);
     }
 
-    private NetworkInterface getNetworkInterface (String name) 
-	throws SocketException {
-	if (name == null) 
-	    return null;
-	NetworkInterface iface = NetworkInterface.getByName (name);
-	if (iface == null)
-	    logger.severe ("Failed to find network interface: '" + name + "'");
-	return iface;
-    }
-
-    private InetAddress getInetAddress (NetworkInterface iface, String type)
-	throws IOException {
-	boolean useIpv4 = "ipv4".equals (type);
-	    
-	Enumeration<InetAddress> e = iface.getInetAddresses ();
-	while (e.hasMoreElements ()) {
-	    InetAddress ia = e.nextElement ();
-	    if (useIpv4 && ia.getClass () == Inet4Address.class)
-		return ia;
-	    else if (!useIpv4 && ia.getClass () == Inet6Address.class)
-		return ia;
-	}
-	throw new IOException ("Failed to find " + type + " address for " + 
-			       "interface: " + iface.getName ());
-    }
-
     /** Open a socket on the specified port
      *  also make the proxy continue accepting connections.
      */
@@ -327,21 +300,22 @@ public class HttpProxy implements Resolver {
 	int cpus = Runtime.getRuntime ().availableProcessors ();
 	int selectorThreads = getInt (section, "num_selector_threads", cpus);
 	String iname = config.getProperty (section, "listen_interface");
-	String itype = config.getProperty (section, "listen_interface_type", "ipv4");
+	String itype = 
+	    config.getProperty (section, "listen_interface_type", "ipv4");
 	if (tport != port) {
 	    try {
 		closeSocket ();
-		NetworkInterface iface = getNetworkInterface (iname);
 		port = tport;
 		ssc = ServerSocketChannel.open ();
 		ssc.configureBlocking (false);
-		if (iface == null) {
+		InetAddress ia = 
+		    InetAddressHelper.getInetAddress (iname, itype);
+		if (ia == null) {
 		    ssc.socket ().bind (new InetSocketAddress (port));
 		} else { 
-		    InetAddress ia = getInetAddress (iface, itype);
 		    logger.info ("listening on inetaddress: " + ia + 
 				 ":" + port +
-				 " on interface: " + iface.getName ());
+				 " on inet address: " + ia);
 		    ssc.socket ().bind (new InetSocketAddress (ia, port));
 		}
 		ExecutorService es = Executors.newCachedThreadPool ();
