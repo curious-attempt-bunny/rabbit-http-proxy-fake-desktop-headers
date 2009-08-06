@@ -100,6 +100,9 @@ public class ProxyLogger implements ConnectionLogger {
     }
     
     public void logConnection (Connection con) {
+	if (accessLog == null)
+	    return;
+
 	StringBuilder sb = new StringBuilder ();
 	Socket s = con.getChannel ().socket (); 
 	if (s != null) {
