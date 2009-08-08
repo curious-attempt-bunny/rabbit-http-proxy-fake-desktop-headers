@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
-import rabbit.nio.InetAddressHelper;
 import rabbit.nio.NioHandler;
 import rabbit.nio.ReadHandler;
 import rabbit.util.Counter;
@@ -320,12 +319,10 @@ public class ConnectionHandler {
 	    up = "true";
 	usePipelining = up.equalsIgnoreCase ("true");
 
-	String iname = config.getProperty ("bind_interface");
-	String itype = config.getProperty ("bind_interface_type", "ipv4");
-	if (iname != null) {
+	String bindIP = config.getProperty ("bind_ip");
+	if (bindIP != null) {
 	    try {
-		InetAddress ia = 
-		    InetAddressHelper.getInetAddress (iname, itype);
+		InetAddress ia = InetAddress.getByName (bindIP);
 		if (ia != null) {
 		    logger.info ("Will bind to: " + ia + 
 				 " for outgoing traffic");
@@ -333,8 +330,7 @@ public class ConnectionHandler {
 		}
 	    } catch (IOException e) {
 		logger.log (Level.SEVERE, 
-			    "Failed to find specified network interface or " + 
-			    "type: " + iname + ", " + itype, 
+			    "Failed to find inet address for: " + bindIP,
 			    e);
 	    }
 	}

@@ -7,12 +7,10 @@
 [rabbit.proxy.HttpProxy]
 # This section holds the basic stuff needed for the proxy.
 
-# Here you can specify an interface that will be used for incomming 
-# conections, that is the interface rabbit will listen on.
-#listen_interface=wlan0
-# Specify the type, default is ipv4, but if you want to use ipv6 then 
-# you need to specify that.
-#listen_interface_type=ipv4
+# Here you can specify an ip that will be used for incomming 
+# conections, that is the ip rabbit will listen on.
+#listen_ip=192.168.0.123
+
 
 # This is the port the proxy listens on.
 # Use any port available (over 1024 unless you run as root).
@@ -105,12 +103,9 @@ keepalivetime=30000
 # Still use with caution, somewhat experimental, may cause bugs.
 usepipelining=false
 
-# Here you can specify an interface that will be used for outgoing 
-# conections.
-#bind_interface=eth0
-# Specify the type, default is ipv4, but if you want to use ipv6 then 
-# you need to specify that.
-#bind_interface_type=ipv4
+# Here you can specify an ip that will be used for outgoing 
+# connections.
+#bind_ip=192.168.0.123
 
 [Handlers]
 # This section sets up the content handlers.

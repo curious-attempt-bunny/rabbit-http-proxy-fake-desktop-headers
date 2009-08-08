@@ -35,7 +35,6 @@ import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
-import rabbit.nio.InetAddressHelper;
 import rabbit.nio.MultiSelectorNioHandler;
 import rabbit.nio.NioHandler;
 import rabbit.util.Config;
@@ -299,20 +298,17 @@ public class HttpProxy implements Resolver {
 	int tport = getInt (section, "port", 9666);
 	int cpus = Runtime.getRuntime ().availableProcessors ();
 	int selectorThreads = getInt (section, "num_selector_threads", cpus);
-	String iname = config.getProperty (section, "listen_interface");
-	String itype = 
-	    config.getProperty (section, "listen_interface_type", "ipv4");
+	String bindIP = config.getProperty (section, "listen_ip");
 	if (tport != port) {
 	    try {
 		closeSocket ();
 		port = tport;
 		ssc = ServerSocketChannel.open ();
 		ssc.configureBlocking (false);
-		InetAddress ia = 
-		    InetAddressHelper.getInetAddress (iname, itype);
-		if (ia == null) {
+		if (bindIP == null) {
 		    ssc.socket ().bind (new InetSocketAddress (port));
 		} else { 
+		    InetAddress ia = InetAddress.getByName (bindIP);
 		    logger.info ("listening on inetaddress: " + ia + 
 				 ":" + port +
 				 " on inet address: " + ia);
