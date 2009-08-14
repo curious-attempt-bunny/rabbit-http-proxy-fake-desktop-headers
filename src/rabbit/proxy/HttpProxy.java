@@ -35,8 +35,10 @@ import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
+import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.MultiSelectorNioHandler;
 import rabbit.nio.NioHandler;
+import rabbit.nio.TaskIdentifier;
 import rabbit.util.Config;
 import rabbit.util.Counter;
 import rabbit.util.SProperties;
@@ -474,7 +476,11 @@ public class HttpProxy implements Resolver {
 	}
 	ResolvRunner rr =
 	    new ResolvRunner (dnsHandler, url, ial);
-	nioHandler.runThreadTask (rr);
+	TaskIdentifier ti = 
+	    new DefaultTaskIdentifier (getClass ().getSimpleName () +
+				       ".getInetAddress", 
+				       " url: " + url);
+	nioHandler.runThreadTask (rr, ti);
     }
 
     /** Get the port to connect to.

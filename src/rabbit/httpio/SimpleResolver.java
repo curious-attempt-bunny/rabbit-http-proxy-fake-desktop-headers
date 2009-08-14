@@ -5,6 +5,7 @@ import rabbit.dns.DNSHandler;
 import rabbit.dns.DNSJavaHandler;
 import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
+import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.NioHandler;
 
 /** A simple resolver that uses the dnsjava resolver. 
@@ -23,7 +24,9 @@ public class SimpleResolver implements Resolver {
     }
 
     public void getInetAddress (URL url, InetAddressListener listener) {
-	tr.runThreadTask (new ResolvRunner (dnsHandler, url, listener));
+	String groupId = getClass ().getSimpleName ();
+	tr.runThreadTask (new ResolvRunner (dnsHandler, url, listener), 
+			  new DefaultTaskIdentifier (groupId, url.toString ()));
     }
 
     public int getConnectPort (int port) {

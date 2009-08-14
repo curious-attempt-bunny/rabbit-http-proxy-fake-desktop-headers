@@ -22,11 +22,11 @@ public class DNSJavaHandler implements DNSHandler {
 	if (config == null)
 	    config = new SProperties ();
 	String ct = config.getProperty ("dnscachetime", "8").trim ();
-	int time = 8 * 3600; 
+	int time = 8 * 3600;
 	try {
 	    time = Integer.parseInt (ct) * 3600;
 	} catch (NumberFormatException e) {
-	    logger.warning ("bad number for dnscachetime: '" + ct + 
+	    logger.warning ("bad number for dnscachetime: '" + ct +
 			    "', using: " + (time / 3600) + " hours");
 	}
 	Cache dnsCache = Lookup.getDefaultCache (DClass.IN);
@@ -36,10 +36,10 @@ public class DNSJavaHandler implements DNSHandler {
 
     /** Look up an internet address. */
     public InetAddress getInetAddress (URL url) throws UnknownHostException {
-	return Address.getByName (url.getHost ());	
+	return getInetAddress (url.getHost ());
     }
 
     public InetAddress getInetAddress (String host) throws UnknownHostException {
-	return Address.getByName (host);	
+	return Address.getByName (host);
     }
 }

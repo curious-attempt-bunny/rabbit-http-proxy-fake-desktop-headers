@@ -9,12 +9,10 @@ import rabbit.util.SProperties;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class DNSSunHandler implements DNSHandler {
-    /** Do any neccessary setup. */
     public void setup (SProperties config) {
 	// empty.
     }
 
-    /** Look up an internet address. */
     public InetAddress getInetAddress (URL url) throws UnknownHostException {
 	return InetAddress.getByName (url.getHost ());
     }
