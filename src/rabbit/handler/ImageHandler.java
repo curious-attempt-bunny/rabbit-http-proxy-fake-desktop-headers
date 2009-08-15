@@ -171,7 +171,6 @@ public class ImageHandler extends BaseHandler {
 	public void bufferRead (final BufferHandle bufHandle) {
 	    TaskIdentifier ti = 
 		new DefaultTaskIdentifier (getClass ().getSimpleName (), 
-					   "reading image: " + 
 					   request.getRequestURI ());
 	    con.getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {

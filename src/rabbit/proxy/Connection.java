@@ -289,8 +289,8 @@ public class Connection {
 	if (proxy.getCache ().getMaxSize () > 0) {
 	    // memory consistency is guarded by the underlying SynchronousQueue
 	    TaskIdentifier ti = 
-		new DefaultTaskIdentifier (getClass ().getSimpleName (), 
-					   "fillInCacheEntries: " + 
+		new DefaultTaskIdentifier (getClass ().getSimpleName () + 
+					   ".fillInCacheEntries: ",
 					   request.getRequestURI ());
 	    getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {

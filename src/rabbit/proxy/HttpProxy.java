@@ -479,7 +479,7 @@ public class HttpProxy implements Resolver {
 	TaskIdentifier ti = 
 	    new DefaultTaskIdentifier (getClass ().getSimpleName () +
 				       ".getInetAddress", 
-				       " url: " + url);
+				       url.toString ());
 	nioHandler.runThreadTask (rr, ti);
     }
 

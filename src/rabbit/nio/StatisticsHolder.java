@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import rabbit.nio.statistics.CompletionEntry;
+import rabbit.nio.statistics.TotalTimeSpent;
 
 /** A class that executes one task and gathers information about
  *  the time spent and the success status of the task. 
@@ -27,35 +29,7 @@ public class StatisticsHolder {
 
     private Map<String, TotalTimeSpent> total =
 	new HashMap<String, TotalTimeSpent> ();
-    
-    public final class CompletionEntry {
-	public final TaskIdentifier ti;
-	public final boolean wasOk;
-	public final long timeSpent;
 
-	public CompletionEntry (TaskIdentifier ti, 
-				boolean wasOk, 
-				long timeSpent) {
-	    this.ti = ti;
-	    this.wasOk = wasOk;
-	    this.timeSpent = timeSpent;
-	}
-    }
-
-    public final class TotalTimeSpent {
-	private long successful = 0;
-	private long failures = 0;
-	private long totalMillis = 0;
-
-	public void update (CompletionEntry ce) {
-	    if (ce.wasOk)
-		successful++;
-	    else
-		failures++;
-	    totalMillis += ce.timeSpent;
-	}
-    }
-    
     private <T> List<T> getList (String id, 
 				 Map<String, List<T>> tasks) {
 	List<T> ls = tasks.get (id);
@@ -143,7 +117,30 @@ public class StatisticsHolder {
 	tts.update (ce);
     }
 
+    private <K, V> Map<K, List<V>> copy (Map<K, List<V>> m) {
+	Map<K, List<V>> ret = new HashMap<K, List<V>> ();
+	for (Map.Entry<K, List<V>> me : m.entrySet ())
+	    ret.put (me.getKey (), new ArrayList<V> (me.getValue ()));
+	return ret;
+    }
+
     public synchronized Map<String, List<TaskIdentifier>> getPendingTasks () {
-	return Collections.unmodifiableMap (pendingTasks);
+	return copy (pendingTasks);
+    }
+
+    public synchronized Map<String, List<TaskIdentifier>> getRunningTasks () {
+	return copy (runningTasks);
+    }
+
+    public synchronized Map<String, List<CompletionEntry>> getLatest () {
+	return copy (latest);
+    }
+
+    public synchronized Map<String, List<CompletionEntry>> getLongest () {
+	return copy (longest);
+    }
+
+    public synchronized Map<String, TotalTimeSpent> getTotalTimeSpent () {
+	return Collections.unmodifiableMap (total);
     }
 }
