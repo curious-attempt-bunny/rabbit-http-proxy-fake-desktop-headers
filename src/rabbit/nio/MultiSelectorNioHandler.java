@@ -159,4 +159,9 @@ public class MultiSelectorNioHandler implements NioHandler {
 	    sr.visit (visitor);
 	visitor.end ();
     }
+    
+    // TODO: where does this belong?
+    public StatisticsHolder getTimingStatistics () {
+	return stats;
+    }
 }

@@ -65,4 +65,8 @@ public interface NioHandler {
      *  debugging. 
      */
     void visitSelectors (SelectorVisitor visitor);
+
+    /** Get the timing information for the thread tasks.
+     */
+    StatisticsHolder getTimingStatistics ();
 }
