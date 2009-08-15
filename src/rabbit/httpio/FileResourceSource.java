@@ -12,7 +12,9 @@ import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.io.Closer;
+import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.NioHandler;
+import rabbit.nio.TaskIdentifier;
 
 /** A resource that comes from a file.
  * 
@@ -87,7 +89,10 @@ public class FileResourceSource implements ResourceSource {
 	this.listener = listener;
 	// Get buffer on selector thread.
 	bufHandle.getBuffer ();
-	nioHandler.runThreadTask (new ReadBlock ());
+	TaskIdentifier ti = 
+	    new DefaultTaskIdentifier (getClass ().getSimpleName (), 
+				       "addBlockListener: channel: " + fc);
+	nioHandler.runThreadTask (new ReadBlock (), ti);
     }
 
     private class ReadBlock implements Runnable {

@@ -201,6 +201,7 @@ public class Connection {
 	public void httpHeaderRead (final HttpHeader header, BufferHandle bh, 
 				    boolean keepalive, boolean isChunked, 
 				    long dataSize) {
+	    System.out.println ("read a reaquest: " + header);
 	    bh.possiblyFlush ();
 	    if (isChunked || dataSize > 0)
 		notImplemented ();

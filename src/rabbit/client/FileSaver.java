@@ -10,6 +10,8 @@ import rabbit.httpio.BlockListener;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.Closer;
+import rabbit.nio.DefaultTaskIdentifier;
+import rabbit.nio.TaskIdentifier;
 
 /** A class to save a ResourceSource into a file.
  *  This is mostly an example of how to use the rabbit client classes.
@@ -35,6 +37,9 @@ public class FileSaver implements BlockListener {
     }
 
     public void bufferRead (final BufferHandle bufHandle) {
+	TaskIdentifier ti = 
+	    new DefaultTaskIdentifier (getClass ().getSimpleName (),
+				      request.getRequestURI ());
 	clientBase.getNioHandler ().runThreadTask (new Runnable () {
 		public void run () {
 		    try {
@@ -46,7 +51,7 @@ public class FileSaver implements BlockListener {
 			failed (e);
 		    }			
 		}
-	    });
+	    }, ti);
     }
 
     private void readMore () {
