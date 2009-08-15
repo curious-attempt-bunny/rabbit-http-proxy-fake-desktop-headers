@@ -26,9 +26,7 @@ import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.io.Closer;
-import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.NioHandler;
-import rabbit.nio.TaskIdentifier;
 import rabbit.util.Counter;
 
 /** The base connection class for rabbit.
@@ -288,15 +286,11 @@ public class Connection {
 	final RequestHandler rh = new RequestHandler (this);
 	if (proxy.getCache ().getMaxSize () > 0) {
 	    // memory consistency is guarded by the underlying SynchronousQueue
-	    TaskIdentifier ti = 
-		new DefaultTaskIdentifier (getClass ().getSimpleName (), 
-					   "fillInCacheEntries: " + 
-					   request.getRequestURI ());
 	    getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {
 			fillInCacheEntries (rh);
 		    }
-		}, ti);
+		});
 	} else {
 	    handleRequestBottom (rh);
 	}

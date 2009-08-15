@@ -10,8 +10,6 @@ import rabbit.httpio.BlockListener;
 import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
-import rabbit.nio.DefaultTaskIdentifier;
-import rabbit.nio.TaskIdentifier;
 import rabbit.proxy.Connection;
 import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
@@ -169,15 +167,11 @@ public class ImageHandler extends BaseHandler {
 
     private class ImageReader implements BlockListener {
 	public void bufferRead (final BufferHandle bufHandle) {
-	    TaskIdentifier ti = 
-		new DefaultTaskIdentifier (getClass ().getSimpleName (), 
-					   "reading image: " + 
-					   request.getRequestURI ());
 	    con.getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {
 			writeImageData (bufHandle);
 		    }
-		}, ti);
+		});
 	}
 	
 	private void writeImageData (BufferHandle bufHandle) {
@@ -224,11 +218,6 @@ public class ImageHandler extends BaseHandler {
      * @throws IOException if conversion fails.
      */
     protected void convertImage () {
-	TaskIdentifier ti = 
-	    new DefaultTaskIdentifier (getClass ().getSimpleName () +
-				       ".convertImage", 
-				       request.getRequestURI ());
-				      
 	con.getNioHandler ().runThreadTask (new Runnable () {
 		public void run () {
 		    try {
@@ -239,7 +228,7 @@ public class ImageHandler extends BaseHandler {
 			failed (e);
 		    }
 		}
-	    }, ti);
+	    });
     }
     
     protected void internalConvertImage () throws IOException {

@@ -19,7 +19,6 @@ import rabbit.util.Counter;
 public class WebConnection implements Closeable {
     private final int id;
     private final Address address;
-    private final SocketBinder binder;
     private final Counter counter;
     private SocketChannel channel;
     private long releasedAt = -1;
@@ -33,11 +32,9 @@ public class WebConnection implements Closeable {
      * @param address the computer to connect to.
      * @param counter the Counter to used to collect statistics
      */
-    public WebConnection (Address address, SocketBinder binder, 
-			  Counter counter) {
+    public WebConnection (Address address, Counter counter) {
 	this.id = idCounter.getAndIncrement ();
 	this.address = address;
-	this.binder = binder;
 	this.counter = counter;
 	counter.inc ("WebConnections created");
     }
@@ -72,8 +69,6 @@ public class WebConnection implements Closeable {
 	} else {
 	    // ok, open the connection....
 	    channel = SocketChannel.open ();
-	    channel.socket ().bind (new InetSocketAddress (binder.getInetAddress (), 
-							   binder.getPort ()));
 	    channel.configureBlocking (false);
 	    SocketAddress addr =
 		new InetSocketAddress (address.getInetAddress (),

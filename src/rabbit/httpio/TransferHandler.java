@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import rabbit.io.Address;
-import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.NioHandler;
 import rabbit.nio.WriteHandler;
 import rabbit.util.TrafficLogger;
@@ -38,11 +37,7 @@ public class TransferHandler implements Runnable {
     }
 
     public void transfer () {
-	String groupId = getClass ().getSimpleName ();
-	String desc = "Transferable: " + t + ", chanel: " + channel + 
-	    ", listener: " + listener;
-	nioHandler.runThreadTask (this, 
-				  new DefaultTaskIdentifier (groupId, desc));
+	nioHandler.runThreadTask (this);
     }
     
     public void run () {

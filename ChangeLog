@@ -1,7 +1,4 @@
-version 4.2 (200x-yy-zz) Made it possible to specify what ip
-	rabbit should listen on. Made it possible to specify what ip
-	rabbit should use for outgoing connections. Made access logging
-	handle log setup failure without getting NullPointerException.
+version 4.2 (200x-yy-zz)
 
 version 4.1 (2009-07-01) Increased the default keepalive timeout to 30
 	seconds. Made number of selector threads configurable, with a

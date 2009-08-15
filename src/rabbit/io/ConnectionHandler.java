@@ -3,13 +3,12 @@ package rabbit.io;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,9 +47,6 @@ public class ConnectionHandler {
 
     // the nio handler
     private final NioHandler nioHandler;
-
-    // the socket binder
-    private SocketBinder socketBinder = new DefaultBinder ();
 
     public ConnectionHandler (Counter counter, Resolver resolver,
 			      NioHandler nioHandler) {
@@ -110,10 +106,6 @@ public class ConnectionHandler {
 	    });
     }
 
-    private SocketBinder getSocketBinder () {
-	return socketBinder;
-    }
-
     private void getConnection (HttpHeader header,
 				WebConnectionListener wcl,
 				Address a) {
@@ -126,11 +118,11 @@ public class ConnectionHandler {
 	    // have to get a fresh connection for them..
 	    method = method.trim ();
 	    if (!(method.equals ("GET") || method.equals ("HEAD"))) {
-		wc = new WebConnection (a, getSocketBinder (), counter);
+		wc = new WebConnection (a, counter);
 	    } else {
 		wc = getPooledConnection (a, activeConnections);
 		if (wc == null)
-		    wc = new WebConnection (a, getSocketBinder (), counter);
+		    wc = new WebConnection (a, counter);
 	    }
 	    try {
 		wc.connect (nioHandler, wcl);
@@ -318,21 +310,5 @@ public class ConnectionHandler {
 	if (up == null)
 	    up = "true";
 	usePipelining = up.equalsIgnoreCase ("true");
-
-	String bindIP = config.getProperty ("bind_ip");
-	if (bindIP != null) {
-	    try {
-		InetAddress ia = InetAddress.getByName (bindIP);
-		if (ia != null) {
-		    logger.info ("Will bind to: " + ia + 
-				 " for outgoing traffic");
-		    socketBinder = new BoundBinder (ia);
-		}
-	    } catch (IOException e) {
-		logger.log (Level.SEVERE, 
-			    "Failed to find inet address for: " + bindIP,
-			    e);
-	    }
-	}
     }
 }

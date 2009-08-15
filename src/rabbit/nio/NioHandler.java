@@ -23,7 +23,7 @@ public interface NioHandler {
      *  The task will be run sometime in the future.
      * @param r the task to run.    
      */
-    void runThreadTask (Runnable r, TaskIdentifier ti);
+    void runThreadTask (Runnable r);
 
     /** Install an event listener for read events.
      *  When the channels is ready the ReadHandler.read () method will 
@@ -65,8 +65,4 @@ public interface NioHandler {
      *  debugging. 
      */
     void visitSelectors (SelectorVisitor visitor);
-
-    /** Get the timing information for the thread tasks.
-     */
-    StatisticsHolder getTimingStatistics ();
 }

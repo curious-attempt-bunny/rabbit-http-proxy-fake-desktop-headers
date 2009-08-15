@@ -10,15 +10,12 @@ import java.util.logging.Logger;
 
 /** An implementation of NioHandler that runs several
  *  selector threads.
- *
- * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class MultiSelectorNioHandler implements NioHandler {
      /** The executor service. */
     private final ExecutorService executorService;
     private final List<SingleSelectorRunner> selectorRunners;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
-    private final StatisticsHolder stats = new StatisticsHolder ();
     private int nextIndex = 0;
 
     /** Create a new MultiSelectorNioHandler that runs background tasks on 
@@ -57,9 +54,8 @@ public class MultiSelectorNioHandler implements NioHandler {
 	return new Long (System.currentTimeMillis () + 15000);
     }
 
-    public void runThreadTask (Runnable r, TaskIdentifier ti) {
-	stats.addPendingTask (ti);
-	executorService.execute (new StatisticsCollector (stats, r, ti));
+    public void runThreadTask (Runnable r) {
+	executorService.execute (r);
     }
 
     private SingleSelectorRunner getSelectorRunner () {
@@ -158,10 +154,5 @@ public class MultiSelectorNioHandler implements NioHandler {
 	for (SingleSelectorRunner sr : selectorRunners)
 	    sr.visit (visitor);
 	visitor.end ();
-    }
-    
-    // TODO: where does this belong?
-    public StatisticsHolder getTimingStatistics () {
-	return stats;
     }
 }
