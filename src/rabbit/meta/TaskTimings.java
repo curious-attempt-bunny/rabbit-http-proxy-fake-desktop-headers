@@ -32,7 +32,6 @@ public class TaskTimings extends BaseMetaHandler {
 	sb.append (HtmlPage.getTableTopicRow ());
 	sb.append ("<th width=\"30%\">Group</th>");
 	sb.append ("<th width=\"70%\">Information</th>\n");
-	sb.append ("</table><br>\n");
 
 	for (Map.Entry<String, List<TaskIdentifier>> me : pending.entrySet ()) {
 	    String id = me.getKey ();
@@ -41,5 +40,6 @@ public class TaskTimings extends BaseMetaHandler {
 			   ti.getDescription () + "</td></tr>\n");
 	    }
 	}
+	sb.append ("</table><br>\n");
     }
 }
