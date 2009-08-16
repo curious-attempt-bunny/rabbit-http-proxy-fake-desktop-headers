@@ -107,17 +107,19 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    // does new dir exist?
 	    dir = newDir;
 	    File dirtest = new File (dir);
+	    boolean readCache = true;
 	    if (!dirtest.exists ()) {
 		dirtest.mkdirs ();
 		if (!dirtest.exists ()) {
 		    logger.warning ("could not create cachedir: " + dirtest);
 		}
+		readCache = false;
 	    } else if (dirtest.isFile ()) {
 		logger.warning ("Cachedir: " + dirtest + " is a file");
 	    }
 	
 	    synchronized (dirLock) {
-		tempdir = new File (dir + File.separator + TEMPDIR);
+		tempdir = new File (dirtest, TEMPDIR);
 		if (!tempdir.exists ()) {
 		    tempdir.mkdir ();
 		    if (!tempdir.exists ()) {
@@ -128,8 +130,9 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		    logger.warning ("Cache temp dir is a file: " + tempdir);
 		}
 	    }
-	    // move to new dir.
-	    readCacheIndex ();
+	    if (readCache)
+		// move to new dir.
+		readCacheIndex ();
 	} finally {
 	    w.unlock ();
 	}
