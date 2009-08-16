@@ -66,7 +66,7 @@ public class AdFilter extends HtmlFilter {
     /** Removes advertising from the given block.
      * @param block the part of the html page we are filtering.
      */
-    public void filterHtml (HtmlBlock block) {
+    @Override public void filterHtml (HtmlBlock block) {
 	int astart = -1;
 	
 	List<Token> tokens = block.getTokens ();

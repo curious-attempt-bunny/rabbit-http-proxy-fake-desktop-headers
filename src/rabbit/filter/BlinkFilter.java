@@ -34,7 +34,7 @@ public class BlinkFilter extends SimpleTagFilter {
     /** Remove blink tags.
      * @param block the part of the html page we are filtering.
      */
-    public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
+    @Override public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
 	TagType tt = tag.getTagType ();
 	if (tt == TagType.BLINK || tt == TagType.SBLINK)
 	    block.removeToken (tokenIndex); 

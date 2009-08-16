@@ -185,9 +185,8 @@ public class HtmlParser {
 		if (pagepart[index] == '<') {
 		    endindex = index;
 		    break;
-		} else {
-		    index++;
 		}
+		index++;
 	    }
 	}
 	if (tagmode) {
@@ -303,9 +302,8 @@ public class HtmlParser {
 		    nextToken = scanComment ();
 		    tagStart = ts;
 		    return nextToken;
-		} else {
-		    return nextToken = LT;
 		}
+		return nextToken = LT;
 	    case '>':
 		return nextToken = MT;
 	    case '=':

@@ -49,13 +49,13 @@ public class BodyFilter extends SimpleTagFilter {
     /** Insert some text at the top of the html page.
      * @param block the part of the html page we are filtering.
      */
-    public void filterHtml (HtmlBlock block) {
+    @Override public void filterHtml (HtmlBlock block) {
 	if (!done) {
 	    super.filterHtml (block);
 	}
     }
 
-    public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
+    @Override public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
 	if (tag.getTagType () == TagType.BODY) {
 	    insertTokens (block, tokenIndex + 1);
 	    done = true;

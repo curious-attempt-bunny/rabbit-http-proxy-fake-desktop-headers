@@ -34,7 +34,7 @@ public class BackgroundFilter extends SimpleTagFilter {
     /** Remove background images from the given block.
      * @param tag the current Tag
      */
-    public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
+    @Override public void handleTag (Tag tag, HtmlBlock block, int tokenIndex) {
 	TagType type = tag.getTagType ();
 	if (type == TagType.BODY || 
 	    type == TagType.TABLE || 
