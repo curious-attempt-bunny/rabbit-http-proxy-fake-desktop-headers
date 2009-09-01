@@ -365,10 +365,15 @@ class SingleSelectorRunner implements Runnable {
     }
 
     public void runSelectorTask (SelectorRunnable sr) {
-	if (!running.get () && selectorThread != null) {
-	    logger.finest ("Trying to add selector task while not running; " +
-			   sr);
-	    return;
+	if (!running.get ()) {
+	    synchronized (this) {
+		if (selectorThread != null) {
+		    String err = 
+			"Trying to add selector task while not running: " + sr;
+		    logger.finest (err);
+		    return;
+		}
+	    }
 	}
 
 	synchronized (returnedTasksLock) {
