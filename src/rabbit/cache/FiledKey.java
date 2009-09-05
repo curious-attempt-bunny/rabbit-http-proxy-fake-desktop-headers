@@ -38,6 +38,8 @@ class FiledKey<K> extends FileData<K> {
 
     /** Check if the given object is equal to the contained key. */
     @Override public boolean equals (Object data) {
+	if (data == null)
+	    return false;
 	K myData = getData ();
 	if (data instanceof FiledKey) {
 	    data = ((FiledKey)data).getData ();

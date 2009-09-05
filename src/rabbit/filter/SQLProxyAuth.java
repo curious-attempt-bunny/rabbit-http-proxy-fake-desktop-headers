@@ -33,7 +33,7 @@ public class SQLProxyAuth implements HttpFilter {
     private String dbuser = null;
     private String dbpwd = null;
     private String select = null;
-    private final String DEFAULT_SELECT = 
+    private static final String DEFAULT_SELECT = 
 	"select password from users where username = ?";
 
     private java.sql.Connection db = null;

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import rabbit.io.FileHelper;
 import rabbit.util.SProperties;
 
 /** The NCache is like a Map in lookup/insert/delete
@@ -66,7 +67,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     /** Create a cache that uses default values.
      *  Note that you must call startCleaner to have the cache fully up.
      */
-    public NCache (SProperties props, FileHandler<K> fhk, FileHandler<V> fhv) {
+    public NCache (SProperties props, FileHandler<K> fhk, FileHandler<V> fhv) 
+	throws IOException {
 	this.fhk = fhk;
 	this.fhv = fhv;
 	htab = new HashMap<FiledKey<K>, CacheEntry<K, V>> ();
@@ -97,7 +99,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      *  it try to read in the cache from the new dir.
      * @param newDir the name of the new directory to use.
      */
-    public void setCacheDir (String newDir) {
+    public void setCacheDir (String newDir) throws IOException {
 	w.lock ();
 	try {
 	    // save old cachedir.
@@ -109,7 +111,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    File dirtest = new File (dir);
 	    boolean readCache = true;
 	    if (!dirtest.exists ()) {
-		dirtest.mkdirs ();
+		FileHelper.mkdirs (dirtest);
 		if (!dirtest.exists ()) {
 		    logger.warning ("could not create cachedir: " + dirtest);
 		}
@@ -121,7 +123,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    synchronized (dirLock) {
 		tempdir = new File (dirtest, TEMPDIR);
 		if (!tempdir.exists ()) {
-		    tempdir.mkdir ();
+		    FileHelper.mkdirs (tempdir);
 		    if (!tempdir.exists ()) {
 			logger.warning ("could not create cache tempdir: " +
 					tempdir);
@@ -322,7 +324,13 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		}
 		// good situation...
 	    } else {
-		f.mkdir ();
+		try {
+		    FileHelper.mkdirs (f);
+		} catch (IOException e) {
+		    logger.log (Level.WARNING,
+				"Could not create directory: " + f,
+				e);
+		}
 	    }	
 	    boolean bool = cfile.renameTo (nFile);
 	    // TODO: handle renameTo failure
@@ -372,12 +380,12 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	changed = true;	
     }
 
-    private void removeHook (String base, String extension) {
+    private void removeHook (String base, String extension) throws IOException {
 	String hookName = base + extension;
 	// remove possible hook before file...
 	File hfile = new File (hookName);
 	if (hfile.exists ())
-	    hfile.delete ();
+	    FileHelper.delete (hfile);
     }
     
     /** Remove the Entry with key k from the cache.
@@ -408,23 +416,29 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	if (r != null) {
 	    // this removes the key => htab.remove can not work..
 	    String entryName = getEntryName (r.getId (), true, null);
-	    removeHook (entryName, ".hook");
-	    removeHook (entryName, ".key");
-	    NCacheEntry<K, V> nent = (NCacheEntry<K, V>)r;
-	    nent.setKey (null);
-	    r.setDataHook (null);
-	    File cfile = new File (entryName);
-	    if (cfile.exists ()) {
-		File p = cfile.getParentFile ();
-		cfile.delete ();
-		// Until NT does rename in a nice manner check for tempdir.
-		synchronized (dirLock) {
-		    if (p.exists () && !p.equals (tempdir)) {		    
-			String ls[] = p.list ();
-			if (ls != null && ls.length == 0)
-			    p.delete();
+	    try {
+		removeHook (entryName, ".hook");
+		removeHook (entryName, ".key");
+		NCacheEntry<K, V> nent = (NCacheEntry<K, V>)r;
+		nent.setKey (null);
+		r.setDataHook (null);
+		File cfile = new File (entryName);
+		if (cfile.exists ()) {
+		    File p = cfile.getParentFile ();
+		    FileHelper.delete (cfile);
+		    // Until NT does rename in a nice manner check for tempdir.
+		    synchronized (dirLock) {
+			if (p.exists () && !p.equals (tempdir)) {		    
+			    String ls[] = p.list ();
+			    if (ls != null && ls.length == 0)
+				FileHelper.delete (p);
+			}
 		    }
 		}
+	    } catch (IOException e) {
+		logger.log (Level.WARNING,
+			    "Could not remove file",
+			    e);		
 	    }
 	}
     }
@@ -598,7 +612,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     /** Configure the cache system from the given config.
      * @param config the properties describing the cache settings.
      */
-    public void setup (SProperties config) {
+    public void setup (SProperties config) throws IOException {
 	if (config == null)
 	    config = new SProperties (); 
 	String cachedir = 

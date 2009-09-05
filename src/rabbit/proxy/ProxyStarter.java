@@ -26,9 +26,12 @@ public class ProxyStarter {
 	    int i;
 	    InputStream f = 
 		ProxyStarter.class.getResourceAsStream ("/Help.txt");
-	    while ((i = f.read(b)) > 0) 
-		System.out.write (b, 0, i);
-	    f.close ();
+	    try {
+		while ((i = f.read(b)) > 0) 
+		    System.out.write (b, 0, i);
+	    } finally {
+		f.close ();
+	    }
 	} catch (IOException e) {
 	    System.err.println ("Could not read help text: " + e);
 	}

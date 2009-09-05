@@ -204,8 +204,14 @@ public class HttpProxy implements Resolver {
 	SProperties props =
 	    config.getProperties (NCache.class.getName ());
 	HttpHeaderFileHandler hhfh = new HttpHeaderFileHandler ();
-	cache = new NCache<HttpHeader, HttpHeader> (props, hhfh, hhfh);
-	cache.startCleaner ();
+	try {
+	    cache = new NCache<HttpHeader, HttpHeader> (props, hhfh, hhfh);
+	    cache.startCleaner ();
+	} catch (IOException e) {
+	    logger.log (Level.SEVERE, 
+			"Failed to setup cache", 
+			e);
+	}
     }
 
     /** Configure the SSL support RabbIT should have.

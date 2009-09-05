@@ -26,6 +26,7 @@ import rabbit.httpio.ResourceSource;
 import rabbit.httpio.TransferHandler;
 import rabbit.httpio.TransferListener;
 import rabbit.io.BufferHandle;
+import rabbit.io.FileHelper;
 import rabbit.proxy.Connection;
 import rabbit.proxy.PartialCacher;
 import rabbit.proxy.TrafficLoggerHandler;
@@ -518,6 +519,16 @@ public class BaseHandler
 	return sw.toString ();
     }
 
+    protected void deleteFile (File f) {
+	try {
+	    FileHelper.delete (f);
+	} catch (IOException e) {
+	    getLogger ().log (Level.WARNING, 
+			      "Failed to delete file",
+			      e);
+	}	
+    }
+
     protected void removeCache () {
 	if (cacheChannel != null) {
 	    try {
@@ -526,7 +537,7 @@ public class BaseHandler
 		    con.getProxy ().getCache ();
 		String entryName = cache.getEntryName (entry.getId (), false, null);
 		File f = new File (entryName);
-		f.delete ();
+		deleteFile (f);
 		entry = null;
 	    } catch (IOException e) {
 		getLogger ().log (Level.WARNING,

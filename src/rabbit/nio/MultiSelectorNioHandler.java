@@ -54,7 +54,7 @@ public class MultiSelectorNioHandler implements NioHandler {
     }
 
     public Long getDefaultTimeout () {
-	return new Long (System.currentTimeMillis () + 15000);
+	return Long.valueOf (System.currentTimeMillis () + 15000);
     }
 
     public void runThreadTask (Runnable r, TaskIdentifier ti) {

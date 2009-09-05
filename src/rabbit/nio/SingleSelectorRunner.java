@@ -65,8 +65,7 @@ class SingleSelectorRunner implements Runnable {
 		    selectorThread.join (10000);
 		}
 	    }
-	    if (selector != null)
-		selector.close ();
+	    selector.close ();
 	} catch (InterruptedException e) {
 	    logger.log (Level.WARNING,
 			"Got exception while closing selector",

@@ -10,6 +10,7 @@ import rabbit.httpio.BlockListener;
 import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
+import rabbit.io.FileHelper;
 import rabbit.nio.DefaultTaskIdentifier;
 import rabbit.nio.TaskIdentifier;
 import rabbit.proxy.Connection;
@@ -119,7 +120,7 @@ public class ImageHandler extends BaseHandler {
     @Override protected void finish (boolean good) {
 	try {
 	    if (convertedFile != null)
-		convertedFile.delete ();
+		deleteFile (convertedFile);
 	} finally {
 	    super.finish (good);
 	}
@@ -130,7 +131,7 @@ public class ImageHandler extends BaseHandler {
     @Override protected void removeCache () {
 	super.removeCache ();
 	if (convertedFile != null)
-	    convertedFile.delete ();
+	    deleteFile (convertedFile);
     }
 
 
@@ -285,7 +286,7 @@ public class ImageHandler extends BaseHandler {
 		 */
 		File oldEntry = new File (entryName);
 		if (oldEntry.exists ())
-		    oldEntry.delete (); 
+		    FileHelper.delete (oldEntry);
 		if (convertedFile.renameTo (new File (entryName)))
 		    convertedFile = null;
 		else 
@@ -296,9 +297,9 @@ public class ImageHandler extends BaseHandler {
 	    }
 	} finally { 
 	    if (convertedFile != null)
-		convertedFile.delete ();
+		deleteFile (convertedFile);
 	    if (typeFile != null && typeFile.exists ())
-		typeFile.delete ();
+		deleteFile (typeFile);
 	}
 	size = (lowQualitySize < origSize ? lowQualitySize : origSize);
 	response.setHeader ("Content-length", "" + size);
