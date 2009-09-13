@@ -211,7 +211,8 @@ public class SWC implements HttpHeaderSentListener,
 	    if (age != null)
 		lage = Long.parseLong (age);
 	    long dt = Math.max ((now - ddt) / 1000, 0);
-	    long correct_age = lage + dt;
+	    // correct_age is found in spec, but is not actually used
+	    //long correct_age = lage + dt;
 	    long correct_recieved_age = Math.max (dt, lage);
 	    long corrected_initial_age = correct_recieved_age + dt;
 	    if (corrected_initial_age > 0) {

@@ -19,4 +19,14 @@ class MemoryKey<K> extends FiledKey<K> {
     @Override public K getData () {
 	return data;
     }
+
+    @Override public int hashCode () {
+	// just do what FiledKey does
+	return super.hashCode ();
+    }
+
+    @Override public boolean equals (Object data) {
+	// just do what FiledKey does
+	return super.equals (data);
+    }
 }

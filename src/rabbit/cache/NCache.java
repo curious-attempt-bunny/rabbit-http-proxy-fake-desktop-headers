@@ -331,9 +331,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 				"Could not create directory: " + f,
 				e);
 		}
-	    }	
-	    boolean bool = cfile.renameTo (nFile);
-	    // TODO: handle renameTo failure
+	    }
+	    if (!cfile.renameTo (nFile)) 
+		logger.severe ("Failed to renamve file from: " + 
+			       cfile.getAbsolutePath () + " to" + 
+			       nFile.getAbsolutePath ());
 	}
 	cfile = new File (newName);	
 	ent.setSize (cfile.length ());
