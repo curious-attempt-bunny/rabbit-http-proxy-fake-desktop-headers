@@ -10,6 +10,12 @@ public class StatisticsCollector implements Runnable {
     private final Runnable realTask;
     private final TaskIdentifier ti;
 
+    /** Create a new StatisticsCollector that will update the 
+     *  given StatisticsHolder about the specific job.
+     * @param stats the StatisticsHolder to update
+     * @param realTask the task to run
+     * @param ti the identifier of the task 
+     */
     public StatisticsCollector (StatisticsHolder stats, 
 				Runnable realTask, 
 				TaskIdentifier ti) {
@@ -18,6 +24,8 @@ public class StatisticsCollector implements Runnable {
 	this.ti = ti;
     }
 
+    /** Run the task.
+     */
     public void run () {
 	stats.changeTaskStatusToRunning (ti);
 	long started = System.currentTimeMillis ();

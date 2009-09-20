@@ -10,6 +10,8 @@ public class TotalTimeSpent {
     private long failures = 0;
     private long totalMillis = 0;
 
+    /** Update this information with data from the newly completed task. 
+     */
     public void update (CompletionEntry ce) {
 	if (ce.wasOk)
 	    successful++;

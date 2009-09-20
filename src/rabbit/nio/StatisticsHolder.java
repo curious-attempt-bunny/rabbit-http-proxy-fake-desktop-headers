@@ -8,8 +8,7 @@ import java.util.Map;
 import rabbit.nio.statistics.CompletionEntry;
 import rabbit.nio.statistics.TotalTimeSpent;
 
-/** A class that executes one task and gathers information about
- *  the time spent and the success status of the task. 
+/** A holder of statistics for tasks.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -56,15 +55,26 @@ public class StatisticsHolder {
 						ti);
     }
 
+    /** A new task is put in the queue, waiting to be handled.
+     * @param ti the identifier of the new task.
+     */
     public synchronized void addPendingTask (TaskIdentifier ti) {
 	addTask (ti, pendingTasks);
     }
 
+    /** A pending task is about to be run.
+     * @param ti the identifier of the task that will start to run. 
+     */
     public synchronized void changeTaskStatusToRunning (TaskIdentifier ti) {
 	removeTask (ti, pendingTasks);
 	addTask (ti, runningTasks);
     }
 
+    /** A task has been completed. 
+     * @param ti the identifier of the task that has completed. 
+     * @param wasOk true if the task completed without errors, false otherwise.
+     * @param timeSpent wall clock time spent on the task.
+     */
     public synchronized void changeTaskStatusToFinished (TaskIdentifier ti, 
 							 boolean wasOk, 
 							 long timeSpent) {
@@ -124,22 +134,32 @@ public class StatisticsHolder {
 	return ret;
     }
 
+    /** Get information about the currently pending tasks. 
+     */
     public synchronized Map<String, List<TaskIdentifier>> getPendingTasks () {
 	return copy (pendingTasks);
     }
 
+    /** Get information about the currently running tasks. 
+     */
     public synchronized Map<String, List<TaskIdentifier>> getRunningTasks () {
 	return copy (runningTasks);
     }
 
+    /** Get information about the most recent completed tasks 
+     */
     public synchronized Map<String, List<CompletionEntry>> getLatest () {
 	return copy (latest);
     }
 
+    /** Get information about the longest running task.
+     */
     public synchronized Map<String, List<CompletionEntry>> getLongest () {
 	return copy (longest);
     }
 
+    /** Get the total time spent for each task.
+     */
     public synchronized Map<String, TotalTimeSpent> getTotalTimeSpent () {
 	return Collections.unmodifiableMap (total);
     }
