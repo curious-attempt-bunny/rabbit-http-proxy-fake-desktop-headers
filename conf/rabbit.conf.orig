@@ -113,13 +113,14 @@ usepipelining=false
 # Each mime type identifier is a regexp, case insensitive.
 
 # Handle images by conversion to low quality jpegs.
-image/gif=rabbit.handler.ImageHandler*gif
-image/p?jpeg=rabbit.handler.ImageHandler*jpeg
-image/png=rabbit.handler.ImageHandler*png
+# yes, some sites send charsets for images, silly, but handle it
+image/gif(;(charset\=.*)?)?=rabbit.handler.ImageHandler*gif
+image/p?jpeg(;(charset\=.*)?)?=rabbit.handler.ImageHandler*jpeg
+image/png(;(charset\=.*)?)?=rabbit.handler.ImageHandler*png
 
 # Filter these streams.
 # The configuration of FilterHandler is later in this file.
-text/html(;charset\=.*)?=rabbit.handler.FilterHandler
+text/html(;(charset\=.*)?)?=rabbit.handler.FilterHandler
 
 # Use this if you only want compression
 #text/html=rabbit.handler.GZipHandler
@@ -131,13 +132,13 @@ text/html(;charset\=.*)?=rabbit.handler.FilterHandler
 #text/javascript=rabbit.handler.GZipHandler
 
 # Compress these streams.
-text/plain(;charset\=.*)?=rabbit.handler.GZipHandler
+text/plain(;(charset\=.*)?)?=rabbit.handler.GZipHandler
 
 # you may want to compress theese, more testing needed. 
-text/xml(;charset\=.*)?=rabbit.handler.GZipHandler
-application/xml(;charset\=.*)?=rabbit.handler.GZipHandler
-application/postscript(;charset\=.*)?=rabbit.handler.GZipHandler
-text/css(;charset\=.*)?=rabbit.handler.GZipHandler
+text/xml(;(charset\=.*)?)?=rabbit.handler.GZipHandler
+application/xml(;(charset\=.*)?)?=rabbit.handler.GZipHandler
+application/postscript(;(charset\=.*)?)?=rabbit.handler.GZipHandler
+text/css(;(charset\=.*)?)?=rabbit.handler.GZipHandler
 
 [CacheHandlers]
 # This section sets up the content handlers for the resourses in the
@@ -155,14 +156,14 @@ text/css(;charset\=.*)?=rabbit.handler.GZipHandler
 
 
 # Filter these streams.
-#text/html(;charset\=.*)?=rabbit.handler.FilterHandler
+#text/html(;(charset\=.*)?)?=rabbit.handler.FilterHandler
 
 # Seems Netscape and IE have problems with this one although 
 # they both say it is ok, disabled for now....
-#application/x-javascript(;charset\=.*)?=rabbit.handler.FilterHandler
+#application/x-javascript(;(charset\=.*)?)?=rabbit.handler.FilterHandler
 
 # Compress these streams.
-#text/plain(;charset\=.*)?=rabbit.handler.GZipHandler
+#text/plain(;(charset\=.*)?)?=rabbit.handler.GZipHandler
 
 [rabbit.cache.NCache]
 # This section sets up the cache.
