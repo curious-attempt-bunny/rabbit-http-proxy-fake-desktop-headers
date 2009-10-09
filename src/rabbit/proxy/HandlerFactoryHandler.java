@@ -1,9 +1,11 @@
 package rabbit.proxy;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import rabbit.handler.HandlerFactory;
 import rabbit.util.Config;
 import rabbit.util.SProperties;
@@ -13,8 +15,8 @@ import rabbit.util.SProperties;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class HandlerFactoryHandler {
-    private final Map<String, HandlerFactory> handlers;
-    private final Map<String, HandlerFactory> cacheHandlers;
+    private final List<HandlerInfo> handlers;
+    private final List<HandlerInfo> cacheHandlers;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
     
     public HandlerFactoryHandler (SProperties handlersProps, 
@@ -24,38 +26,43 @@ class HandlerFactoryHandler {
 	cacheHandlers = loadHandlers (cacheHandlersProps, config);
     }
 
+    private class HandlerInfo {
+	public final String mime;
+	public final Pattern pattern;
+	public final HandlerFactory factory;
+
+	public HandlerInfo (String mime, HandlerFactory factory) {
+	    this.mime = mime;
+	    this.pattern = Pattern.compile (mime, Pattern.CASE_INSENSITIVE);
+	    this.factory = factory;
+	}
+
+	public boolean accept (String mime) {
+	    Matcher m = pattern.matcher (mime);
+	    return m.matches ();
+	}
+
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{" + mime + ", " +
+		factory + "}";
+	}
+    }
+
     /** load a set of handlers.
      * @param section the section in the config file.
      * @param log the Logger to write errors/warnings to.
      * @return a Map with mimetypes as keys and Handlers as values.
      */
-    protected Map<String, HandlerFactory> 
-	loadHandlers (SProperties handlersProps, Config config) {
-	Map<String, HandlerFactory> hhandlers = 
-	    new HashMap<String, HandlerFactory> ();
+    protected List<HandlerInfo> loadHandlers (SProperties handlersProps,
+					      Config config) {
+	List<HandlerInfo> hhandlers = new ArrayList<HandlerInfo> ();
 	if (handlersProps == null)
 	    return hhandlers;
 	for (String handler : handlersProps.keySet ()) {
 	    HandlerFactory hf;
 	    String id = handlersProps.getProperty (handler).trim ();
-	    // simple regexp like expansion,
-	    // first '?' char indicates optional prev char
-	    int i = handler.indexOf ('?');
-	    if (i <= 0) {
-		// no '?' found, or it is the first char
-		hf = setupHandler (id, config, handler);
-		hhandlers.put (handler, hf);
-	    } else {
-		// remove '?'
-		handler = handler.substring (0, i) + handler.substring (i + 1);
-		hf = setupHandler (id, config, handler);
-		hhandlers.put (handler, hf);
-		// remove the optional char
-		String handler2 = 
-		    handler.substring (0, i - 1) + handler.substring (i);
-		hf = setupHandler (id, config, handler2);
-		hhandlers.put (handler2, hf);
-	    }
+	    hf = setupHandler (id, config, handler);
+	    hhandlers.add (new HandlerInfo (handler, hf));
 	}
 	return hhandlers;
     }
@@ -92,10 +99,18 @@ class HandlerFactoryHandler {
     }
 
     HandlerFactory getHandlerFactory (String mime) {
-	return handlers.get (mime);
+	for (HandlerInfo hi : handlers) {
+	    if (hi.accept (mime))
+		return hi.factory;
+	}
+	return null;
     }
 
     HandlerFactory getCacheHandlerFactory (String mime) {
-	return cacheHandlers.get (mime);
+	for (HandlerInfo hi : cacheHandlers) {
+	    if (hi.accept (mime))
+		return hi.factory;
+	}
+	return null;
     }
 }
