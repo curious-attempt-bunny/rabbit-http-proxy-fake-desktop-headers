@@ -1,6 +1,7 @@
 version 4.3 (20xx-yy-zz) Some code cleanups identified by findbugs.
+	Changed the handler setup to use full regexps.
 
-version 4.2 (2009-08-20) Made it possible to specify what ip rabbit 
+version 4.2 (2009-08-20) Made it possible to specify what ip rabbit
 	should listen on. Made it possible to specify what ip rabbit
 	should use for outgoing connections. Made access logging handle
 	log setup failure without getting NullPointerException.  Added
