@@ -303,7 +303,7 @@ public class ImageHandler extends BaseHandler {
 	}
 	size = (lowQualitySize < origSize ? lowQualitySize : origSize);
 	response.setHeader ("Content-length", "" + size);
-	con.setExtraInfo ("imageratio:" + origSize + "/" + lowQualitySize + 
+	con.setExtraInfo ("imageratio:" + lowQualitySize + "/" + origSize + 
 			  "=" + ((float)lowQualitySize / origSize));	
 	content.release ();
 	content = new FileResourceSource (entryName, con.getNioHandler (),
