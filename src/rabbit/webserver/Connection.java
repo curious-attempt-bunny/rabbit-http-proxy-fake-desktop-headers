@@ -136,6 +136,7 @@ public class Connection {
     }
 
     private void sendBadResponse (HttpHeader response) {
+	response.setHeader ("Content-type", "text/html");
 	timeToClose = true;
 	sendResponse (response);
     }
@@ -169,7 +170,6 @@ public class Connection {
 	HttpHeader ret = new HttpHeader ();
 	ret.setStatusLine (statusLine);
 	ret.setHeader ("Server", sws.getClass ().getName ());
-	ret.setHeader ("Content-type", "text/html");
 	ret.setHeader ("Date", HttpDateParser.getDateString (new Date ()));
 	return ret;    
     }
@@ -201,7 +201,6 @@ public class Connection {
 	public void httpHeaderRead (final HttpHeader header, BufferHandle bh, 
 				    boolean keepalive, boolean isChunked, 
 				    long dataSize) {
-	    System.out.println ("read a reaquest: " + header);
 	    bh.possiblyFlush ();
 	    if (isChunked || dataSize > 0)
 		notImplemented ();
