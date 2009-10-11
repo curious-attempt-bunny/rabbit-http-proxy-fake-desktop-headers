@@ -110,9 +110,9 @@ public class Connection {
 	}
     }
 
-    private boolean isSafe (File f) {
+    private boolean isSafe (File f) throws IOException {
 	File dir = sws.getBaseDir ();
-	return f.getAbsolutePath ().startsWith (dir.getAbsolutePath ());
+	return f.getCanonicalPath ().startsWith (dir.getCanonicalPath ());
     }
 
     private void notFound () {
