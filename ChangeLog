@@ -2,7 +2,7 @@ version 4.3 (20xx-yy-zz) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
 	setup so that it catches more images. Updated the sample web
 	server so that it is more secure and sends correct mime type in
-	more cases.
+	more cases. Updated dnsjava to 2.0.7.
 
 version 4.2 (2009-08-20) Made it possible to specify what ip rabbit
 	should listen on. Made it possible to specify what ip rabbit
