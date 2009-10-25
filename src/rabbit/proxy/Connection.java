@@ -939,8 +939,9 @@ public class Connection {
 	this.meta = meta;
     }
 
-    /** Set the state of this request. This can only be promoted down..
-     * @param useCache true if we may use the cache for this request,
+    /** Specify if the current resource may be served from our cache.
+     *  This can only be promoted down..
+     * @param useCache true if we may use the cache for serving this request,
      *        false otherwise.
      */
     public void setMayUseCache (boolean useCache) {
@@ -954,7 +955,8 @@ public class Connection {
 	return mayUseCache;
     }
 
-    /** Set the state of this request. This can only be promoted down.
+    /** Specify if we may cache the response resource.
+     *  This can only be promoted down.
      * @param cacheAllowed true if we may cache the response, false otherwise.
      */
     public void setMayCache (boolean cacheAllowed) {
