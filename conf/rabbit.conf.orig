@@ -416,24 +416,34 @@ compress=true
 
 # This is the program used to convert the images.
 # if this program is not found, this filter will do nothing...
-convert=/usr/bin/convert
+
+# to use convert from imagemagick
+#convert=/usr/bin/convert
+
+# to use convert from graphicsmagick
+convert=/usr/bin/gm
 
 # $filename is expanded to the right name(the cachefile) during
 # runtime 
+# imagemagick arguments
 #convertargs=-quality 10 $filename[0] jpeg:$filename.c
-convertargs=-quality 10 -flatten $filename +profile "*" jpeg:$filename.c
+
+# graphicsmagick arguments
+convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
 
 # Images that are smaller than this are not converted at all
 min_size=2000
 
 [rabbit.handler.ImageHandler*gif]
-convert=/usr/bin/convert
-convertargs=-quality 10 -flatten $filename +profile "*" jpeg:$filename.c
+# use graphicsmagick
+convert=/usr/bin/gm
+convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
 min_size=2000
 
 [rabbit.handler.ImageHandler*png]
-convert=/usr/bin/convert
-convertargs=-quality 10 -flatten $filename +profile "*" jpeg:$filename.c
+# use graphicsmagick
+convert=/usr/bin/gm
+convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
 min_size=2000
 
 [rabbit.handler.FilterHandler]
