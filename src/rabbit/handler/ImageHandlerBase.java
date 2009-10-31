@@ -28,7 +28,7 @@ public abstract class ImageHandlerBase extends BaseHandler {
     private boolean doConvert = true;
     private int minSizeToConvert = 2000;
 
-    protected boolean converted = false;
+    private boolean converted = false;
     protected File convertedFile = null;
 
     /** For creating the factory.
@@ -105,8 +105,10 @@ public abstract class ImageHandlerBase extends BaseHandler {
      */
     @Override protected void finish (boolean good) {
 	try {
-	    if (convertedFile != null)
+	    if (convertedFile != null) {
 		deleteFile (convertedFile);
+		convertedFile = null;
+	    }
 	} finally {
 	    super.finish (good);
 	}
@@ -116,8 +118,10 @@ public abstract class ImageHandlerBase extends BaseHandler {
      */
     @Override protected void removeCache () {
 	super.removeCache ();
-	if (convertedFile != null)
+	if (convertedFile != null) {
 	    deleteFile (convertedFile);
+	    convertedFile = null;
+	}
     }
 
 
@@ -234,6 +238,19 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	    proxy.getCache ().getEntryName (entry.getId (), false, null);
 
 	ImageConversionResult icr = internalConvertImage (entryName);
+	try {
+	    ImageSelector is = 
+		new ImageSelector (icr.convertedFile, icr.typeFile);
+	    selectImage (entryName, is, icr);
+	    convertedFile = is.convertedFile;
+	} finally {
+	    if (icr.convertedFile != null && icr.convertedFile.exists ())
+		deleteFile (icr.convertedFile);
+	    convertedFile = null;
+	    if (icr.typeFile != null && icr.typeFile.exists ())
+		deleteFile (icr.typeFile);
+	}
+
 	size = Math.min (icr.convertedSize, icr.origSize);
 	response.setHeader ("Content-length", "" + size);
 	con.setExtraInfo ("imageratio:" + icr.convertedSize + "/" + 
@@ -246,12 +263,18 @@ public abstract class ImageHandlerBase extends BaseHandler {
     }
 
     public static class ImageConversionResult {
-	public long origSize;
-	public long convertedSize;
+	public final long origSize;
+	public final long convertedSize;
+	public final File convertedFile;
+	public final File typeFile;
 
-	public ImageConversionResult (long origSize, long convertedSize) {
+	public ImageConversionResult (long origSize, 
+				      File convertedFile,
+				      File typeFile) {
 	    this.origSize = origSize;
-	    this.convertedSize = convertedSize;
+	    this.convertedFile = convertedFile;
+	    this.typeFile = typeFile;
+	    this.convertedSize = convertedFile.length ();
 	}
     }
 
@@ -261,7 +284,7 @@ public abstract class ImageHandlerBase extends BaseHandler {
     protected abstract ImageConversionResult internalConvertImage (String entryName)
 	throws IOException;
 
-    public static class ImageSelector {
+    private static class ImageSelector {
 	public File convertedFile;
 	public File typeFile;
 
@@ -276,8 +299,8 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	}
     }
 
-    protected void selectImage (String entryName, ImageSelector is, 
-				ImageConversionResult icr) 
+    private void selectImage (String entryName, ImageSelector is, 
+			      ImageConversionResult icr) 
 	throws IOException {
 	if (icr.convertedSize > 0 && icr.origSize > icr.convertedSize) {
 	    String ctype = checkFileType (is.typeFile);

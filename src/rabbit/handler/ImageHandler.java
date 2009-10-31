@@ -5,7 +5,6 @@ import java.io.IOException;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
-import rabbit.io.FileHelper;
 import rabbit.proxy.Connection;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
@@ -87,22 +86,11 @@ public class ImageHandler extends ImageHandlerBase {
 		getLogger ().warning ("Interupted during wait for: " +
 				      entryName);
 	    }
-
+	} finally {
 	    convertedFile = new File (entryName + ".c");
 	    typeFile = new File (entryName + ".type");
-	    long lowQualitySize = convertedFile.length ();
-	    ImageConversionResult icr = 
-		new ImageConversionResult (origSize, lowQualitySize);
-	    ImageSelector is = new ImageSelector (convertedFile, typeFile);
-	    selectImage (entryName, is, icr);
-	    convertedFile = is.convertedFile;
-	    return icr;
-	} finally {
-	    if (convertedFile != null)
-		deleteFile (convertedFile);
-	    if (typeFile != null && typeFile.exists ())
-		deleteFile (typeFile);
 	}
+	return new ImageConversionResult (origSize, convertedFile, typeFile);
     }
 
     @Override public void setup (SProperties prop) {

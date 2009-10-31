@@ -107,20 +107,9 @@ public class JavaImageHandler extends ImageHandlerBase {
 	    }
 	} finally {
 	    origImage.flush ();
-	}
-	long lowQualitySize = output.length ();
-	try {
-	    ImageConversionResult icr = 
-		new ImageConversionResult (origSize, lowQualitySize);
 	    convertedFile = output;
-	    ImageSelector is = new ImageSelector (convertedFile, null);
-	    selectImage (entryName, is, icr);
-	    convertedFile = is.convertedFile;
-	} finally {
-	    if (convertedFile != null)
-		deleteFile (convertedFile);
 	}
-	return new ImageConversionResult (origSize, lowQualitySize);
+	return new ImageConversionResult (origSize, output, null);
     }
 
     @Override public void setup (SProperties prop) {
