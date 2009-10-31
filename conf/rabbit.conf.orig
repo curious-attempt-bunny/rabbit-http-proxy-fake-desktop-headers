@@ -114,9 +114,9 @@ usepipelining=false
 
 # Handle images by conversion to low quality jpegs.
 # yes, some sites send charsets for images, silly, but handle it
-image/gif(;(charset\=.*)?)?=rabbit.handler.JavaImageHandler*gif
-image/p?jpeg(;(charset\=.*)?)?=rabbit.handler.JavaImageHandler*jpeg
-image/png(;(charset\=.*)?)?=rabbit.handler.JavaImageHandler*png
+image/gif(;(charset\=.*)?)?=rabbit.handler.ImageHandler*gif
+image/p?jpeg(;(charset\=.*)?)?=rabbit.handler.ImageHandler*jpeg
+image/png(;(charset\=.*)?)?=rabbit.handler.ImageHandler*png
 
 # Filter these streams.
 # The configuration of FilterHandler is later in this file.
@@ -410,7 +410,7 @@ compress=true
 #compress=false
 
 
-[rabbit.handler.JavaImageHandler*jpeg]
+[rabbit.handler.ImageHandler*jpeg]
 # This handler converts images into low quality jpegs instead of high
 # quality gifs/pngs.
 
@@ -434,13 +434,13 @@ convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
 # Images that are smaller than this are not converted at all
 min_size=2000
 
-[rabbit.handler.JavaImageHandler*gif]
+[rabbit.handler.ImageHandler*gif]
 # use graphicsmagick
 convert=/usr/bin/gm
 convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
 min_size=2000
 
-[rabbit.handler.JavaImageHandler*png]
+[rabbit.handler.ImageHandler*png]
 # use graphicsmagick
 convert=/usr/bin/gm
 convertargs=convert -quality 10 -flatten $filename +profile "*" jpeg:$filename.c
