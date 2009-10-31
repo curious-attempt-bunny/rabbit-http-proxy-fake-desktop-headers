@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.httpio.FileResourceSource;
+import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.Closer;
@@ -29,7 +30,6 @@ public abstract class ImageHandlerBase extends BaseHandler {
     private int minSizeToConvert = 2000;
 
     protected boolean converted = false;
-    protected long lowQualitySize = -1;
     protected File convertedFile = null;
 
     /** For creating the factory.
@@ -77,7 +77,8 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	return true;
     }
 
-    /** Check if this handler may force the cached resource to be less than the cache max size.
+    /** Check if this handler may force the cached resource to be less than
+     *  the cache max size.
      * @return false
      */
     @Override protected boolean mayRestrictCacheSize () {
@@ -218,7 +219,7 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	con.getNioHandler ().runThreadTask (new Runnable () {
 		public void run () {
 		    try {
-			internalConvertImage ();
+			convertAndGetBest ();
 			converted = true;
 			ImageHandlerBase.super.handle ();
 		    } catch (IOException e) {
@@ -228,12 +229,79 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	    }, ti);
     }
 
-    /** Perform the actual image conversion. */
-    protected abstract void internalConvertImage () throws IOException;
-    
+    private void convertAndGetBest () throws IOException {
+	HttpProxy proxy = con.getProxy ();
+	String entryName =
+	    proxy.getCache ().getEntryName (entry.getId (), false, null);
+
+	ImageConversionResult icr = internalConvertImage (entryName);
+	size = Math.min (icr.convertedSize, icr.origSize);
+	response.setHeader ("Content-length", "" + size);
+	con.setExtraInfo ("imageratio:" + icr.convertedSize + "/" + 
+			  icr.origSize + "=" + 
+			  ((double)icr.convertedSize / icr.origSize));
+	content.release ();
+	content = new FileResourceSource (entryName, con.getNioHandler (),
+					  con.getBufferHandler ());
+	convertedFile = null;
+    }
+
+    public static class ImageConversionResult {
+	public static long origSize;
+	public static long convertedSize;
+
+	public ImageConversionResult (long origSize, long convertedSize) {
+	    this.origSize = origSize;
+	    this.convertedSize = convertedSize;
+	}
+    }
+
+    /** Perform the actual image conversion. 
+     * @param entryName the filename of the cache entry to use.
+     */
+    protected abstract ImageConversionResult internalConvertImage (String entryName)
+	throws IOException;
+
+    public static class ImageSelector {
+	public File convertedFile;
+	public File typeFile;
+
+	public ImageSelector (File convertedFile, File typeFile) {
+	    this.convertedFile = convertedFile;
+	    this.typeFile = typeFile;
+	}
+	
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{convertedFile: " + 
+		convertedFile + ", typeFile: " + typeFile + "}";
+	}
+    }
+
+    protected void selectImage (String entryName, ImageSelector is, 
+				ImageConversionResult icr) 
+	throws IOException {
+	if (icr.convertedSize > 0 && icr.origSize > icr.convertedSize) {
+	    String ctype = checkFileType (is.typeFile);
+	    response.setHeader ("Content-Type", ctype);
+	    /** We need to remove the existing file first for
+	     *  windows system, they will not overwrite files in a move.
+	     *  Spotted by: Michael Mlivoncic
+	     */
+	    File oldEntry = new File (entryName);
+	    if (oldEntry.exists ())
+		FileHelper.delete (oldEntry);
+	    if (is.convertedFile.renameTo (new File (entryName)))
+		is.convertedFile = null;
+	    else
+		getLogger ().warning ("rename failed: " +
+				      is.convertedFile.getName () +
+				      " => " + entryName);
+	}
+    }
+
     protected String checkFileType (File typeFile) throws IOException {
 	String ctype = "image/jpeg";
-	if (typeFile.exists () && typeFile.length() > 0) {
+	if (typeFile != null && typeFile.exists () && typeFile.length() > 0) {
 	    BufferedReader br = null;
 	    try {
 		br = new BufferedReader (new FileReader (typeFile));

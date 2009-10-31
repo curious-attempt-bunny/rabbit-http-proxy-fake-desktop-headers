@@ -3,12 +3,10 @@ package rabbit.handler;
 import java.io.File;
 import java.io.IOException;
 import rabbit.http.HttpHeader;
-import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.FileHelper;
 import rabbit.proxy.Connection;
-import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 
@@ -19,10 +17,8 @@ import rabbit.util.SProperties;
  */
 public class ImageHandler extends ImageHandlerBase {
     private static final String STD_CONVERT = "/usr/bin/convert";
-    private static final String STD_CONVERT_ARGS = 
+    private static final String STD_CONVERT_ARGS =
     "-quality 10 -flatten $filename +profile \"*\" jpeg:$filename.c";
-
-    private File typeFile = null;
 
     /** For creating the factory.
      */
@@ -57,19 +53,18 @@ public class ImageHandler extends ImageHandlerBase {
 				   boolean mayFilter, long size) {
 	return new ImageHandler (con, tlh, header, bufHandle, webHeader,
 				 content, mayCache, mayFilter, size,
-				 getConfig (), getDoConvert (), 
+				 getConfig (), getDoConvert (),
 				 getMinSizeToConvert ());
     }
 
-    @Override protected void internalConvertImage () throws IOException {
+    @Override protected ImageConversionResult 
+    internalConvertImage (String entryName) throws IOException {
 	long origSize = size;
-	String convert = getConfig ().getProperty ("convert", STD_CONVERT);
-	String convargs = getConfig ().getProperty ("convertargs", STD_CONVERT_ARGS);
-
+	SProperties cfg = getConfig ();
+	String convert = cfg.getProperty ("convert", STD_CONVERT);
+	String convargs = cfg.getProperty ("convertargs", STD_CONVERT_ARGS);
+	File typeFile = null;
 	int idx = 0;
-	HttpProxy proxy = con.getProxy ();
-	String entryName =
-	    proxy.getCache ().getEntryName (entry.getId (), false, null);
 	try {
 	    while ((idx = convargs.indexOf ("$filename")) > -1) {
 		convargs = convargs.substring (0, idx) + entryName +
@@ -95,39 +90,19 @@ public class ImageHandler extends ImageHandlerBase {
 
 	    convertedFile = new File (entryName + ".c");
 	    typeFile = new File (entryName + ".type");
-	    lowQualitySize = convertedFile.length ();
-	    if (lowQualitySize > 0 && origSize > lowQualitySize) {
-		String ctype = checkFileType (typeFile);
-		response.setHeader ("Content-Type", ctype);
-		/** We need to remove the existing file first for
-		 *  windows system, they will not overwrite files in a move.
-		 *  Spotted by: Michael Mlivoncic
-		 */
-		File oldEntry = new File (entryName);
-		if (oldEntry.exists ())
-		    FileHelper.delete (oldEntry);
-		if (convertedFile.renameTo (new File (entryName)))
-		    convertedFile = null;
-		else
-		    getLogger ().warning ("rename failed: " +
-					  convertedFile.getName () +
-					  " => " +
-					  entryName);
-	    }
+	    long lowQualitySize = convertedFile.length ();
+	    ImageConversionResult icr = 
+		new ImageConversionResult (origSize, lowQualitySize);
+	    ImageSelector is = new ImageSelector (convertedFile, typeFile);
+	    selectImage (entryName, is, icr);
+	    convertedFile = is.convertedFile;
+	    return icr;
 	} finally {
 	    if (convertedFile != null)
 		deleteFile (convertedFile);
 	    if (typeFile != null && typeFile.exists ())
 		deleteFile (typeFile);
 	}
-	size = (lowQualitySize < origSize ? lowQualitySize : origSize);
-	response.setHeader ("Content-length", "" + size);
-	con.setExtraInfo ("imageratio:" + lowQualitySize + "/" + origSize +
-			  "=" + ((float)lowQualitySize / origSize));
-	content.release ();
-	content = new FileResourceSource (entryName, con.getNioHandler (),
-					  con.getBufferHandler ());
-	convertedFile = null;
     }
 
     @Override public void setup (SProperties prop) {
