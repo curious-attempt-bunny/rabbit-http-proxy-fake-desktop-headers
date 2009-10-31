@@ -86,10 +86,11 @@ public class JavaImageHandler extends ImageHandlerBase {
     @Override protected ImageConversionResult 
     internalConvertImage (String entryName) throws IOException {
 	long origSize = size;
-	BufferedImage origImage = ImageIO.read (new File (entryName));
+	File input = new File (entryName);
 	File output = new File (entryName + ".c");
 	
 	// TODO: check image size so that we can limit total memory usage
+	BufferedImage origImage = ImageIO.read (input);
 	try {
 	    ImageWriter writer = getImageWriter ();
 	    try {

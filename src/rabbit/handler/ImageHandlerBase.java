@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.httpio.FileResourceSource;
-import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.Closer;
@@ -247,8 +246,8 @@ public abstract class ImageHandlerBase extends BaseHandler {
     }
 
     public static class ImageConversionResult {
-	public static long origSize;
-	public static long convertedSize;
+	public long origSize;
+	public long convertedSize;
 
 	public ImageConversionResult (long origSize, long convertedSize) {
 	    this.origSize = origSize;
