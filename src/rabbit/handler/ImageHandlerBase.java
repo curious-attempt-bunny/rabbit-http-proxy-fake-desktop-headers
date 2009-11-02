@@ -251,7 +251,7 @@ public abstract class ImageHandlerBase extends BaseHandler {
 		deleteFile (icr.typeFile);
 	}
 
-	size = Math.min (icr.convertedSize, icr.origSize);
+	size = icr.convertedSize > 0 ? icr.convertedSize : icr.origSize;
 	response.setHeader ("Content-length", "" + size);
 	con.setExtraInfo ("imageratio:" + icr.convertedSize + "/" + 
 			  icr.origSize + "=" + 
@@ -274,7 +274,17 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	    this.origSize = origSize;
 	    this.convertedFile = convertedFile;
 	    this.typeFile = typeFile;
-	    this.convertedSize = convertedFile.length ();
+	    if (convertedFile.exists ())
+		this.convertedSize = convertedFile.length ();
+	    else 
+		convertedSize = 0;
+	}
+
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{origSize: " + 
+		origSize + ", convertedSize: " + convertedSize + 
+		", convertedFile: " + convertedFile + 
+		", typeFile: " + typeFile + "}";
 	}
     }
 

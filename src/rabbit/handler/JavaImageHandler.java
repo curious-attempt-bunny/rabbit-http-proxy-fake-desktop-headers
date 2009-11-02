@@ -1,5 +1,6 @@
 package rabbit.handler;
 
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
@@ -82,6 +83,23 @@ public class JavaImageHandler extends ImageHandlerBase {
 	iwparam.setCompressionQuality (getQuality ());
 	return iwparam;
     }
+
+    private BufferedImage getRGBImage (BufferedImage orig) {
+	BufferedImage newImage = 
+	    new BufferedImage (orig.getWidth (), orig.getHeight (), 
+			       BufferedImage.TYPE_INT_RGB);
+	try {
+	    Graphics g2 = newImage.getGraphics (); 
+	    try {
+		g2.drawImage (orig, 0, 0, null);
+	    } finally {
+		g2.dispose ();
+	    }
+	} finally {
+	    orig.flush ();
+	}
+	return newImage;
+    }
     
     @Override protected ImageConversionResult 
     internalConvertImage (String entryName) throws IOException {
@@ -91,7 +109,12 @@ public class JavaImageHandler extends ImageHandlerBase {
 	
 	// TODO: check image size so that we can limit total memory usage
 	BufferedImage origImage = ImageIO.read (input);
+	if (origImage == null) {
+	    return new ImageConversionResult (origSize, output, null);
+	}
 	try {
+	    if (origImage.getType () == BufferedImage.TYPE_CUSTOM)
+		origImage = getRGBImage (origImage);
 	    ImageWriter writer = getImageWriter ();
 	    try {
 		ImageOutputStream ios = ImageIO.createImageOutputStream (output);
