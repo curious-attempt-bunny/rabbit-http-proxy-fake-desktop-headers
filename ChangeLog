@@ -4,7 +4,8 @@ version 4.3 (20xx-yy-zz) Some code cleanups identified by findbugs.
 	server so that it is more secure and sends correct mime type in
 	more cases. Updated dnsjava to 2.0.7. Added a image handler that
 	uses ImageIO/ImageWriter so it is full java and that means that it
-	does not have to fork a convert process.
+	does not have to fork a convert process. Updated some filter
+	documentation.
 
 version 4.2 (2009-08-20) Made it possible to specify what ip rabbit
 	should listen on. Made it possible to specify what ip rabbit

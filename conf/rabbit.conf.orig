@@ -209,7 +209,9 @@ accessfilters=rabbit.filter.AccessFilter
 # BlockFilter      Dont allow access to certain pages.
 # HttpSnoop        Print the Http headers out on System.out.
 # ProxyAuth	   Perform proxy authentication on all users, backend db is a file
+#                  This filter needs to be after HttpBaseFilter to work correctly.
 # SQLProxyAuth     Perform proxy authentication on all users, backend is an sql db.
+#                  This filter needs to be after HttpBaseFilter to work correctly.
 # ReverseProxy     Transform requests to "/some/page" into "http://some.host/some/page" 
 #                  If you use the reverse proxy option, you probably 
 #                  want it first in the list
