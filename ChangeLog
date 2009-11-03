@@ -5,7 +5,8 @@ version 4.3 (20xx-yy-zz) Some code cleanups identified by findbugs.
 	more cases. Updated dnsjava to 2.0.7. Added a image handler that
 	uses ImageIO/ImageWriter so it is full java and that means that it
 	does not have to fork a convert process. Updated some filter
-	documentation.
+	documentation. Made it possible to configure SQLProxyAuth to cache
+	the results.
 
 version 4.2 (2009-08-20) Made it possible to specify what ip rabbit
 	should listen on. Made it possible to specify what ip rabbit

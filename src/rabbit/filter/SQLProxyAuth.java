@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
@@ -24,6 +26,7 @@ import rabbit.util.SProperties;
  *  <li>user
  *  <li>password
  *  <li>select
+ *  <li>cachetime (minutes)
  *  </ul>
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -33,11 +36,15 @@ public class SQLProxyAuth implements HttpFilter {
     private String dbuser = null;
     private String dbpwd = null;
     private String select = null;
+    private int cacheTime = 0;
+
     private static final String DEFAULT_SELECT = 
 	"select password from users where username = ?";
 
     private java.sql.Connection db = null;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
+
+    private Map<String, CacheEntry> cache = new HashMap<String, CacheEntry> ();
 
     private synchronized void initConnection () throws SQLException {
 	db = DriverManager.getConnection (url, dbuser, dbpwd);
@@ -106,9 +113,28 @@ public class SQLProxyAuth implements HttpFilter {
 	db = null;
     } 
 
+    private static class CacheEntry {
+	public final String pwd;
+	public final long timeout;
+
+	public CacheEntry (String pwd, long timeout) {
+	    this.pwd = pwd;
+	    this.timeout = timeout;
+	}
+
+	public boolean stillValid () {
+	    long now = System.currentTimeMillis ();
+	    return timeout > now;
+	}
+    }
+
     private String getBackendPassword (String username) 
 	throws SQLException {
 	synchronized (this) {
+	    CacheEntry resp = cache.get (username);
+	    if (resp != null && resp.stillValid ())
+		return resp.pwd;
+
 	    if (db == null)
 		initConnection ();
 	}
@@ -121,7 +147,16 @@ public class SQLProxyAuth implements HttpFilter {
 	    ps.setString (1, username);
 	    rs = ps.executeQuery ();
 	    if (rs.next ()) {
-		return rs.getString (1);		
+		String ret = rs.getString (1);
+		synchronized (this) {
+		    if (cacheTime > 0) {
+			long timeout = 
+			    System.currentTimeMillis () + 60000 + cacheTime;
+			CacheEntry ce = new CacheEntry (ret, timeout);
+			cache.put (username, ce);
+		    }
+		}
+		return ret;
 	    }
 	    return null;
 	} finally {
@@ -157,6 +192,8 @@ public class SQLProxyAuth implements HttpFilter {
 	    dbuser = properties.getProperty ("user");
 	    dbpwd = properties.getProperty ("password");
 	    select = properties.getProperty ("select", DEFAULT_SELECT);
+	    String ct = properties.getProperty ("cachetime", "0");
+	    cacheTime = Integer.parseInt (ct);
 	}
     }    
 }
