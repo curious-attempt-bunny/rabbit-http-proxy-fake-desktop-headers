@@ -2,16 +2,18 @@ package rabbit.handler;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.IIOImage;
-import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
@@ -25,6 +27,7 @@ import rabbit.util.SProperties;
  */
 public class JavaImageHandler extends ImageHandlerBase {
     private static final String STD_QUALITY = "0.1";
+    private long maxImageSize;
 
     /** For creating the factory.
      */
@@ -46,11 +49,12 @@ public class JavaImageHandler extends ImageHandlerBase {
 			     HttpHeader response, ResourceSource content,
 			     boolean mayCache, boolean mayFilter, long size,
 			     SProperties config, boolean doConvert,
-			     int minSizeToConvert) {
+			     int minSizeToConvert, long maxImageSize) {
 	super (con, tlh, request, clientHandle, response, content,
 	       mayCache, mayFilter, size, config, doConvert, minSizeToConvert);
+	this.maxImageSize = maxImageSize;
     }
-
+    
     @Override
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
 				   HttpHeader header, BufferHandle bufHandle,
@@ -60,7 +64,7 @@ public class JavaImageHandler extends ImageHandlerBase {
 	return new JavaImageHandler (con, tlh, header, bufHandle, webHeader,
 				     content, mayCache, mayFilter, size,
 				     getConfig (), getDoConvert (), 
-				     getMinSizeToConvert ());
+				     getMinSizeToConvert (), maxImageSize);
     }
 
     private float getQuality () {
@@ -108,7 +112,7 @@ public class JavaImageHandler extends ImageHandlerBase {
 	File output = new File (entryName + ".c");
 	
 	// TODO: check image size so that we can limit total memory usage
-	BufferedImage origImage = ImageIO.read (input);
+	BufferedImage origImage = getImage (input);
 	if (origImage == null) {
 	    return new ImageConversionResult (origSize, output, null);
 	}
@@ -135,7 +139,40 @@ public class JavaImageHandler extends ImageHandlerBase {
 	return new ImageConversionResult (origSize, output, null);
     }
 
+    private BufferedImage getImage (File input) throws IOException {
+	ImageInputStream iis = ImageIO.createImageInputStream (input);
+	try{
+	    Iterator<ImageReader> readers = ImageIO.getImageReaders (iis);
+	    if (!readers.hasNext ()) 
+		throw new IOException ("Failed to find image reader: " + 
+				       request.getRequestURI ());
+
+	    ImageReader ir = readers.next ();
+	    try {
+		return getImage (ir, iis);
+	    } finally {
+		ir.dispose ();
+	    }
+	} finally {
+	    iis.close ();
+	}
+    }
+
+    private BufferedImage getImage (ImageReader ir, ImageInputStream iis) 
+	throws IOException {
+	ir.setInput (iis);
+	// 4 bytes per pixels, we may need 2 images
+	long size = ir.getWidth (0) * ir.getHeight (0) * 4 * 2;
+	if (size > maxImageSize)
+	    throw new IOException ("Image is too large, wont convert: " +
+				   request.getRequestURI ());
+	return ir.read (0);
+    }
+
     @Override public void setup (SProperties prop) {
 	super.setup (prop);
+        Runtime rt = Runtime.getRuntime ();
+        long max = rt.maxMemory ();
+	maxImageSize = max / 4;
     }
 }
