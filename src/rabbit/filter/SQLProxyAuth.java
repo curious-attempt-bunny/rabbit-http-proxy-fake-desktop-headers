@@ -149,9 +149,9 @@ public class SQLProxyAuth implements HttpFilter {
 	    if (rs.next ()) {
 		String ret = rs.getString (1);
 		synchronized (this) {
-		    if (cacheTime > 0) {
+		    if (ret != null && cacheTime > 0) {
 			long timeout = 
-			    System.currentTimeMillis () + 60000 + cacheTime;
+			    System.currentTimeMillis () + 60000 * cacheTime;
 			CacheEntry ce = new CacheEntry (ret, timeout);
 			cache.put (username, ce);
 		    }
