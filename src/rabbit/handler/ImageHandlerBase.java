@@ -253,9 +253,11 @@ public abstract class ImageHandlerBase extends BaseHandler {
 
 	size = icr.convertedSize > 0 ? icr.convertedSize : icr.origSize;
 	response.setHeader ("Content-length", "" + size);
+	double ratio = (double)icr.convertedSize / icr.origSize;
+	String sRatio = String.format ("%.3f", ratio);
 	con.setExtraInfo ("imageratio:" + icr.convertedSize + "/" + 
 			  icr.origSize + "=" + 
-			  ((double)icr.convertedSize / icr.origSize));
+			  sRatio);
 	content.release ();
 	content = new FileResourceSource (entryName, con.getNioHandler (),
 					  con.getBufferHandler ());
