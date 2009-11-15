@@ -23,7 +23,7 @@
    Image conversion is a heavy process and is done with an external
    program, I would like to do this in java but have not found any good
    and fast package to do it. Anyway as standard it uses convert from
-   ImageMagick, but it is configurable to use any command line program
+   GraphicsMagick, but it is configurable to use any command line program
    that can do the job. Of course RabbIT can be run with image conversion
    turned off but that is in a way the wrong thing to do since this is
    the big timesaver.

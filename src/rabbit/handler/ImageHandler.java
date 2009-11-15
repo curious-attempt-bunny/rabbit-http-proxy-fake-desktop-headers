@@ -10,14 +10,14 @@ import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 
 /** This image handler uses an external program to convert images.
- *  The default converter is the program "convert" from imagemagick.
+ *  The default converter is the program "convert" from GraphicsMagick.
  *  Using graphicsmagick with "gm convert" also seems to work fine.
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ImageHandler extends ImageHandlerBase {
-    private static final String STD_CONVERT = "/usr/bin/convert";
+    private static final String STD_CONVERT = "/usr/bin/gm";
     private static final String STD_CONVERT_ARGS =
-    "-quality 10 -flatten $filename +profile \"*\" jpeg:$filename.c";
+    "conovert -quality 10 -flatten $filename +profile \"*\" jpeg:$filename.c";
 
     /** For creating the factory.
      */
