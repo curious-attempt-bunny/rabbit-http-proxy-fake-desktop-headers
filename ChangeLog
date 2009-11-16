@@ -1,4 +1,4 @@
-version 4.3 (20xx-yy-zz) Some code cleanups identified by findbugs.
+version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
 	setup so that it catches more images. Updated the sample web
 	server so that it is more secure and sends correct mime type in
