@@ -1,10 +1,10 @@
 <project name="rabbit" default="dist.bin" basedir=".">
     <description>
-        Ant build file for RabbIT
+        Ant build file for RabbIT/4
     </description>
 
     <property name="major_version" value="4"/>
-    <property name="minor_version" value="3"/>
+    <property name="minor_version" value="4"/>
 
     <!-- paths -->
     <property name="src" location="src"/>
