@@ -1,4 +1,5 @@
-version 4.4 (20xx-yy-zz)
+version 4.4 (20xx-yy-zz) Made it possible to restrict sql authentication to
+	one ip only.
 
 version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
