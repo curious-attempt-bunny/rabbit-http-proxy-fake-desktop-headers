@@ -204,12 +204,6 @@ public abstract class ImageHandlerBase extends BaseHandler {
 	}
     }
 
-    public void closeStreams (Process ps) throws IOException {
-	ps.getInputStream ().close ();
-	ps.getOutputStream ().close ();
-	ps.getErrorStream ().close ();
-    }
-
     /** Convert the image into a small low quality image (normally a jpeg).
      * @throws IOException if conversion fails.
      */
