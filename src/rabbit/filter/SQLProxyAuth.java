@@ -1,6 +1,8 @@
 package rabbit.filter;
 
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.nio.channels.SocketChannel;
 import java.sql.DriverManager;
@@ -25,8 +27,9 @@ import rabbit.util.SProperties;
  *  <li>url
  *  <li>user
  *  <li>password
- *  <li>select
+ *  <li>select - the sql query to run
  *  <li>cachetime (minutes)
+ *  <li>one_ip_only - restrict access so that users can only use one ip
  *  </ul>
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -37,6 +40,7 @@ public class SQLProxyAuth implements HttpFilter {
     private String dbpwd = null;
     private String select = null;
     private int cacheTime = 0;
+    private boolean oneIpOnly = true;
 
     private static final String DEFAULT_SELECT = 
 	"select password from users where username = ?";
@@ -44,7 +48,8 @@ public class SQLProxyAuth implements HttpFilter {
     private java.sql.Connection db = null;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
-    private Map<String, CacheEntry> cache = new HashMap<String, CacheEntry> ();
+    /** Username to user info */
+    private Map<String, UserInfo> cache = new HashMap<String, UserInfo> ();
 
     private synchronized void initConnection () throws SQLException {
 	db = DriverManager.getConnection (url, dbuser, dbpwd);
@@ -62,23 +67,22 @@ public class SQLProxyAuth implements HttpFilter {
      *         describing the error (like a 403).
      */
     public HttpHeader doHttpInFiltering (SocketChannel socket, 
-					 HttpHeader header, Connection con) {
+					 HttpHeader header, 
+					 Connection con) {
 	if (con.getMeta ())
 	    return null;
 	String username = con.getUserName ();
 	String pwd = con.getPassword ();
 	if (username == null || pwd == null) 
 	    return getError (con, header);
-	String rpwd = null;
-	try { 
-	    rpwd = getBackendPassword (username);
+	try {
+	    if (validPassword (username, pwd, con.getChannel ()))
+		return null;
 	} catch (SQLException e) {
 	    logger.log (Level.WARNING, "Exception when trying to get user: " + e);
 	    closeDB (con);
 	}
-	if (rpwd == null || !rpwd.equals (pwd))
-	    return getError (con, header);
-	return null;
+	return getError (con, header);
     }
 
     /** test if a socket/header combination is valid or return a new HttpHeader.
@@ -113,60 +117,89 @@ public class SQLProxyAuth implements HttpFilter {
 	db = null;
     } 
 
-    private static class CacheEntry {
-	public final String pwd;
-	public final long timeout;
+    private static class UserInfo {
+	private final String pwd;
+	private final long timeout;
+	private final SocketAddress sa;
 
-	public CacheEntry (String pwd, long timeout) {
+	public UserInfo (String pwd, long timeout, SocketAddress sa) {
 	    this.pwd = pwd;
 	    this.timeout = timeout;
+	    this.sa = sa;
 	}
 
 	public boolean stillValid () {
 	    long now = System.currentTimeMillis ();
 	    return timeout > now;
 	}
+	
+	public boolean correctPassWord (String userPassword) {
+	    return userPassword.equals (pwd);
+	}
+	
+	public boolean correctSocketAddress (SocketAddress sa) {
+	    return this.sa.equals (sa);
+	}
+    }
+    
+    private boolean validPassword (String username, String pwd, 
+				   SocketChannel channel) 
+	throws SQLException {
+	UserInfo ce = getUserInfo (username, channel);
+	if (!ce.correctPassWord (pwd))
+	    return false;
+	if (oneIpOnly) {
+	    Socket socket = channel.socket ();
+	    if (!ce.correctSocketAddress (socket.getRemoteSocketAddress ()))
+		return false;
+	}
+	return true;
     }
 
-    private String getBackendPassword (String username) 
+    private UserInfo getUserInfo (String username, 
+				  SocketChannel channel) 
 	throws SQLException {
+	UserInfo resp;
 	synchronized (this) {
-	    CacheEntry resp = cache.get (username);
-	    if (resp != null && resp.stillValid ())
-		return resp.pwd;
+	    resp = cache.get (username);
+	}
+	if (resp != null) {
+	    if (cacheTime <= 0)
+		return resp;
+	    if (resp.stillValid ())
+		return resp;
+	}
 
+	synchronized (this) {
 	    if (db == null)
 		initConnection ();
 	}
 	PreparedStatement ps = null;
-	ResultSet rs = null;
 	try {
 	    synchronized (this) {
 		ps = db.prepareStatement (select);
 	    }
 	    ps.setString (1, username);
-	    rs = ps.executeQuery ();
-	    if (rs.next ()) {
-		String ret = rs.getString (1);
-		synchronized (this) {
-		    if (ret != null && cacheTime > 0) {
-			long timeout = 
-			    System.currentTimeMillis () + 60000 * cacheTime;
-			CacheEntry ce = new CacheEntry (ret, timeout);
-			cache.put (username, ce);
+	    ResultSet rs = ps.executeQuery ();
+	    try {
+		if (rs.next ()) {
+		    String ret = rs.getString (1);
+		    long timeout = 
+			System.currentTimeMillis () + 60000 * cacheTime;
+		    SocketAddress sa = 
+			channel.socket ().getRemoteSocketAddress ();
+		    UserInfo ce = new UserInfo (ret, timeout, sa);
+		    synchronized (this) {
+			if (cacheTime > 0)
+			    cache.put (username, ce);
 		    }
+		    return ce;
 		}
-		return ret;
+	    } finally {
+		rs.close ();
 	    }
 	    return null;
 	} finally {
-	    if (rs != null) {
-		try {
-		    rs.close ();
-		} catch (SQLException e) {
-		    logger.log (Level.WARNING, "Failed to close resultset", e);
-		}
-	    }
 	    if (ps != null) {
 		try {
 		    ps.close ();
@@ -194,6 +227,8 @@ public class SQLProxyAuth implements HttpFilter {
 	    select = properties.getProperty ("select", DEFAULT_SELECT);
 	    String ct = properties.getProperty ("cachetime", "0");
 	    cacheTime = Integer.parseInt (ct);
+	    String ra = properties.getProperty ("one_ip_only", "true");
+	    oneIpOnly = Boolean.valueOf (ra);
 	}
     }    
 }
