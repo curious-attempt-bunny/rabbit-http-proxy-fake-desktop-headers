@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.logging.Logger;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -24,9 +23,6 @@ public class JavaImageConverter implements ImageConverter {
     private static final String STD_QUALITY = "0.1";
     private final float quality;
     private final long maxImageSize;
-    private SProperties cfg;
-
-    private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     public JavaImageConverter (SProperties props) {
         Runtime rt = Runtime.getRuntime ();
@@ -34,6 +30,10 @@ public class JavaImageConverter implements ImageConverter {
 	maxImageSize = max / 4;
 	String sq = props.getProperty ("quality", STD_QUALITY);
 	quality = Float.parseFloat (sq);
+    }
+
+    public boolean canConvert () {
+	return true;
     }
 
     public void convertImage (File input, File output, String info)

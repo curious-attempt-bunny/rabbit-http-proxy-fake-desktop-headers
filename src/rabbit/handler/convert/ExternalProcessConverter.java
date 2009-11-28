@@ -32,9 +32,12 @@ public class ExternalProcessConverter implements ImageConverter {
 	}
     }
 
+    public boolean canConvert () {
+	return canConvert;
+    }
+
     public void convertImage (File from, File to, String info)
 	throws IOException {
-	File typeFile = null;
 	int idx = 0;
 	String entryName = from.getAbsolutePath ();
 	String convargs = convertArgs;

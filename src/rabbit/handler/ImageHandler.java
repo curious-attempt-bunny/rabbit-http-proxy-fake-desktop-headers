@@ -391,9 +391,15 @@ public class ImageHandler extends BaseHandler {
 		Integer.parseInt (prop.getProperty ("min_size", "2000"));
 	}
 	String converterType = prop.getProperty ("converter_type", "external");
-	if (converterType.equalsIgnoreCase ("external"))
+	if (converterType.equalsIgnoreCase ("external")) {
 	    imageConverter = new ExternalProcessConverter (prop);
-	else
+	    if (!imageConverter.canConvert ()) {
+		getLogger ().warning ("imageConverter: " + imageConverter + 
+				      " can not convert images, using java.");
+		imageConverter = null;
+	    }
+	} 
+	if (imageConverter == null) 
 	    imageConverter = new JavaImageConverter (prop);
     }
 }

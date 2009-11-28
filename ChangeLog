@@ -1,5 +1,8 @@
 version 4.4 (20xx-yy-zz) Made it possible to restrict sql authentication to
-	one ip only.
+	one ip only. Moved the image conversion to separate package and
+	merge the different image handlers into just one ImageHandler that
+	uses the right image converter internally. Made ImageHandler fall
+	back to java based image conversion if the external process fails.
 
 version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
