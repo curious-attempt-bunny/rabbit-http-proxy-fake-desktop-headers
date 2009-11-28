@@ -37,10 +37,10 @@ public class ExternalProcessConverter implements ImageConverter {
 	File typeFile = null;
 	int idx = 0;
 	String entryName = from.getAbsolutePath ();
-	String convargs = "";
-	while ((idx = convertArgs.indexOf ("$filename")) > -1) {
-	    convargs = convertArgs.substring (0, idx) + entryName +
-		convertArgs.substring (idx + "$filename".length());
+	String convargs = convertArgs;
+	while ((idx = convargs.indexOf ("$filename")) > -1) {
+	    convargs = convargs.substring (0, idx) + entryName +
+		convargs.substring (idx + "$filename".length());
 	}
 	String command = convert + " " + convargs;
 	logger.fine ("ImageHandler running: '" + command + "'");
