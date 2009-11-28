@@ -1,23 +1,40 @@
 package rabbit.handler;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import rabbit.http.HttpHeader;
+import rabbit.httpio.BlockListener;
+import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
-import rabbit.proxy.Connection;
-import rabbit.proxy.TrafficLoggerHandler;
+import rabbit.io.Closer;
+import rabbit.io.FileHelper;
 import rabbit.handler.convert.ExternalProcessConverter;
+import rabbit.handler.convert.ImageConverter;
+import rabbit.handler.convert.JavaImageConverter;
+import rabbit.nio.DefaultTaskIdentifier;
+import rabbit.nio.TaskIdentifier;
+import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
+import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 
-/** This image handler uses an external program to convert images.
- *  The default converter is the program "convert" from GraphicsMagick.
- *  Using graphicsmagick with "gm convert" also seems to work fine.
+/** This handler first downloads the image runs convert on it and
+ *  then serves the smaller image.
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class ImageHandler extends ImageHandlerBase {
-    private ExternalProcessConverter epc;
+public class ImageHandler extends BaseHandler {
+    private SProperties config = new SProperties ();
+    private boolean doConvert = true;
+    private int minSizeToConvert = 2000;
 
+    private boolean converted = false;
+    protected File convertedFile = null;
+    private ImageConverter imageConverter;
+    
     /** For creating the factory.
      */
     public ImageHandler () {
@@ -40,7 +57,13 @@ public class ImageHandler extends ImageHandlerBase {
 			 SProperties config, boolean doConvert,
 			 int minSizeToConvert) {
 	super (con, tlh, request, clientHandle, response, content,
-	       mayCache, mayFilter, size, config, doConvert, minSizeToConvert);
+	       mayCache, mayFilter, size);
+	if (size == -1)
+	    con.setKeepalive (false);
+	con.setChunking (false);
+	this.config = config;
+	this.doConvert = doConvert;
+	this.minSizeToConvert = minSizeToConvert;
     }
 
     @Override
@@ -51,21 +74,325 @@ public class ImageHandler extends ImageHandlerBase {
 				   boolean mayFilter, long size) {
 	return new ImageHandler (con, tlh, header, bufHandle, webHeader,
 				 content, mayCache, mayFilter, size,
-				 getConfig (), getDoConvert (),
+				 getConfig (), getDoConvert (), 
 				 getMinSizeToConvert ());
     }
+    
+    /**
+     * ®return true this handler modifies the content.
+     */
+    @Override public boolean changesContentSize () {
+	return true;
+    }
 
-    @Override protected ImageConversionResult
+    /** Images needs to be cacheable to be compressed.
+     * @return true
+     */
+    @Override protected boolean mayCacheFromSize () {
+	return true;
+    }
+
+    /** Check if this handler may force the cached resource to be less than
+     *  the cache max size.
+     * @return false
+     */
+    @Override protected boolean mayRestrictCacheSize () {
+	return false;
+    }
+
+    /** Try to convert the image before letting the superclass handle it.
+     */
+    @Override public void handle () {
+	try {
+	    tryconvert ();
+	} catch (IOException e) {
+	    failed (e);
+	}
+    }
+
+    @Override protected void addCache () {
+	if (!converted)
+	    super.addCache ();
+	// if we get here then we have converted the image
+	// and do not want a cache...
+    }
+
+    /** clear up the mess we made (remove intermediate files etc).
+     */
+    @Override protected void finish (boolean good) {
+	try {
+	    if (convertedFile != null) {
+		deleteFile (convertedFile);
+		convertedFile = null;
+	    }
+	} finally {
+	    super.finish (good);
+	}
+    }
+
+    /** Remove the cachestream and the cache entry.
+     */
+    @Override protected void removeCache () {
+	super.removeCache ();
+	if (convertedFile != null) {
+	    deleteFile (convertedFile);
+	    convertedFile = null;
+	}
+    }
+
+
+    /** Try to convert the image. This is done like this:
+     *  <xmp>
+     *  super.addCache ();
+     *  readImage();
+     *  convertImage();
+     *  cacheChannel = null;
+     *  </xmp>
+     *  We have to use the cachefile to convert the image, and if we
+     *  convert it we dont want to write the file to the cache later
+     *  on.
+     */
+    protected void tryconvert () throws IOException {
+	// TODO: if the image size is unknown (chunked) we will have -1 > 2000
+	// TODO: perhaps we should add something to handle that.
+	if (doConvert && mayFilter && mayCache && size > minSizeToConvert) {
+	    super.addCache ();
+	    // check if cache setup worked.
+	    if (cacheChannel == null)
+		super.handle ();
+	    else
+		readImage ();
+	} else {
+	    super.handle ();
+	}
+    }
+
+    /** Read in the image
+     * @throws IOException if reading of the image fails.
+     */
+    protected void readImage () throws IOException {
+	content.addBlockListener (new ImageReader ());
+    }
+
+    private class ImageReader implements BlockListener {
+	public void bufferRead (final BufferHandle bufHandle) {
+	    TaskIdentifier ti =
+		new DefaultTaskIdentifier (getClass ().getSimpleName (),
+					   request.getRequestURI ());
+	    con.getNioHandler ().runThreadTask (new Runnable () {
+		    public void run () {
+			writeImageData (bufHandle);
+		    }
+		}, ti);
+	}
+
+	private void writeImageData (BufferHandle bufHandle) {
+	    try {
+		ByteBuffer buf = bufHandle.getBuffer ();
+		writeCache (buf);
+		totalRead += buf.remaining ();
+		buf.position (buf.limit ());
+		bufHandle.possiblyFlush ();
+		content.addBlockListener (this);
+	    } catch (IOException e) {
+		failed (e);
+	    }
+	}
+
+	public void finishedRead () {
+	    try {
+		if (size > 0 && totalRead != size)
+		    setPartialContent (totalRead, size);
+		cacheChannel.close ();
+		cacheChannel = null;
+		convertImage ();
+	    } catch (IOException e) {
+		failed (e);
+	    }
+	}
+
+	public void failed (Exception cause) {
+	    ImageHandler.this.failed (cause);
+	}
+
+	public void timeout () {
+	    ImageHandler.this.failed (new IOException ("Timeout"));
+	}
+    }
+
+    /** Convert the image into a small low quality image (normally a jpeg).
+     * @throws IOException if conversion fails.
+     */
+    protected void convertImage () {
+	TaskIdentifier ti =
+	    new DefaultTaskIdentifier (getClass ().getSimpleName () +
+				       ".convertImage",
+				       request.getRequestURI ());
+
+	con.getNioHandler ().runThreadTask (new Runnable () {
+		public void run () {
+		    try {
+			convertAndGetBest ();
+			converted = true;
+			ImageHandler.super.handle ();
+		    } catch (IOException e) {
+			failed (e);
+		    }
+		}
+	    }, ti);
+    }
+
+    private void convertAndGetBest () throws IOException {
+	HttpProxy proxy = con.getProxy ();
+	String entryName =
+	    proxy.getCache ().getEntryName (entry.getId (), false, null);
+
+	ImageConversionResult icr = internalConvertImage (entryName);
+	try {
+	    ImageSelector is = 
+		new ImageSelector (icr.convertedFile, icr.typeFile);
+	    selectImage (entryName, is, icr);
+	    convertedFile = is.convertedFile;
+	} finally {
+	    if (icr.convertedFile != null && icr.convertedFile.exists ())
+		deleteFile (icr.convertedFile);
+	    convertedFile = null;
+	    if (icr.typeFile != null && icr.typeFile.exists ())
+		deleteFile (icr.typeFile);
+	}
+
+	size = icr.convertedSize > 0 ? icr.convertedSize : icr.origSize;
+	response.setHeader ("Content-length", "" + size);
+	double ratio = (double)icr.convertedSize / icr.origSize;
+	String sRatio = String.format ("%.3f", ratio);
+	con.setExtraInfo ("imageratio:" + icr.convertedSize + "/" + 
+			  icr.origSize + "=" + 
+			  sRatio);
+	content.release ();
+	content = new FileResourceSource (entryName, con.getNioHandler (),
+					  con.getBufferHandler ());
+	convertedFile = null;
+    }
+
+    public static class ImageConversionResult {
+	public final long origSize;
+	public final long convertedSize;
+	public final File convertedFile;
+	public final File typeFile;
+
+	public ImageConversionResult (long origSize, 
+				      File convertedFile,
+				      File typeFile) {
+	    this.origSize = origSize;
+	    this.convertedFile = convertedFile;
+	    this.typeFile = typeFile;
+	    if (convertedFile.exists ())
+		this.convertedSize = convertedFile.length ();
+	    else 
+		convertedSize = 0;
+	}
+
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{origSize: " + 
+		origSize + ", convertedSize: " + convertedSize + 
+		", convertedFile: " + convertedFile + 
+		", typeFile: " + typeFile + "}";
+	}
+    }
+
+    /** Perform the actual image conversion. 
+     * @param entryName the filename of the cache entry to use.
+     */
+    protected ImageConversionResult 
     internalConvertImage (String entryName) throws IOException {
 	long origSize = size;
-	File origFile = new File (entryName);
+	File input = new File (entryName);
 	convertedFile = new File (entryName + ".c");
 	File typeFile = new File (entryName + ".type");
-	epc.convertImage (origFile, convertedFile, request.getRequestURI ());
+	imageConverter.convertImage (input, convertedFile, 
+				     request.getRequestURI ());
 	return new ImageConversionResult (origSize, convertedFile, typeFile);
+    }
+    
+    private static class ImageSelector {
+	public File convertedFile;
+	public File typeFile;
+
+	public ImageSelector (File convertedFile, File typeFile) {
+	    this.convertedFile = convertedFile;
+	    this.typeFile = typeFile;
+	}
+	
+	@Override public String toString () {
+	    return getClass ().getSimpleName () + "{convertedFile: " + 
+		convertedFile + ", typeFile: " + typeFile + "}";
+	}
+    }
+
+    private void selectImage (String entryName, ImageSelector is, 
+			      ImageConversionResult icr) 
+	throws IOException {
+	if (icr.convertedSize > 0 && icr.origSize > icr.convertedSize) {
+	    String ctype = checkFileType (is.typeFile);
+	    response.setHeader ("Content-Type", ctype);
+	    /** We need to remove the existing file first for
+	     *  windows system, they will not overwrite files in a move.
+	     *  Spotted by: Michael Mlivoncic
+	     */
+	    File oldEntry = new File (entryName);
+	    if (oldEntry.exists ())
+		FileHelper.delete (oldEntry);
+	    if (is.convertedFile.renameTo (new File (entryName)))
+		is.convertedFile = null;
+	    else
+		getLogger ().warning ("rename failed: " +
+				      is.convertedFile.getName () +
+				      " => " + entryName);
+	}
+    }
+
+    protected String checkFileType (File typeFile) throws IOException {
+	String ctype = "image/jpeg";
+	if (typeFile != null && typeFile.exists () && typeFile.length() > 0) {
+	    BufferedReader br = null;
+	    try {
+		br = new BufferedReader (new FileReader (typeFile));
+		ctype = br.readLine();
+	    } finally {
+		Closer.close (br, getLogger ());
+	    }
+	}
+	return ctype;
+    }
+
+    public void setDoConvert (boolean doConvert) {
+	this.doConvert = doConvert;
+    }
+
+    public boolean getDoConvert () {
+	return doConvert;
+    }
+
+    public SProperties getConfig () {
+	return config;
+    }
+
+    public int getMinSizeToConvert () {
+	return minSizeToConvert;
     }
 
     @Override public void setup (SProperties prop) {
-	epc = new ExternalProcessConverter (prop);
+	super.setup (prop);
+	if (prop != null) {
+	    config = prop;
+	    setDoConvert (true);
+	    minSizeToConvert =
+		Integer.parseInt (prop.getProperty ("min_size", "2000"));
+	}
+	String converterType = prop.getProperty ("converter_type", "external");
+	if (converterType.equalsIgnoreCase ("external"))
+	    imageConverter = new ExternalProcessConverter (prop);
+	else
+	    imageConverter = new JavaImageConverter (prop);
     }
 }
