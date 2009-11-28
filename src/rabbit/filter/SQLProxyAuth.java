@@ -146,6 +146,8 @@ public class SQLProxyAuth implements HttpFilter {
 				   SocketChannel channel) 
 	throws SQLException {
 	UserInfo ce = getUserInfo (username, channel);
+	if (ce == null)
+	    return false;
 	if (!ce.correctPassWord (pwd))
 	    return false;
 	if (oneIpOnly) {
