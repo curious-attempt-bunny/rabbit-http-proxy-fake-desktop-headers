@@ -7,7 +7,7 @@ import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.proxy.Connection;
 import rabbit.proxy.TrafficLoggerHandler;
-import rabbit.handler.converter.ExternalProcessConverter;
+import rabbit.handler.convert.ExternalProcessConverter;
 import rabbit.util.SProperties;
 
 /** This image handler uses an external program to convert images.
@@ -61,7 +61,7 @@ public class ImageHandler extends ImageHandlerBase {
 	File origFile = new File (entryName);
 	convertedFile = new File (entryName + ".c");
 	File typeFile = new File (entryName + ".type");
-	epc.convertImage (origFile, convertedFile);
+	epc.convertImage (origFile, convertedFile, request.getRequestURI ());
 	return new ImageConversionResult (origSize, convertedFile, typeFile);
     }
 
