@@ -55,7 +55,7 @@ public class ImageHandler extends BaseHandler {
 			 HttpHeader response, ResourceSource content,
 			 boolean mayCache, boolean mayFilter, long size,
 			 SProperties config, boolean doConvert,
-			 int minSizeToConvert) {
+			 int minSizeToConvert, ImageConverter imageConverter) {
 	super (con, tlh, request, clientHandle, response, content,
 	       mayCache, mayFilter, size);
 	if (size == -1)
@@ -64,6 +64,7 @@ public class ImageHandler extends BaseHandler {
 	this.config = config;
 	this.doConvert = doConvert;
 	this.minSizeToConvert = minSizeToConvert;
+	this.imageConverter = imageConverter;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class ImageHandler extends BaseHandler {
 	return new ImageHandler (con, tlh, header, bufHandle, webHeader,
 				 content, mayCache, mayFilter, size,
 				 getConfig (), getDoConvert (), 
-				 getMinSizeToConvert ());
+				 getMinSizeToConvert (), imageConverter);
     }
     
     /**
