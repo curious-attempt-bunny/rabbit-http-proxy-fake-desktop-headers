@@ -5,19 +5,21 @@ import java.net.URL;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import rabbit.filter.authenticate.Authenticator;
+import rabbit.filter.authenticate.PlainFileAuthenticator;
+import rabbit.filter.authenticate.SQLAuthenticator;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
 import rabbit.proxy.HttpGenerator;
 import rabbit.util.SProperties;
-import rabbit.util.SimpleUserHandler;
 
 /** This is a filter that requires users to use proxy-authentication.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ProxyAuth implements HttpFilter {
-    private SimpleUserHandler userHandler;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
+    private Authenticator authenticator;
     
     /** test if a socket/header combination is valid or return a new HttpHeader.
      *  Check that the user has been authenticate..
@@ -33,7 +35,9 @@ public class ProxyAuth implements HttpFilter {
 	    return null;
 	String username = con.getUserName ();
 	String pwd = con.getPassword ();
-	if (!userHandler.isValidUser (username, pwd))
+	if (username == null || pwd == null) 
+	    return getError (con, header);
+	if (!authenticator.authenticate (username, pwd, con.getChannel ()))
 	    return getError (con, header);
 	return null;
     }
@@ -64,8 +68,10 @@ public class ProxyAuth implements HttpFilter {
      * @param properties the new configuration of this class.
      */
     public void setup (SProperties properties) {
-	String userFile = properties.getProperty ("userfile", "conf/allowed");
-	userHandler = new SimpleUserHandler ();
-	userHandler.setFile (userFile);
+	String authType = properties.getProperty ("authenticator", "plain");
+	if ("plain".equalsIgnoreCase (authType)) 
+	    authenticator = new PlainFileAuthenticator (properties);
+	else if ("sql".equalsIgnoreCase (authType))
+	    authenticator = new SQLAuthenticator (properties);
     }
 }
