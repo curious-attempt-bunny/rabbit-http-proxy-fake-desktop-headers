@@ -5,12 +5,12 @@ import java.net.SocketAddress;
 /** Information about an authenticated user.
  */
 public class AuthUserInfo {
-    private final String pwd;
+    private final String token;
     private final long timeout;
     private final SocketAddress sa;
 
-    public AuthUserInfo (String pwd, long timeout, SocketAddress sa) {
-	this.pwd = pwd;
+    public AuthUserInfo (String token, long timeout, SocketAddress sa) {
+	this.token = token;
 	this.timeout = timeout;
 	this.sa = sa;
     }
@@ -20,8 +20,8 @@ public class AuthUserInfo {
 	return timeout > now;
     }
 
-    public boolean correctPassWord (String userPassword) {
-	return userPassword.equals (pwd);
+    public boolean correctToken (String token) {
+	return token.equals (this.token);
     }
 
     public boolean correctSocketAddress (SocketAddress sa) {

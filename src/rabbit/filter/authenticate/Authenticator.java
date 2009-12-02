@@ -1,10 +1,14 @@
 package rabbit.filter.authenticate;
 
-import java.nio.channels.SocketChannel;
+import rabbit.http.HttpHeader;
+import rabbit.proxy.Connection;
 
 /** Something that can authenticate users using some kind of database. 
  */
 public interface Authenticator {
+
+    /** Find the token used to authenticate */
+    String getToken (HttpHeader header, Connection con);
 
     /** Try to authenticate the user.
      * @param user the username
@@ -12,5 +16,5 @@ public interface Authenticator {
      * @param channel the socket channel the user is currently using
      * @return true if authentication succeeded, false otherwise.
      */
-    boolean authenticate (String user, String pwd, SocketChannel channel);
+    boolean authenticate (String user, String pwd);
 }

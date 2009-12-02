@@ -1,6 +1,7 @@
 package rabbit.filter.authenticate;
 
-import java.nio.channels.SocketChannel;
+import rabbit.http.HttpHeader;
+import rabbit.proxy.Connection;
 import rabbit.util.SProperties;
 import rabbit.util.SimpleUserHandler;
 
@@ -18,7 +19,11 @@ public class PlainFileAuthenticator implements Authenticator {
 	userHandler.setFile (userFile);
     }
 
-    public boolean authenticate (String user, String pwd, SocketChannel channel) {
+    public String getToken (HttpHeader header, Connection con) {
+	return con.getPassword ();
+    }
+
+    public boolean authenticate (String user, String pwd) {
 	return userHandler.isValidUser (user, pwd);
     }
 }

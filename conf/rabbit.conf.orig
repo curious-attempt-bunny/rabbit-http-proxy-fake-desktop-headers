@@ -342,7 +342,9 @@ blockURLmatching=(\.sex\.|[-.]ad([sx]?)\.|/ad\.|adserving\.|ad101com-|pagead/img
 # This filter is not enabled by default, add it to 
 # httpinfilters if you want it.
 
-# Set the authenticator to either "plain" or "sql"
+# Set the authenticator to either "plain" or "sql" or a class name.
+# If you use a custom class, then it must implement The 
+# rabbit.filter.authenticate.Authenticator interface.
 authenticator=plain
 # For plain text file authentication:
 userfile=conf/allowed
