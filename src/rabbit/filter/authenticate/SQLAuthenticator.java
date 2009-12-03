@@ -14,9 +14,9 @@ import rabbit.util.SProperties;
 /** An authenticator that checks the username/password against
  *  an sql database.
  *
- *  Will read the following parameters from the config file: 
+ *  Will read the following parameters from the config file:
  *  <ul>
- *  <li>driver 
+ *  <li>driver
  *  <li>url
  *  <li>user
  *  <li>password
@@ -34,10 +34,10 @@ public class SQLAuthenticator implements Authenticator {
     private final String select;
 
     private final Logger logger = Logger.getLogger (getClass ().getName ());
-    private static final String DEFAULT_SELECT = 
+    private static final String DEFAULT_SELECT =
 	"select password from users where username = ?";
-    
-    private final AtomicReference<Connection> db = 
+
+    private final AtomicReference<Connection> db =
 	new AtomicReference<Connection> (null);
 
     public SQLAuthenticator (SProperties props) {
@@ -45,7 +45,7 @@ public class SQLAuthenticator implements Authenticator {
 	try {
 	    Class.forName (driver);
 	} catch (ClassNotFoundException e) {
-	    throw new IllegalStateException ("Failed to load driver: " + 
+	    throw new IllegalStateException ("Failed to load driver: " +
 					     driver, e);
 	}
 	url = props.getProperty ("url");
@@ -65,18 +65,27 @@ public class SQLAuthenticator implements Authenticator {
 		return false;
 	    return pwd.equals (token);
 	} catch (SQLException e) {
-	    logger.log (Level.WARNING, "Exception when trying to authenticate " + 
+	    e.printStackTrace ();
+	    logger.log (Level.WARNING, "Exception when trying to authenticate " +
 			"user: " + e);
 	    closeDB ();
 	}
 	return false;
     }
-    
-    private void initConnection () throws SQLException {
-	Connection con = DriverManager.getConnection (url, dbuser, dbpwd);
+
+    private Connection initConnection () throws SQLException {
+	Connection con = null;
+	if (dbuser != null && !dbuser.isEmpty () &&
+	    dbpwd != null && !dbpwd.isEmpty ())
+	    con = DriverManager.getConnection (url, dbuser, dbpwd);
+	else
+	    con = DriverManager.getConnection (url);
+	if (con == null)
+	    throw new SQLException ("Failed to establish conneciton: " + url);
 	if (!db.compareAndSet (null, con)) {
 	    closeDB (con);
 	}
+	return con;
     }
 
     private void closeDB () {
@@ -91,12 +100,12 @@ public class SQLAuthenticator implements Authenticator {
 	} catch (SQLException e) {
 	    logger.log (Level.WARNING, "failed to close database", e);
 	}
-    } 
+    }
 
     private String getDbPassword (String username) throws SQLException {
 	Connection con = db.get ();
 	if (con == null)
-	    initConnection ();
+	    con = initConnection ();
 	PreparedStatement ps = con.prepareStatement (select);
 	try {
 	    ps.setString (1, username);
@@ -111,7 +120,7 @@ public class SQLAuthenticator implements Authenticator {
 	    }
 	} finally {
 	    ps.close ();
-	} 
+	}
 	return null;
     }
 }

@@ -1,18 +1,23 @@
 package rabbit.filter.authenticate;
 
-import java.net.SocketAddress;
+import java.net.InetAddress;
 
 /** Information about an authenticated user.
  */
 public class AuthUserInfo {
     private final String token;
     private final long timeout;
-    private final SocketAddress sa;
+    private final InetAddress sa;
 
-    public AuthUserInfo (String token, long timeout, SocketAddress sa) {
+    public AuthUserInfo (String token, long timeout, InetAddress sa) {
 	this.token = token;
 	this.timeout = timeout;
 	this.sa = sa;
+    }
+
+    @Override public String toString () {
+	return getClass ().getSimpleName () + "{token: " + token + 
+	    ", timeout: " + timeout + ", socket: " + sa + "}";
     }
 
     public boolean stillValid () {
@@ -24,7 +29,7 @@ public class AuthUserInfo {
 	return token.equals (this.token);
     }
 
-    public boolean correctSocketAddress (SocketAddress sa) {
+    public boolean correctSocketAddress (InetAddress sa) {
 	return this.sa.equals (sa);
     }
 }

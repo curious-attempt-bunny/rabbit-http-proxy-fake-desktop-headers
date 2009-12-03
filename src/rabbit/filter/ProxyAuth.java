@@ -3,7 +3,7 @@ package rabbit.filter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.Socket;
-import java.net.SocketAddress;
+import java.net.InetAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,24 +28,24 @@ public class ProxyAuth implements HttpFilter {
     private int cacheTime;
     private boolean oneIpOnly;
     /** Username to user info */
-    private final Map<String, AuthUserInfo> cache = 
+    private final Map<String, AuthUserInfo> cache =
 	new ConcurrentHashMap<String, AuthUserInfo> ();
-    
+
     /** test if a socket/header combination is valid or return a new HttpHeader.
      *  Check that the user has been authenticate..
      * @param socket the SocketChannel that made the request.
      * @param header the actual request made.
      * @param con the Connection handling the request.
-     * @return null if everything is fine or a HttpHeader 
+     * @return null if everything is fine or a HttpHeader
      *         describing the error (like a 403).
      */
-    public HttpHeader doHttpInFiltering (SocketChannel socket, 
+    public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
 	if (con.getMeta ())
 	    return null;
 	String username = con.getUserName ();
 	String token = authenticator.getToken (header, con);
-	if (username == null || token == null) 
+	if (username == null || token == null)
 	    return getError (header, con);
 	SocketChannel channel = con.getChannel ();
 	if (hasValidCache (username, token, channel))
@@ -57,7 +57,7 @@ public class ProxyAuth implements HttpFilter {
 	return null;
     }
 
-    private boolean hasValidCache (String user, String token, 
+    private boolean hasValidCache (String user, String token,
 				   SocketChannel channel) {
 	AuthUserInfo ce = cache.get (user);
 	if (ce == null)
@@ -66,18 +66,18 @@ public class ProxyAuth implements HttpFilter {
 	    return false;
 	if (oneIpOnly) {
 	    Socket socket = channel.socket ();
-	    if (!ce.correctSocketAddress (socket.getRemoteSocketAddress ()))
+	    if (!ce.correctSocketAddress (socket.getInetAddress ()))
 		return false;
 	}
 	return true;
     }
 
-    private void storeInCache (String user, String token, 
-			       SocketChannel channel) { 
-	long timeout = 
+    private void storeInCache (String user, String token,
+			       SocketChannel channel) {
+	long timeout =
 	    System.currentTimeMillis () + 60000 * cacheTime;
-	SocketAddress sa = 
-	    channel.socket ().getRemoteSocketAddress ();
+	InetAddress sa =
+	    channel.socket ().getInetAddress ();
 	AuthUserInfo ce = new AuthUserInfo (token, timeout, sa);
 	cache.put (user, ce);
     }
@@ -99,10 +99,10 @@ public class ProxyAuth implements HttpFilter {
      * @param con the Connection handling the request.
      * @return This method always returns null.
      */
-    public HttpHeader doHttpOutFiltering (SocketChannel socket, 
+    public HttpHeader doHttpOutFiltering (SocketChannel socket,
 					  HttpHeader header, Connection con) {
 	return null;
-    }    
+    }
 
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.
@@ -119,7 +119,7 @@ public class ProxyAuth implements HttpFilter {
 	    authenticator = new SQLAuthenticator (properties);
 	} else {
 	    try {
-		Class<? extends Authenticator> clz = 
+		Class<? extends Authenticator> clz =
 		    Class.forName (authType).asSubclass (Authenticator.class);
 		authenticator = clz.newInstance ();
 	    } catch (ClassNotFoundException e) {
@@ -127,7 +127,7 @@ public class ProxyAuth implements HttpFilter {
 	    } catch (InstantiationException e) {
 		logger.warning ("Failed to instantiate: '" + authType + "'");
 	    } catch (IllegalAccessException e) {
-		logger.warning ("Failed to instantiate: '" + authType + 
+		logger.warning ("Failed to instantiate: '" + authType +
 				"': " + e);
 	    }
 	}
