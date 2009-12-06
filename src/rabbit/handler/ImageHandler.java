@@ -250,10 +250,7 @@ public class ImageHandler extends BaseHandler {
 
 	ImageConversionResult icr = internalConvertImage (entryName);
 	try {
-	    ImageSelector is = 
-		new ImageSelector (icr.convertedFile, icr.typeFile);
-	    selectImage (entryName, is, icr);
-	    convertedFile = is.convertedFile;
+	    convertedFile = selectImage (entryName, icr);
 	} finally {
 	    if (icr.convertedFile != null && icr.convertedFile.exists ())
 		deleteFile (icr.convertedFile);
@@ -315,26 +312,11 @@ public class ImageHandler extends BaseHandler {
 	return new ImageConversionResult (origSize, convertedFile, typeFile);
     }
     
-    private static class ImageSelector {
-	public File convertedFile;
-	public File typeFile;
-
-	public ImageSelector (File convertedFile, File typeFile) {
-	    this.convertedFile = convertedFile;
-	    this.typeFile = typeFile;
-	}
-	
-	@Override public String toString () {
-	    return getClass ().getSimpleName () + "{convertedFile: " + 
-		convertedFile + ", typeFile: " + typeFile + "}";
-	}
-    }
-
-    private void selectImage (String entryName, ImageSelector is, 
-			      ImageConversionResult icr) 
+    private File selectImage (String entryName, ImageConversionResult icr) 
 	throws IOException {
+	File convertedFile = icr.convertedFile;
 	if (icr.convertedSize > 0 && icr.origSize > icr.convertedSize) {
-	    String ctype = checkFileType (is.typeFile);
+	    String ctype = checkFileType (icr.typeFile);
 	    response.setHeader ("Content-Type", ctype);
 	    /** We need to remove the existing file first for
 	     *  windows system, they will not overwrite files in a move.
@@ -343,13 +325,14 @@ public class ImageHandler extends BaseHandler {
 	    File oldEntry = new File (entryName);
 	    if (oldEntry.exists ())
 		FileHelper.delete (oldEntry);
-	    if (is.convertedFile.renameTo (new File (entryName)))
-		is.convertedFile = null;
+	    if (icr.convertedFile.renameTo (new File (entryName)))
+		convertedFile = null;
 	    else
 		getLogger ().warning ("rename failed: " +
-				      is.convertedFile.getName () +
+				      convertedFile.getName () +
 				      " => " + entryName);
 	}
+	return convertedFile;
     }
 
     protected String checkFileType (File typeFile) throws IOException {
