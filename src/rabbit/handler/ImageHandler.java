@@ -269,7 +269,6 @@ public class ImageHandler extends BaseHandler {
 	content.release ();
 	content = new FileResourceSource (entryName, con.getNioHandler (),
 					  con.getBufferHandler ());
-	convertedFile = null;
     }
 
     public static class ImageConversionResult {
@@ -311,7 +310,9 @@ public class ImageHandler extends BaseHandler {
 				     request.getRequestURI ());
 	return new ImageConversionResult (origSize, convertedFile, typeFile);
     }
-    
+
+    /** Make sure that the cache entry is the smallest image. 
+     */
     private File selectImage (String entryName, ImageConversionResult icr) 
 	throws IOException {
 	File convertedFile = icr.convertedFile;
@@ -337,7 +338,7 @@ public class ImageHandler extends BaseHandler {
 
     protected String checkFileType (File typeFile) throws IOException {
 	String ctype = "image/jpeg";
-	if (typeFile != null && typeFile.exists () && typeFile.length() > 0) {
+	if (typeFile != null && typeFile.exists () && typeFile.length () > 0) {
 	    BufferedReader br = null;
 	    try {
 		br = new BufferedReader (new FileReader (typeFile));
