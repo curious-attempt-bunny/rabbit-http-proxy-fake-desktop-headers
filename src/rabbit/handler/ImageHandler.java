@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.httpio.FileResourceSource;
@@ -154,6 +155,12 @@ public class ImageHandler extends BaseHandler {
      *  on.
      */
     protected void tryconvert () throws IOException {
+	if (getLogger ().isLoggable (Level.FINER))
+	    getLogger ().finer (request.getRequestURI () + 
+				": doConvert: " + doConvert + ", mayFilter: " + 
+				mayFilter + ", mayCache: " + mayCache + 
+				", size: " + size + ", minSizeToConvert: " + 
+				minSizeToConvert);
 	// TODO: if the image size is unknown (chunked) we will have -1 > 2000
 	// TODO: perhaps we should add something to handle that.
 	if (doConvert && mayFilter && mayCache && size > minSizeToConvert) {
@@ -248,9 +255,13 @@ public class ImageHandler extends BaseHandler {
 	String entryName =
 	    proxy.getCache ().getEntryName (entry.getId (), false, null);
 
-	ImageConversionResult icr = internalConvertImage (entryName);
+	if (getLogger ().isLoggable (Level.FINER))
+	    getLogger ().finer (request.getRequestURI () + 
+				": Trying to convert image: " + entryName);
+	File entry = new File (entryName);
+	ImageConversionResult icr = internalConvertImage (entry, entryName);
 	try {
-	    convertedFile = selectImage (entryName, icr);
+	    convertedFile = selectImage (entry, icr);
 	} finally {
 	    if (icr.convertedFile != null && icr.convertedFile.exists ())
 		deleteFile (icr.convertedFile);
@@ -259,6 +270,10 @@ public class ImageHandler extends BaseHandler {
 		deleteFile (icr.typeFile);
 	}
 
+	if (getLogger ().isLoggable (Level.FINER))
+	    getLogger ().finer (request.getRequestURI () + 
+				": OrigSize: " + icr.origSize + 
+				", convertedSize: " + icr.convertedSize);
 	size = icr.convertedSize > 0 ? icr.convertedSize : icr.origSize;
 	response.setHeader ("Content-length", "" + size);
 	double ratio = (double)icr.convertedSize / icr.origSize;
@@ -301,9 +316,8 @@ public class ImageHandler extends BaseHandler {
      * @param entryName the filename of the cache entry to use.
      */
     protected ImageConversionResult 
-    internalConvertImage (String entryName) throws IOException {
+    internalConvertImage (File input, String entryName) throws IOException {
 	long origSize = size;
-	File input = new File (entryName);
 	convertedFile = new File (entryName + ".c");
 	File typeFile = new File (entryName + ".type");
 	imageConverter.convertImage (input, convertedFile, 
@@ -313,7 +327,7 @@ public class ImageHandler extends BaseHandler {
 
     /** Make sure that the cache entry is the smallest image. 
      */
-    private File selectImage (String entryName, ImageConversionResult icr) 
+    private File selectImage (File entry, ImageConversionResult icr) 
 	throws IOException {
 	File convertedFile = icr.convertedFile;
 	if (icr.convertedSize > 0 && icr.origSize > icr.convertedSize) {
@@ -323,15 +337,23 @@ public class ImageHandler extends BaseHandler {
 	     *  windows system, they will not overwrite files in a move.
 	     *  Spotted by: Michael Mlivoncic
 	     */
-	    File oldEntry = new File (entryName);
-	    if (oldEntry.exists ())
-		FileHelper.delete (oldEntry);
-	    if (icr.convertedFile.renameTo (new File (entryName)))
+	    if (entry.exists ()) {
+		if (getLogger ().isLoggable (Level.FINER))
+		    getLogger ().finer (request.getRequestURI () + 
+					": deleting old entry: " + 
+					entry);
+		FileHelper.delete (entry);
+	    }
+	    if (getLogger ().isLoggable (Level.FINER))
+		getLogger ().finer (request.getRequestURI () + 
+				    ": Trying to move converted file: " + 
+				    icr.convertedFile + " => "  + entry);
+	    if (icr.convertedFile.renameTo (entry))
 		convertedFile = null;
 	    else
 		getLogger ().warning ("rename failed: " +
 				      convertedFile.getName () +
-				      " => " + entryName);
+				      " => " + entry);
 	}
 	return convertedFile;
     }

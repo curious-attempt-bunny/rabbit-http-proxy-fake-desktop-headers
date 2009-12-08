@@ -6,6 +6,7 @@ version 4.4 (20xx-yy-zz) Made it possible to restrict sql authentication to
 	fails. Merged the different proxy authentication filters into one
 	filter class and several backends. Moved proxy authentication
 	caching up to ProxyAuth so that all authenticators can use it.
+	Added some logging to the image handler.
 
 version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
