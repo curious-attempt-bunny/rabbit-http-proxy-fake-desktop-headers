@@ -78,7 +78,7 @@ public class FilterHandler extends GZipHandler {
 	    if (ce.equals ("gzip")) {
 		gzListener = new GZListener ();
 		gzu = new GZipUnpacker (gzListener, false);		
-	    } else if( ce.equals("deflate")) {
+	    } else if (ce.equals("deflate")) {
 		gzListener = new GZListener ();
 		gzu = new GZipUnpacker (gzListener, true);
 	    } else {
