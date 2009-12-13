@@ -118,7 +118,10 @@ public class FilterHandler extends GZipHandler {
 	    gzListener = new GZListener ();
 	    gzu = new GZipUnpacker (gzListener, true);
 	} else {
-	    getLogger ().warning ("Encloding: " + ce);
+	    getLogger ().warning ("Do not know how to handle encoding: " + ce);
+	}
+	if (gzu != null && !compress) {
+	    response.removeHeader ("Content-Encoding");
 	}
     }
 
