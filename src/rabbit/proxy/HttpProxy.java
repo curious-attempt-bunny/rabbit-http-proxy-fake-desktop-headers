@@ -289,7 +289,7 @@ public class HttpProxy implements Resolver {
 	loadClasses ();
 	openSocket ();
 	setupConnectionHandler ();
-	logger.info ("Configuration loaded: ready for action.");
+	logger.info (VERSION + ": Configuration loaded: ready for action.");
     }
 
     private int getInt (String section, String key, int defaultValue) {
