@@ -48,8 +48,16 @@ public class ProxyAuth implements HttpFilter {
 	if (username == null || token == null)
 	    return getError (header, con);
 	SocketChannel channel = con.getChannel ();
-	if (hasValidCache (username, token, channel))
+	AuthUserInfo ce = cache.get (username);
+	if (hasValidCache (token, ce)) {
+	    if (oneIpOnly) {
+		InetAddress ia = channel.socket ().getInetAddress ();
+		if (!ce.correctSocketAddress (ia)) 
+		    return getError (header, con);
+	    }
 	    return null;
+	}
+
 	if (!authenticator.authenticate (username, token))
 	    return getError (header, con);
 	if (cacheTime > 0)
@@ -57,18 +65,11 @@ public class ProxyAuth implements HttpFilter {
 	return null;
     }
 
-    private boolean hasValidCache (String user, String token,
-				   SocketChannel channel) {
-	AuthUserInfo ce = cache.get (user);
+    private boolean hasValidCache (String token, AuthUserInfo ce) {
 	if (ce == null)
 	    return false;
 	if (!ce.correctToken (token))
 	    return false;
-	if (oneIpOnly) {
-	    Socket socket = channel.socket ();
-	    if (!ce.correctSocketAddress (socket.getInetAddress ()))
-		return false;
-	}
 	return true;
     }
 

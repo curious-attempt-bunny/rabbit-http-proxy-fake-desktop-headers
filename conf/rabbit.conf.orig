@@ -342,6 +342,13 @@ blockURLmatching=(\.sex\.|[-.]ad([sx]?)\.|/ad\.|adserving\.|ad101com-|pagead/img
 # This filter is not enabled by default, add it to 
 # httpinfilters if you want it.
 
+# Restrict access so that only one ip can use the same username at a time
+# To use this you need to set the cache time to > 0
+one_ip_only=true
+# how many minutes to cache the result, rabbit will only cache
+# if the cachetime is > 0
+cachetime=5
+
 # Set the authenticator to either "plain" or "sql" or a class name.
 # If you use a custom class, then it must implement The 
 # rabbit.filter.authenticate.Authenticator interface.
@@ -365,12 +372,6 @@ user=
 password=
 # The select to use, you have to have one '?' for the username
 select=select password from rabbit_users where username=?
-# Restrict access so that only one ip can use the same username at a time
-# To use this you need to set the cache time to > 0
-one_ip_only=true
-# how many minutes to cache the result, rabbit will only cache
-# if the cachetime is > 0
-cachetime=5
 
 [rabbit.filter.ReverseProxy]
 # This filter is not enabled by default, add it to 
