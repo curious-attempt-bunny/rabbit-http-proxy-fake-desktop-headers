@@ -2,7 +2,6 @@ package rabbit.filter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.Socket;
 import java.net.InetAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
@@ -67,6 +66,8 @@ public class ProxyAuth implements HttpFilter {
 
     private boolean hasValidCache (String token, AuthUserInfo ce) {
 	if (ce == null)
+	    return false;
+	if (!ce.stillValid ())
 	    return false;
 	if (!ce.correctToken (token))
 	    return false;
