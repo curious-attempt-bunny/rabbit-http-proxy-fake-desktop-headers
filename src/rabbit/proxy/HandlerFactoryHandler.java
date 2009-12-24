@@ -26,7 +26,7 @@ class HandlerFactoryHandler {
 	cacheHandlers = loadHandlers (cacheHandlersProps, config);
     }
 
-    private class HandlerInfo {
+    private static class HandlerInfo {
 	public final String mime;
 	public final Pattern pattern;
 	public final HandlerFactory factory;

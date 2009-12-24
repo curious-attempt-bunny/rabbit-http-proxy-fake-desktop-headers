@@ -390,12 +390,12 @@ public class ImageHandler extends BaseHandler {
 
     @Override public void setup (SProperties prop) {
 	super.setup (prop);
-	if (prop != null) {
-	    config = prop;
-	    setDoConvert (true);
-	    minSizeToConvert =
-		Integer.parseInt (prop.getProperty ("min_size", "2000"));
-	}
+	if (prop == null)
+	    return;
+	config = prop;
+	setDoConvert (true);
+	minSizeToConvert =
+	    Integer.parseInt (prop.getProperty ("min_size", "2000"));
 	String converterType = prop.getProperty ("converter_type", "external");
 	if (converterType.equalsIgnoreCase ("external")) {
 	    imageConverter = new ExternalProcessConverter (prop);

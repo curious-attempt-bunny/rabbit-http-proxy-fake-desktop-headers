@@ -88,7 +88,7 @@ public class ProxyAuth implements HttpFilter {
     private void storeInCache (String user, String token,
 			       SocketChannel channel) {
 	long timeout =
-	    System.currentTimeMillis () + 60000 * cacheTime;
+	    System.currentTimeMillis () + 60000L * cacheTime;
 	InetAddress sa =
 	    channel.socket ().getInetAddress ();
 	AuthUserInfo ce = new AuthUserInfo (token, timeout, sa);
