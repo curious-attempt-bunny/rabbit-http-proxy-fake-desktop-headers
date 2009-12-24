@@ -349,6 +349,9 @@ one_ip_only=true
 # if the cachetime is > 0
 cachetime=5
 
+# Allow a set or urls. The pattern is a regexp.
+allow_without_auth=^http://(www.)?khelekore.org/
+
 # Set the authenticator to either "plain" or "sql" or a class name.
 # If you use a custom class, then it must implement The 
 # rabbit.filter.authenticate.Authenticator interface.

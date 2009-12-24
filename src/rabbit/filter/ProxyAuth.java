@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import rabbit.filter.authenticate.AuthUserInfo;
 import rabbit.filter.authenticate.Authenticator;
 import rabbit.filter.authenticate.PlainFileAuthenticator;
@@ -26,6 +27,8 @@ public class ProxyAuth implements HttpFilter {
     private Authenticator authenticator;
     private int cacheTime;
     private boolean oneIpOnly;
+    private Pattern noAuthPattern;
+
     /** Username to user info */
     private final Map<String, AuthUserInfo> cache =
 	new ConcurrentHashMap<String, AuthUserInfo> ();
@@ -41,6 +44,8 @@ public class ProxyAuth implements HttpFilter {
     public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
 	if (con.getMeta ())
+	    return null;
+	if (noAuthRequired (header))
 	    return null;
 	String username = con.getUserName ();
 	String token = authenticator.getToken (header, con);
@@ -62,6 +67,12 @@ public class ProxyAuth implements HttpFilter {
 	if (cacheTime > 0)
 	    storeInCache (username, token, channel);
 	return null;
+    }
+
+    private boolean noAuthRequired (HttpHeader header) {
+	if (noAuthPattern == null)
+	    return false;
+	return noAuthPattern.matcher (header.getRequestURI ()).find ();
     }
 
     private boolean hasValidCache (String token, AuthUserInfo ce) {
@@ -114,6 +125,9 @@ public class ProxyAuth implements HttpFilter {
 	cacheTime = Integer.parseInt (ct);
 	String ra = properties.getProperty ("one_ip_only", "true");
 	oneIpOnly = Boolean.valueOf (ra);
+	String allow = properties.getProperty ("allow_without_auth");
+	if (allow != null) 
+	    noAuthPattern = Pattern.compile (allow);
 	String authType = properties.getProperty ("authenticator", "plain");
 	if ("plain".equalsIgnoreCase (authType)) {
 	    authenticator = new PlainFileAuthenticator (properties);

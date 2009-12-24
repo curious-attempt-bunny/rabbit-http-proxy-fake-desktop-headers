@@ -7,7 +7,9 @@ version 4.4 (20xx-yy-zz) Made it possible to restrict sql authentication to
 	filter class and several backends. Moved proxy authentication
 	caching up to ProxyAuth so that all authenticators can use it.
 	Added some logging to the image handler. Setting repack to true and
-	compress to false now works.
+	compress to false now works. Added a setting "allow_without_auth"
+	to the ProxyAuth so that it possible to access some pages even if
+	proxy authentication is generally required.
 
 version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
