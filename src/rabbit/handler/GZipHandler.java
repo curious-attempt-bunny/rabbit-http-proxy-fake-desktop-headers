@@ -116,10 +116,6 @@ public class GZipHandler extends BaseHandler {
 	    return buffer;
 	}
 
-	public void returnBuffer (byte[] buf) {
-	    // do not really care...
-	}
-
 	public void packed (byte[] buf, int off, int len) {
 	    if (len > 0) {
 		ByteBuffer bb = ByteBuffer.wrap (buf, off, len);
