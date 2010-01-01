@@ -137,7 +137,7 @@ public class BaseHandler
     }
 
     /** 
-     * ®return false this handler never modifies the content.
+     * ®return false if this handler never modifies the content.
      */
     public boolean changesContentSize () {
 	return false;
@@ -228,22 +228,7 @@ public class BaseHandler
 		}
 	    }
 	    
-	    if (entry != null && mayCache) {
-		Cache<HttpHeader, HttpHeader> cache = 
-		    con.getProxy ().getCache ();
-		String entryName = 
-		    cache.getEntryName (entry.getId (), false, null);
-		File f = new File (entryName);
-		long filesize = f.length ();
-		entry.setSize (filesize);
-		String cl = response.getHeader ("Content-Length");
-		if (cl == null) {
-		    response.removeHeader ("Transfer-Encoding");
-		    response.setHeader ("Content-Length", "" + filesize);
-		}		
-		removePrivateParts (response);
-		cache.addEntry (entry);
-	    }
+	    finishCache ();
 	    if (response != null 
 		&& response.getHeader ("Content-Length") != null)
 		con.setContentLength (response.getHeader ("Content-length"));
@@ -269,6 +254,23 @@ public class BaseHandler
 	if (clientHandle != null)
 	    clientHandle.possiblyFlush (); 
 	clientHandle = null;
+    }
+
+    private void finishCache () {
+	if (entry == null || !mayCache) 
+	    return;
+	Cache<HttpHeader, HttpHeader> cache = con.getProxy ().getCache ();
+	String entryName = cache.getEntryName (entry.getId (), false, null);
+	File f = new File (entryName);
+	long filesize = f.length ();
+	entry.setSize (filesize);
+	String cl = response.getHeader ("Content-Length");
+	if (cl == null) {
+	    response.removeHeader ("Transfer-Encoding");
+	    response.setHeader ("Content-Length", "" + filesize);
+	}		
+	removePrivateParts (response);
+	cache.addEntry (entry);
     }
 
     /** Try to use the resource size to decide if we may cache or not. 
