@@ -39,13 +39,13 @@ public class SCC {
 		mayRange = 
 		    checkWeakEtag (rh.webheader.getHeader ("ETag"), ifRange);
 		*/
-		mayRange = con.checkStrongEtag (etag, ifRange);
+		mayRange = ETagUtils.checkStrongEtag (etag, ifRange);
 	    } else {
 		// we can't use strong validators on dates!
 		mayRange = false;
 	    }
 	    CacheChecker cck = new CacheChecker ();
-	    boolean cc = cck.checkConditions (con, header, rh.getWebHeader ());
+	    boolean cc = cck.checkConditions (header, rh.getWebHeader ());
 	    if (mayRange && !cc) {
 		// abort...
 		rh.setWebHeader (null);

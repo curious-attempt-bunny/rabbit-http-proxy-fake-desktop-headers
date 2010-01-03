@@ -12,7 +12,7 @@ class NotModifiedHandler {
      * @param in the request being made.
      * @param rh the RequestHandler for this request
      */
-    public HttpHeader is304 (HttpHeader in, Connection con, 
+    public HttpHeader is304 (HttpHeader in, HttpGenerator httpGenerator,
 			     RequestHandler rh) {
 	CacheEntry<HttpHeader, HttpHeader> entry = rh.getEntry ();
 	if (entry == null)
@@ -49,15 +49,15 @@ class NotModifiedHandler {
 	if (ims != null || ums != null) {
 	    String lm = oldresp.getHeader ("Last-Modified");
 	    if (lm == null)
-		return ematch (con, etagMatch, oldresp);
+		return ematch (httpGenerator, etagMatch, oldresp);
 	    dm = HttpDateParser.getDate (lm);
 	}
 	
 	long diff;
 	if (ums != null && (diff = dm.getTime () - ums.getTime ()) >= 0) {
 	    if (mustUseStrong && diff > 60000)
-		return con.getHttpGenerator ().get412 ();
-	    return con.getHttpGenerator ().get412 ();
+		return httpGenerator.get412 ();
+	    return httpGenerator.get412 ();
 	}
 
 	/* Check if we have a match of etags (Weak comparison). */
@@ -66,16 +66,16 @@ class NotModifiedHandler {
 		if (sinm != null 
 		    && (sinm.equals ("*") 
 			|| ((mustUseStrong 
-			     && con.checkStrongEtag (et, sinm)) 
+			     && ETagUtils.checkStrongEtag (et, sinm)) 
 			    || (!mustUseStrong 
-				&& con.checkWeakEtag (et, sinm)))))
+				&& ETagUtils.checkWeakEtag (et, sinm)))))
 		    etagMatch = true;
 	    }
 	} 
 
 	if (sims == null) {
 	    /* No IMS, act upon INM only. */
-	    return ematch (con, etagMatch, oldresp);
+	    return ematch (httpGenerator, etagMatch, oldresp);
 	}
 	/* Here we may or may not have a etagMatch.
 	 * Etagmatch and bad(nonexistant/unparsable..) IMS => act on etag
@@ -84,26 +84,26 @@ class NotModifiedHandler {
 	    Logger logger = Logger.getLogger (getClass ().getName ());
 	    logger.info ("unparseable date: " + sims + 
 			 " for URL: " + in.getRequestURI ());
-	    return ematch (con, etagMatch, oldresp);
+	    return ematch (httpGenerator, etagMatch, oldresp);
 	}
 	
 	if (dm == null)
-	    return ematch (con, etagMatch, oldresp);
+	    return ematch (httpGenerator, etagMatch, oldresp);
 	
 	if (dm.after (ims)) 
 	    return null;
 	if (vinm.size () < 1) {
 	    if (mustUseStrong && dm.getTime () - ims.getTime () < 60000) 
 		return null;
-	    return con.getHttpGenerator ().get304 (oldresp);
+	    return httpGenerator.get304 (oldresp);
 	}
-	return ematch (con, etagMatch, oldresp);
+	return ematch (httpGenerator, etagMatch, oldresp);
     }
     
-    private HttpHeader ematch (Connection con, 
+    private HttpHeader ematch (HttpGenerator httpGenerator, 
 			       boolean etagMatch, HttpHeader oldresp) {
 	if (etagMatch)
-	    return con.getHttpGenerator ().get304 (oldresp);
+	    return httpGenerator.get304 (oldresp);
 	return null;
     }
 

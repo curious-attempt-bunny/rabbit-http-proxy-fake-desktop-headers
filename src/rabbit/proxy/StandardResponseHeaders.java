@@ -71,7 +71,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	boolean tiny = ifRange != null;
 	if (tiny) {
 	    String etag = header.getHeader ("ETag");
-	    if (etag != null && con.checkStrongEtag (ifRange, etag))
+	    if (etag != null && ETagUtils.checkStrongEtag (ifRange, etag))
 		tiny = false;
 	}
 	if (tiny) {
@@ -99,7 +99,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	copyHeaderIfExists ("Content-Location", oldresp, header);
 	copyHeaderIfExists ("ETag", oldresp, header);
 	String etag = header.getHeader ("Etag");
-	if (etag != null && !con.isWeak (etag))
+	if (etag != null && !ETagUtils.isWeak (etag))
 	    copyHeaderIfExists ("Expires", oldresp, header);
 	List<String> ccs = oldresp.getHeaders ("Cache-Control");
 	for (int i = 0, s = ccs.size (); i < s; i++) 

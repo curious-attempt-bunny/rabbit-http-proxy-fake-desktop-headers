@@ -64,7 +64,7 @@ class CacheChecker {
 	if (im == null)
 	    return null;
 	String et = oldresp.getHeader ("Etag");
-	if (!con.checkStrongEtag (et, im))
+	if (!ETagUtils.checkStrongEtag (et, im))
 	    return con.getHttpGenerator ().get412 ();
 	return null;
     }    
@@ -82,7 +82,7 @@ class CacheChecker {
 	HttpHeader resp = checkIfMatch (con, header, rh);
 	if (resp == null) {
 	    NotModifiedHandler nmh = new NotModifiedHandler ();
-	    resp = nmh.is304 (header, con, rh);
+	    resp = nmh.is304 (header, con.getHttpGenerator (), rh);
 	}
 	if (resp != null) {
 	    con.sendAndRestart (resp);
@@ -118,12 +118,11 @@ class CacheChecker {
       If-Range: "tag-ajbqyucqaf"\r\n
 
     */
-    public boolean checkConditions (Connection con, 
-				    HttpHeader header, HttpHeader webheader) {
+    public boolean checkConditions (HttpHeader header, HttpHeader webheader) {
 	String inm = header.getHeader ("If-None-Match");
 	if (inm != null) {
 	    String etag = webheader.getHeader ("ETag");
-	    if (!con.checkWeakEtag (inm, etag))
+	    if (!ETagUtils.checkWeakEtag (inm, etag))
 		return false;
 	}
 	Date dm = null;
