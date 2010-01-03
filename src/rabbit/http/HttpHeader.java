@@ -127,7 +127,7 @@ public class HttpHeader extends GeneralHeader {
 	this.requestURI = requestURI;
 	hashCodeValue = getRequestURI ().toLowerCase ().hashCode ();
     }
-    
+
     /** Get the HTTP Version of this request (only valid for requests).
      * @return the http version.
      */

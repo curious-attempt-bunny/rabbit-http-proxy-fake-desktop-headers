@@ -97,7 +97,7 @@ public class BaseHandler
 	this.request = request;
 	this.clientHandle = clientHandle;
 	this.response = response;
-	if (response == null)
+	if (!request.isDot9Request () && response == null)
 	    throw new IllegalArgumentException ("response may not be null");
 	this.content = content;
 	this.mayCache = mayCache;
@@ -133,7 +133,10 @@ public class BaseHandler
      * have all succeded
      */
     public void handle () {
-	sendHeader ();
+	if (request.isDot9Request ())
+	    send ();
+	else 
+	    sendHeader ();
     }
 
     /** 

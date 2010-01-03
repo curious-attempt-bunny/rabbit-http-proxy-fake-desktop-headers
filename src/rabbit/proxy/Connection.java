@@ -180,12 +180,8 @@ public class Connection {
 	this.request = request;
 	this.requestHandle = bh;
 	requestVersion = request.getHTTPVersion ();
-	if (requestVersion == null) {
-	    // TODO: fix http/0.9 handling.
-	    logger.info ("bad header read: " + request);
-	    closeDown ();
-	    return;
-	}
+	if (request.isDot9Request ())
+	    requestVersion = "HTTP/0.9";
 	requestVersion = requestVersion.toUpperCase ();
 	request.addHeader ("Via", requestVersion + " RabbIT");
 
@@ -391,7 +387,8 @@ public class Connection {
 
     void webConnectionEstablished (RequestHandler rh) {
 	getProxy ().markForPipelining (rh.getWebConnection ());
-	setMayCacheFromCC (rh);
+	if (!request.isDot9Request ())
+	    setMayCacheFromCC (rh);
 	resourceEstablished (rh);
     }
 
@@ -503,6 +500,8 @@ public class Connection {
     }
 
     private void finalFixesOnWebHeader (RequestHandler rh, Handler handler) {
+	if (rh.getWebHeader () == null)
+	    return;
 	if (chunk) {
 	    if (rh.getSize () < 0 || handler.changesContentSize ()) {
 		rh.getWebHeader ().removeHeader ("Content-Length");

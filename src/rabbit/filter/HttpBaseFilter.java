@@ -255,6 +255,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    con.setMayCache (false);
 	    con.setMayUseCache (false);
 	    con.setKeepalive (false);
+	    con.setChunking (false);
 	    return null;
 	}
 	

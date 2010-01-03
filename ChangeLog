@@ -9,7 +9,8 @@ version 4.4 (20xx-yy-zz) Made it possible to restrict sql authentication to
 	Added some logging to the image handler. Setting repack to true and
 	compress to false now works. Added a setting "allow_without_auth"
 	to the ProxyAuth so that it possible to access some pages even if
-	proxy authentication is generally required.
+	proxy authentication is generally required. Fixed a problem with
+	HTTP/0.9 request.
 
 version 4.3 (2009-11-17) Some code cleanups identified by findbugs.
 	Changed the handler setup to use full regexps. Updated the handler
