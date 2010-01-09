@@ -8,3 +8,4 @@ htdocs/javadoc/*
 logs/*
 run_rabbit
 *~
+dist/*
