@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class MultiSelectorNioHandler implements NioHandler {
-     /** The executor service. */
+    /** The executor service. */
     private final ExecutorService executorService;
     private final List<SingleSelectorRunner> selectorRunners;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
