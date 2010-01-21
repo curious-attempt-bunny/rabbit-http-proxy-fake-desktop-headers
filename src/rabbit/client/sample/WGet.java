@@ -26,7 +26,10 @@ public class WGet {
     public static void main (String[] args) {
 	try {
 	    WGet wget = new WGet ();
-	    wget.get (args);
+	    if (args.length > 0)
+		wget.get (args);
+	    else
+		wget.clientBase.shutdown ();
 	} catch (IOException e) {
 	    e.printStackTrace ();
 	}
