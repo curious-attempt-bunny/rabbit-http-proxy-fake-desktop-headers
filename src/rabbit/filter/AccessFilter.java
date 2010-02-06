@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rabbit.io.Closer;
+import org.khelekore.rnio.impl.Closer;
 import rabbit.util.IPAccess;
 import rabbit.util.SProperties;
 

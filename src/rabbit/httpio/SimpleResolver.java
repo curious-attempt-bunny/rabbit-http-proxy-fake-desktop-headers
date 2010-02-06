@@ -1,12 +1,12 @@
 package rabbit.httpio;
 
 import java.net.URL;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.dns.DNSHandler;
 import rabbit.dns.DNSJavaHandler;
 import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
-import rabbit.nio.DefaultTaskIdentifier;
-import rabbit.nio.NioHandler;
 
 /** A simple resolver that uses the dnsjava resolver. 
  *

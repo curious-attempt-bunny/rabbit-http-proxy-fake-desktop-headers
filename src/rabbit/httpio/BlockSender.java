@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import rabbit.io.BufferHandle;
-import rabbit.nio.NioHandler;
-import rabbit.nio.WriteHandler;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.WriteHandler;
 import rabbit.util.TrafficLogger;
 
 /** A handler that writes data blocks.

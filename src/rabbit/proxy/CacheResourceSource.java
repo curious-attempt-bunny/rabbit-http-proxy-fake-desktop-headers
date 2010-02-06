@@ -1,12 +1,12 @@
 package rabbit.proxy;
 
 import java.io.IOException;
+import org.khelekore.rnio.NioHandler;
 import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.FileResourceSource;
 import rabbit.io.BufferHandler;
-import rabbit.nio.NioHandler;
 
 /** A resource that comes from the cache.
  * 

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Logger;
-import rabbit.io.Closer;
-import rabbit.nio.AcceptHandler;
-import rabbit.nio.NioHandler;
+import org.khelekore.rnio.AcceptHandler;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.impl.Closer;
 
 /** A standard acceptor.
  *

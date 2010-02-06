@@ -2,9 +2,9 @@ package rabbit.proxy;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import org.khelekore.rnio.ReadHandler;
 import rabbit.io.BufferHandle;
 import rabbit.io.WebConnection;
-import rabbit.nio.ReadHandler;
 
 /** A base for client resource transfer classes.
  *

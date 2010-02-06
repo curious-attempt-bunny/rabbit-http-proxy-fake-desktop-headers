@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.ReadHandler;
 import rabbit.http.HttpHeader;
-import rabbit.nio.NioHandler;
-import rabbit.nio.ReadHandler;
 import rabbit.util.Counter;
 import rabbit.util.SProperties;
 

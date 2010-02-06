@@ -17,6 +17,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.StatisticsHolder;
+import org.khelekore.rnio.TaskIdentifier;
+import org.khelekore.rnio.impl.BasicStatisticsHolder;
+import org.khelekore.rnio.impl.DefaultTaskIdentifier;
+import org.khelekore.rnio.impl.MultiSelectorNioHandler;
 import rabbit.cache.Cache;
 import rabbit.cache.NCache;
 import rabbit.dns.DNSHandler;
@@ -35,10 +41,6 @@ import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
-import rabbit.nio.DefaultTaskIdentifier;
-import rabbit.nio.MultiSelectorNioHandler;
-import rabbit.nio.NioHandler;
-import rabbit.nio.TaskIdentifier;
 import rabbit.util.Config;
 import rabbit.util.Counter;
 import rabbit.util.SProperties;
@@ -323,7 +325,9 @@ public class HttpProxy implements Resolver {
 		    ssc.socket ().bind (new InetSocketAddress (ia, port));
 		}
 		ExecutorService es = Executors.newCachedThreadPool ();
-		nioHandler = new MultiSelectorNioHandler (es, selectorThreads);
+		StatisticsHolder sh = new BasicStatisticsHolder ();
+		nioHandler = 
+		    new MultiSelectorNioHandler (es, sh, selectorThreads);
 		AcceptorListener listener =
 		    new ProxyConnectionAcceptor (acceptorId++, this);
 		Acceptor acceptor = new Acceptor (ssc, nioHandler, listener);

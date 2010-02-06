@@ -8,8 +8,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rabbit.nio.ConnectHandler;
-import rabbit.nio.NioHandler;
+import org.khelekore.rnio.ConnectHandler;
+import org.khelekore.rnio.NioHandler;
 import rabbit.util.Counter;
 
 /** A class to handle a connection to the Internet.

@@ -3,6 +3,7 @@ package rabbit.proxy;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import org.khelekore.rnio.NioHandler;
 import rabbit.cache.Cache;
 import rabbit.http.Header;
 import rabbit.http.HttpHeader;
@@ -10,7 +11,6 @@ import rabbit.http.MultipartHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.io.BufferHandler;
 import rabbit.io.Range;
-import rabbit.nio.NioHandler;
 
 /** A resource that gets ranges from the cache.
  *  This resource will read data from disk so it may block.

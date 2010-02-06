@@ -10,6 +10,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.TaskIdentifier;
+import org.khelekore.rnio.impl.Closer;
+import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
 import rabbit.handler.BaseHandler;
@@ -25,10 +29,6 @@ import rabbit.httpio.RequestLineTooLongException;
 import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
-import rabbit.io.Closer;
-import rabbit.nio.DefaultTaskIdentifier;
-import rabbit.nio.NioHandler;
-import rabbit.nio.TaskIdentifier;
 import rabbit.util.Counter;
 
 /** The base connection class for rabbit.

@@ -2,11 +2,11 @@ package rabbit.httpio;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import org.khelekore.rnio.NioHandler;
 import rabbit.http.HttpHeader;
 import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
-import rabbit.nio.NioHandler;
 import rabbit.util.TrafficLogger;
 
 /** A handler that write one http header and reads a response

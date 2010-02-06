@@ -6,11 +6,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.ReadHandler;
 import rabbit.http.Header;
 import rabbit.http.HttpHeader;
 import rabbit.io.BufferHandle;
-import rabbit.nio.NioHandler;
-import rabbit.nio.ReadHandler;
 import rabbit.util.TrafficLogger;
 
 /** A handler that reads http headers

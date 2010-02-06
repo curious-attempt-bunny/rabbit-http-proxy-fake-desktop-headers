@@ -5,6 +5,10 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.StatisticsHolder;
+import org.khelekore.rnio.impl.BasicStatisticsHolder;
+import org.khelekore.rnio.impl.MultiSelectorNioHandler;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.HttpResponseListener;
 import rabbit.httpio.HttpResponseReader;
@@ -17,8 +21,6 @@ import rabbit.io.ConnectionHandler;
 import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
-import rabbit.nio.MultiSelectorNioHandler;
-import rabbit.nio.NioHandler;
 import rabbit.util.Counter;
 import rabbit.util.SimpleTrafficLogger;
 import rabbit.util.TrafficLogger;
@@ -39,7 +41,8 @@ public class ClientBase {
      */
     public ClientBase () throws IOException {
 	ExecutorService es = Executors.newCachedThreadPool ();
-	nioHandler = new MultiSelectorNioHandler (es, 4);
+	StatisticsHolder sh = new BasicStatisticsHolder ();
+	nioHandler = new MultiSelectorNioHandler (es, sh, 4);
 	nioHandler.start ();
 	Resolver resolver = new SimpleResolver (nioHandler);
 	connectionHandler =

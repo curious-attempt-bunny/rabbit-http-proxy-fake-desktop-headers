@@ -5,13 +5,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import org.khelekore.rnio.TaskIdentifier;
+import org.khelekore.rnio.impl.Closer;
+import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
-import rabbit.io.Closer;
-import rabbit.nio.DefaultTaskIdentifier;
-import rabbit.nio.TaskIdentifier;
 
 /** A class to save a ResourceSource into a file.
  *  This is mostly an example of how to use the rabbit client classes.

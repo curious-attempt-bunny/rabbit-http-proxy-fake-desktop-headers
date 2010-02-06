@@ -5,11 +5,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.khelekore.rnio.NioHandler;
+import org.khelekore.rnio.ReadHandler;
+import org.khelekore.rnio.WriteHandler;
+import org.khelekore.rnio.impl.Closer;
 import rabbit.io.BufferHandle;
-import rabbit.io.Closer;
-import rabbit.nio.NioHandler;
-import rabbit.nio.ReadHandler;
-import rabbit.nio.WriteHandler;
 import rabbit.util.TrafficLogger;
 
 /** A handler that just tunnels data.
