@@ -1,7 +1,5 @@
 package rabbit.util;
 
-import java.io.UnsupportedEncodingException;
-
 /** This class encodes/decodes stuff to/from the web.
  */
 public class Coder {
