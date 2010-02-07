@@ -18,11 +18,12 @@ import rabbit.util.TrafficLogger;
  */
 public class Status extends BaseMetaHandler {
 
-    protected String getPageHeader () {
+    @Override protected String getPageHeader () {
 	return "Status";
     }
   
     /** Add the page information */
+    @Override 
     protected PageCompletion addPageInformation (StringBuilder sb) {
 	addStatus (sb);
 	return PageCompletion.PAGE_DONE;

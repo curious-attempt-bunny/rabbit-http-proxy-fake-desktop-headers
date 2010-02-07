@@ -119,39 +119,5 @@ public class Coder {
 	ret.append ('=');
 	return ret.toString ();
     }
-
-    /** URLDecode a string. This is useful when your handling CGI-arguments..
-     * @param enc the encoded String.
-     * @return an unescaped String. ('%dd' => 'c', '+' => ' ')
-     */
-    public static String URLdecode (String enc) {
-	enc = enc.replace ('+', ' ');
-	int i = 0;
-	while (true) {
-	    i = enc.indexOf ('%', i);
-	    if (i < 0) 
-		break;
-	    try {
-		char c = (char) Integer.parseInt (enc.substring (i + 1,i + 3), 16);
-		enc = enc.substring (0, i) + c + enc.substring (i + 3);
-	    } catch (NumberFormatException e) {
-		// ignore
-	    }
-	}
-	return enc;
-    }
-
-    /** URLEncode a string. Only a convenience function for 
-     *  java.net.URLEncoder.encode ()
-     * @param str the String to URLEncode.
-     */ 
-    public static String URLEncode (String str) {
-	try {
-	    return java.net.URLEncoder.encode (str, "UTF-8");
-	} catch (UnsupportedEncodingException e) {
-	    e.printStackTrace ();
-	} 
-	return str;
-    }
 }
 

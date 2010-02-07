@@ -44,7 +44,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	HttpHeader ret = new HttpHeader ();
 	ret.setStatusLine (statusLine);
 	ret.setHeader ("Server", serverIdentity);
-	ret.setHeader ("Content-type", "text/html");
+	ret.setHeader ("Content-type", "text/html; charset=utf-8");
 	ret.setHeader ("Pragma", "no-cache");
 	ret.setHeader ("Date", HttpDateParser.getDateString (new Date ()));
 	return ret;    

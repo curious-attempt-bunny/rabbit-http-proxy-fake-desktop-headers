@@ -1,13 +1,15 @@
 package rabbit.proxy;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
 import rabbit.meta.MetaHandler;
-import rabbit.util.Coder;
 import rabbit.util.SProperties;
 import rabbit.util.TrafficLogger;
 
@@ -16,8 +18,8 @@ class MetaHandlerHandler {
     /** Handle a meta page.
      * @param header the request being made.
      */
-    public void handleMeta (Connection con, HttpHeader header, 
-			    TrafficLogger tlProxy, TrafficLogger tlClient) 
+    public void handleMeta (Connection con, HttpHeader header,
+			    TrafficLogger tlProxy, TrafficLogger tlClient)
 	throws IOException {
 	con.getCounter ().inc ("Meta pages requested");
 	URL url = null;
@@ -31,7 +33,7 @@ class MetaHandlerHandler {
 	String file = url.getFile ().substring (1);  // remove initial '/'
 	if (file.length () == 0)
 	    file = "FileSender/";
-	
+
 	int index = -1;
 	String args = "";
 	if ((index = file.indexOf ("?")) >= 0) {
@@ -52,13 +54,13 @@ class MetaHandlerHandler {
 	    }
 	    if (file.indexOf (".") < 0)
 		file = "rabbit.meta." + file;
-	    
-	    Class<? extends MetaHandler> cls = 
+
+	    Class<? extends MetaHandler> cls =
 		Class.forName (file).asSubclass (MetaHandler.class);
 	    MetaHandler mh = null;
 	    mh = cls.newInstance ();
 	    mh.handle (header, htab, con, tlProxy, tlClient);
-	    con.getCounter ().inc ("Meta pages handled");	
+	    con.getCounter ().inc ("Meta pages handled");
 	    // Now take care of every error...
 	} catch (NoSuchMethodError e) {
 	    error = "Given metahandler doesnt have a public no-arg constructor:"
@@ -73,7 +75,7 @@ class MetaHandlerHandler {
 	    error = "Que? metahandler access violation?:" + file + ", " + e;
 	} catch (IllegalArgumentException e) {
 	    error = "Strange name of metapage?:" + file + ", " + e;
-	} 
+	}
 	if (error != null) {
 	    Logger.getLogger (getClass ().getName ()).warning (error);
 	    con.doError (400, error);
@@ -102,7 +104,13 @@ class MetaHandlerHandler {
 	    } else if (key == null) {
 		key = next;
 	    } else {
-		htab.put (key, Coder.URLdecode (next));
+		try {
+		    next = URLDecoder.decode (next, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+		    Logger log = Logger.getLogger (getClass ().getName ());
+		    log.log (Level.WARNING, "Failed to get utf-8", e);
+		}
+		htab.put (key, next);
 		key = null;
 	    }
 	}
