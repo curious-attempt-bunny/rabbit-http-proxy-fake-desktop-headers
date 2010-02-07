@@ -12,7 +12,7 @@ import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
 import rabbit.proxy.HttpProxy;
-import rabbit.util.Coder;
+import rabbit.util.Base64;
 import rabbit.util.SProperties;
 import rabbit.util.SimpleUserHandler;
 
@@ -40,7 +40,7 @@ public class HttpBaseFilter implements HttpFilter {
 	// guess we should handle digest here also.. :-/
 	if (uap.startsWith ("Basic ")) {
 	    uap = uap.substring ("Basic ".length ());
-	    String userapass = Coder.uudecode (uap);
+	    String userapass = Base64.decode (uap);
 	    int i = -1;
 	    if ((i = userapass.indexOf (":")) > -1) {
 		String userid = userapass.substring (0, i);
@@ -95,7 +95,7 @@ public class HttpBaseFilter implements HttpFilter {
             
             String userPass = requestURI.substring(s3 + 2, s5);
             header.setHeader("Authorization", "Basic " +
-			     Coder.uuencode(userPass));
+			     Base64.encode(userPass));
 	    
             header.setRequestURI(requestURI.substring(0, s3 + 2) +
 				 requestURI.substring(s5 + 1));
@@ -386,7 +386,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    // it should look like this (using RabbIT:RabbIT):
 	    // Proxy-authorization: Basic UmFiYklUOlJhYmJJVA==
 	    header.setHeader ("Proxy-authorization", 
-			      "Basic " + Coder.uuencode (auth));
+			      "Basic " + Base64.encode (auth));
 	}
 
 	// try to use keepalive backwards.

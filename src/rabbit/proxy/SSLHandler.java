@@ -13,7 +13,7 @@ import rabbit.io.BufferHandle;
 import rabbit.io.CacheBufferHandle;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
-import rabbit.util.Coder;
+import rabbit.util.Base64;
 
 /** A handler that shuttles ssl traffic
  *
@@ -78,7 +78,7 @@ class SSLHandler implements TunnelDoneListener {
 	    // Proxy-authorization: Basic UmFiYklUOlJhYmJJVA==
 	    if (auth != null && !auth.equals (""))
 		request.setHeader ("Proxy-authorization",
-				   "Basic " + Coder.uuencode (auth));
+				   "Basic " + Base64.encode (auth));
 	}
 	WebConnectionListener wcl = new WebConnector ();
 	proxy.getWebConnection (request, wcl);
