@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import rabbit.util.SProperties;
 
-/** A class to handle proxy logging. 
- * 
+/** A class to handle proxy logging.
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ProxyLogger implements ConnectionLogger {
@@ -26,14 +26,14 @@ public class ProxyLogger implements ConnectionLogger {
     private Logger accessLog;
 
     /** The format we write dates on. */
-    private SimpleDateFormat sdf = 
+    private SimpleDateFormat sdf =
     new SimpleDateFormat ("dd/MMM/yyyy:HH:mm:ss 'GMT'");
 
     /** The monitor for sdf. */
     private Object sdfMonitor = new Object ();
 
     /** The distance to GMT in milis. */
-    private long offset;    
+    private long offset;
 
     /** Create a new ProxyLogger. */
     public ProxyLogger () {
@@ -45,17 +45,17 @@ public class ProxyLogger implements ConnectionLogger {
 			       gc.get (Calendar.MONTH),
 			       gc.get (Calendar.DAY_OF_MONTH),
 			       gc.get (Calendar.DAY_OF_WEEK),
-			       gc.get (Calendar.MILLISECOND));	
+			       gc.get (Calendar.MILLISECOND));
     }
 
-    /** Get the distance to GMT in millis 
+    /** Get the distance to GMT in millis
      */
     public long getOffset () {
 	return offset;
     }
 
     private Logger getLogger (SProperties config, String prefix,
-			      String logDomain, Formatter format) 
+			      Formatter format, String... logDomains)
 	throws IOException {
 	String log = config.get (prefix + "_log");
 	String sl = config.get (prefix + "_size_limit");
@@ -68,28 +68,34 @@ public class ProxyLogger implements ConnectionLogger {
 
 	FileHandler fh = new FileHandler (log, limit, numFiles, true);
 	fh.setFormatter (new SimpleFormatter ());
-	Logger logger = Logger.getLogger(logDomain);
-	logger.setLevel (level);
-	logger.addHandler (fh);
-	logger.setUseParentHandlers (false);
-	
+	Logger ret = null;
+	for (String logDomain : logDomains) {
+	    Logger logger = Logger.getLogger(logDomain);
+	    logger.setLevel (level);
+	    logger.addHandler (fh);
+	    logger.setUseParentHandlers (false);
+	    if (ret == null)
+		ret = logger;
+	}
+
 	if (format != null)
 	    fh.setFormatter (format);
-	
-	return logger;
+
+	return ret;
     }
 
     public void setup (SProperties config) throws IOException {
-	String sysLogging = 
+	String sysLogging =
 	    System.getProperty ("java.util.logging.config.file");
 	if (sysLogging != null) {
 	    System.out.println ("Logging configure by system property");
 	} else {
-	    Logger eh = getLogger (config, "error", "rabbit", null);
+	    Logger eh = getLogger (config, "error", null, "rabbit",
+				   "org.khelekore.rnio");
 	    eh.info ("Log level set to: " + eh.getLevel ());
 	}
-	Logger ah = getLogger (config, "access", "rabbit_access", 
-			       new AccessFormatter ());
+	Logger ah = getLogger (config, "access", new AccessFormatter (),
+			       "rabbit_access");
 	accessLog = ah;
     }
 
@@ -98,18 +104,18 @@ public class ProxyLogger implements ConnectionLogger {
 	    return record.getMessage () + "\n";
 	}
     }
-    
+
     public void logConnection (Connection con) {
 	if (accessLog == null)
 	    return;
 
 	StringBuilder sb = new StringBuilder ();
-	Socket s = con.getChannel ().socket (); 
+	Socket s = con.getChannel ().socket ();
 	if (s != null) {
-	    InetAddress ia = s.getInetAddress (); 
+	    InetAddress ia = s.getInetAddress ();
 	    if (ia != null)
 		sb.append (ia.getHostAddress());
-	    else 
+	    else
 		sb.append ("????");
 	}
 	sb.append (" - ");
