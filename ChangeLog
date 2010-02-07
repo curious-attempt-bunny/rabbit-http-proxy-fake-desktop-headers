@@ -1,6 +1,8 @@
 version 4.5 (20xx-yy-zz) Created rnio as a separate project out of
 	the rabbit.nio package and made rabbit use rnio. Use URLDeocder
-	instead of home written method. Use utf-8 for meta pages by default.
+	instead of home written method. Use utf-8 for meta pages by
+	default. Add a few missing javadoc package descriptions and fixed
+	a few typos in the javadoc.
 
 version 4.4 (2010-01-04) Made it possible to restrict sql authentication to
 	one ip only. Moved the image conversion to separate package and
@@ -8,7 +10,7 @@ version 4.4 (2010-01-04) Made it possible to restrict sql authentication to
 	uses the right image converter internally. Made ImageHandler fall
 	back to java based image conversion if the external process
 	fails. Merged the different proxy authentication filters into one
-	filter class and several backends. Moved proxy authentication
+	filter class and several back-ends. Moved proxy authentication
 	caching up to ProxyAuth so that all authenticators can use it.
 	Added some logging to the image handler. Setting repack to true and
 	compress to false now works. Added a setting "allow_without_auth"
@@ -31,12 +33,12 @@ version 4.2 (2009-08-20) Made it possible to specify what ip rabbit
 	should use for outgoing connections. Made access logging handle
 	log setup failure without getting NullPointerException.  Added
 	task timing and a status page that can show the time take by
-	different tasks. Do not log about empty cache dir on startup.
+	different tasks. Do not log about empty cache dir on start-up.
 
 version 4.1 (2009-07-01) Increased the default keepalive timeout to 30
 	seconds. Made number of selector threads configurable, with a
-	default value of the number of cpu cores. Made selector status
-	page easer to read by altering colors between selectors. Made
+	default value of the number of CPU cores. Made selector status
+	page easier to read by altering colors between selectors. Made
 	WebConnectionResourceSource actually grow the download buffer when
 	it has read full chunks a few times. Made ConnectionHandler use
 	concurrent collections for better scalability. ConnectionHandler
