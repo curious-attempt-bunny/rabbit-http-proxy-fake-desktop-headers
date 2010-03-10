@@ -31,7 +31,7 @@ class ChunkedContentTransferHandler extends ResourceHandlerBase
 					  TrafficLoggerHandler tlh) {
 	super (con, bufHandle, tlh);
 	chunkHandler = new ChunkHandler (this, con.getProxy ().getStrictHttp ());
-	chunkHandler.addBlockListener (this);
+	chunkHandler.setBlockListener (this);
     }
 
     public void modifyRequest (HttpHeader header) {

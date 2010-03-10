@@ -72,7 +72,7 @@ public class WebConnectionResourceSource
     public void addBlockListener (BlockListener listener) {
 	this.listener = listener;
 	if (isChunked)
-	    chunkHandler.addBlockListener (listener);
+	    chunkHandler.setBlockListener (listener);
 	if (dataSize > -1 && totalRead >= dataSize) {
 	    cleanupAndFinish ();
 	} else if (bufHandle.isEmpty ()) {

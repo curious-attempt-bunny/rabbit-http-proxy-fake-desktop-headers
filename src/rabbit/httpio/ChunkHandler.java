@@ -6,7 +6,8 @@ import java.util.StringTokenizer;
 import rabbit.io.BufferHandle;
 import rabbit.io.SimpleBufferHandle;
 
-/** The chunk handler gets raw data buffers and 
+/** The chunk handler gets raw data buffers and passes the de-chunked content
+ *  to the listener.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -18,14 +19,14 @@ public class ChunkHandler {
     private boolean readTrailingCRLF = false;
     private boolean readExtension = false;
     private BlockListener listener;
-    private long totalRead = 0;    
+    private long totalRead = 0;
 
     public ChunkHandler (ChunkDataFeeder feeder, boolean strictHttp) {
 	this.feeder = feeder;
 	this.strictHttp = strictHttp;
     }
 
-    public void addBlockListener (BlockListener listener) {
+    public void setBlockListener (BlockListener listener) {
 	this.listener = listener;
     }
 
@@ -36,7 +37,7 @@ public class ChunkHandler {
     private boolean needChunkSize () {
 	return currentChunkSize == -1;
     }
-    
+
     public void handleData (BufferHandle bufHandle) {
 	try {
 	    ByteBuffer buffer = bufHandle.getBuffer ();
@@ -63,7 +64,7 @@ public class ChunkHandler {
 			feeder.readMore ();
 		    } else {
 			if (checkChunkSizeAndExtension (buffer)) {
-			    // rest of buffer is a huge extension that we 
+			    // rest of buffer is a huge extension that we
 			    // do not recognize, so we ignore it...
 			    feeder.readMore ();
 			} else {
@@ -75,7 +76,7 @@ public class ChunkHandler {
 	    } else if (readExtension) {
 		tryToReadExtension (bufHandle);
 	    } else {
-		if (currentChunkSize == 0) 
+		if (currentChunkSize == 0)
 		    readFooter (bufHandle);
 		else
 		    handleChunkData (bufHandle);
@@ -85,7 +86,7 @@ public class ChunkHandler {
 	}
     }
 
-    private void tryToReadExtension (BufferHandle bufHandle) 
+    private void tryToReadExtension (BufferHandle bufHandle)
 	throws IOException {
 	LineReader lr = new LineReader (strictHttp);
 	lr.readLine (bufHandle.getBuffer (), new ExtensionHandler ());
@@ -106,15 +107,15 @@ public class ChunkHandler {
 	StringBuilder sb = new StringBuilder ();
 	while (buffer.remaining () > 0) {
 	    byte b = buffer.get ();
-	    if (!(b >= '0' && b <= '9' || 
-		  b >= 'a' && b <= 'f' || 
-		  b >= 'A' && b <= 'F' || 
+	    if (!(b >= '0' && b <= '9' ||
+		  b >= 'a' && b <= 'f' ||
+		  b >= 'A' && b <= 'F' ||
 		  b == ';')) {
 		buffer.reset ();
 		return false;
 	    }
 	    if (b == ';') {
-		// ok, extension follows. 
+		// ok, extension follows.
 		currentChunkSize = Integer.parseInt (sb.toString (), 16);
 		readExtension = true;
 		buffer.position (buffer.limit ());
@@ -122,14 +123,14 @@ public class ChunkHandler {
 	    }
 	    sb.append ((char)b);
 	}
-	// ok, if we get here it may be a valid chunk size, 
+	// ok, if we get here it may be a valid chunk size,
 	// but it will be very large... ignore for now.
 	return false;
     }
 
     private void handleChunkData (BufferHandle bufHandle) {
 	ByteBuffer buffer = bufHandle.getBuffer ();
-	int remaining = buffer.remaining ();	
+	int remaining = buffer.remaining ();
 	int leftInChunk = currentChunkSize - readFromChunk;
 	int thisChunk = Math.min (remaining, leftInChunk);
 	if (thisChunk == 0) {
@@ -166,7 +167,7 @@ public class ChunkHandler {
 	readTrailingCRLF = true;
     }
 
-    private void readFooter (BufferHandle bufHandle) 
+    private void readFooter (BufferHandle bufHandle)
 	throws IOException {
 	LineReader lr = new LineReader (strictHttp);
 	EmptyLineHandler elh;
@@ -182,22 +183,22 @@ public class ChunkHandler {
 	} while (!elh.ok ());
 	listener.finishedRead ();
     }
-    
+
     private static class EmptyLineHandler implements LineListener {
 	private boolean ok = false;
 	private boolean lineRead = false;
 	public void lineRead (String line) throws IOException {
 	    lineRead = true;
 	    ok = "".equals (line);
-	} 
+	}
 	public boolean ok () {
 	    return ok;
 	}
 	public boolean lineRead () {
 	    return lineRead;
-	} 
+	}
     }
-    
+
     private class ChunkSizeHandler implements LineListener {
 	public void lineRead (String line) throws IOException {
 	    StringTokenizer st = new StringTokenizer (line, "\t \n\r(;");
@@ -214,7 +215,7 @@ public class ChunkHandler {
 	    }
 	}
     }
-    
+
     private class ExtensionHandler implements LineListener {
 	public void lineRead (String line) throws IOException {
 	    readExtension = false;
