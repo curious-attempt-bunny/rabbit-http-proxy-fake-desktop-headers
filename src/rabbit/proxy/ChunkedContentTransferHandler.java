@@ -44,6 +44,7 @@ class ChunkedContentTransferHandler extends ResourceHandlerBase
 
     public void bufferRead (BufferHandle bufHandle) {
 	try {
+	    fireResouceDataRead (bufHandle);
 	    BlockSender bs = 
 		new BlockSender (wc.getChannel (), con.getNioHandler (), 
 				 tlh.getNetwork (), bufHandle, true, this);

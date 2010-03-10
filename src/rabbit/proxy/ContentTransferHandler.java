@@ -52,6 +52,7 @@ class ContentTransferHandler extends ResourceHandlerBase
 	    sbufHandle = new SimpleBufferHandle (sendBuffer);
 	}
 	try {
+	    fireResouceDataRead (sbufHandle);
 	    BlockSender bs = 
 		new BlockSender (wc.getChannel (), con.getNioHandler (), 
 				 tlh.getNetwork (), sbufHandle, false, this);

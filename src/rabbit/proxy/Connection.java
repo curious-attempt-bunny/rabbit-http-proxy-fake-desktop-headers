@@ -895,6 +895,10 @@ public class Connection {
 	return contentLength;
     }
 
+    public ClientResourceHandler getClientResourceHandler () {
+	return clientResourceHandler;
+    }
+
     public String getExtraInfo () {
 	return extraInfo;
     }

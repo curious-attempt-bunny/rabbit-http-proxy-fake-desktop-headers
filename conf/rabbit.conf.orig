@@ -333,9 +333,11 @@ blockURLmatching=(\.sex\.|[-.]ad([sx]?)\.|/ad\.|adserving\.|ad101com-|pagead/img
 #allowURLmatching=(www\.)?somesite.com/
 
 [rabbit.filter.HttpSnoop]
-# Setting this to true will shorten the log a bit. 
-#requestLineOnly=false
-
+# mode can be one of NORMAL, REQUEST_LINE, FULL
+# NORMAL: log full request/response header
+# REQUEST_LINE: only log the request/response line
+# FULL: log rull request/response header and any request body
+#mode=NORMAL
 
 
 [rabbit.filter.ProxyAuth]

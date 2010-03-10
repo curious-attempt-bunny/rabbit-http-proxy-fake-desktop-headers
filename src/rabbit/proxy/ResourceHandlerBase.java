@@ -2,6 +2,8 @@ package rabbit.proxy;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import org.khelekore.rnio.ReadHandler;
 import rabbit.io.BufferHandle;
 import rabbit.io.WebConnection;
@@ -16,7 +18,8 @@ abstract class ResourceHandlerBase implements ClientResourceHandler {
     protected TrafficLoggerHandler tlh;
     protected WebConnection wc;
     protected ClientResourceTransferredListener listener;
-
+    private List<ClientResourceListener> resourceListeners;
+    
     public ResourceHandlerBase (Connection con, 
 				BufferHandle bufHandle,
 				TrafficLoggerHandler tlh) {
@@ -40,6 +43,20 @@ abstract class ResourceHandlerBase implements ClientResourceHandler {
 	else 
 	    waitForRead ();
     }
+
+    public void addContentListener (ClientResourceListener crl) {
+	if (resourceListeners == null)
+	    resourceListeners = new ArrayList<ClientResourceListener> ();
+	resourceListeners.add (crl);
+    }
+
+    public void fireResouceDataRead (BufferHandle bufHandle) {
+	if (resourceListeners == null)
+	    return;
+	for (ClientResourceListener crl : resourceListeners) {
+	    crl.resouceDataRead (bufHandle);
+	}
+    }
     
     abstract void sendBuffer ();
 
@@ -55,7 +72,6 @@ abstract class ResourceHandlerBase implements ClientResourceHandler {
 	public void read () {
 	    try {
 		ByteBuffer buffer = bufHandle.getBuffer ();
-		buffer.limit (buffer.capacity ());
 		int read = con.getChannel ().read (buffer);
 		if (read == 0) {
 		    waitForRead ();

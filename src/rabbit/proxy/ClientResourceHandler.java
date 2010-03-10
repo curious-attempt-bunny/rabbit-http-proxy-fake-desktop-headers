@@ -21,4 +21,8 @@ public interface ClientResourceHandler {
      */
     void transfer (WebConnection wc, 
 		   ClientResourceTransferredListener crtl);
+
+    /** Add a listener for the client resource data.
+     */
+    void addContentListener (ClientResourceListener crl);
 }
