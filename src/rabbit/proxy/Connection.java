@@ -14,6 +14,7 @@ import org.khelekore.rnio.impl.Closer;
 import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
+import rabbit.cache.CacheException;
 import rabbit.handler.BaseHandler;
 import rabbit.handler.Handler;
 import rabbit.handler.MultiPartHandler;
@@ -267,9 +268,15 @@ public class Connection {
 	    return;
 	List<String> ccs = request.getHeaders ("Cache-Control");
 	int ccl = ccs.size ();
-	for (int i = 0; i < ccl; i++)
-	    if (ccs.get (i).equals ("no-store"))
-		proxy.getCache ().remove (entry.getKey ());
+	try {
+	    for (int i = 0; i < ccl; i++) {
+		if (ccs.get (i).equals ("no-store")) {
+		    proxy.getCache ().remove (entry.getKey ());
+		}
+	    }
+	} catch (CacheException e) {
+	    logger.log (Level.WARNING, "Failed to remove entry from cache", e);
+	}
     }
 
     private boolean checkMaxAge (RequestHandler rh) {
@@ -302,24 +309,28 @@ public class Connection {
 	status = "Handling request - checking cache";
 	Cache<HttpHeader, HttpHeader> cache = proxy.getCache ();
 	String method = request.getMethod ();
-	if (!method.equals ("GET") && !method.equals ("HEAD"))
-	    cache.remove (request);
+	try {
+	    if (!method.equals ("GET") && !method.equals ("HEAD"))
+		cache.remove (request);
 
-	rh.setEntry (cache.getEntry (request));
-	if (rh.getEntry () != null)
-	    rh.setDataHook (rh.getEntry ().getDataHook (proxy.getCache ()));
+	    rh.setEntry (cache.getEntry (request));
+	    if (rh.getEntry () != null)
+		rh.setDataHook (rh.getEntry ().getDataHook (proxy.getCache ()));
+	    checkNoStore (rh.getEntry ());
+	    // Check if cached item is too old
+	    if (!rh.getCond ().checkMaxStale (request, rh) && checkMaxAge (rh))
+		setMayUseCache (false);
 
-	checkNoStore (rh.getEntry ());
-	// Check if cached item is too old
-	if (!rh.getCond ().checkMaxStale (request, rh) && checkMaxAge (rh))
-	    setMayUseCache (false);
-
-	// Add headers to send If-None-Match, or If-Modified-Since
-	rh.setConditional (rh.getCond ().checkConditional (this, request, rh,
-							   mustRevalidate));
-	if (partialContent (rh))
-	    fillupContent ();
-	checkIfRange (rh);
+	    // Add headers to send If-None-Match, or If-Modified-Since
+	    rh.setConditional (rh.getCond ().checkConditional (this, request, 
+							       rh,
+							       mustRevalidate));
+	    if (partialContent (rh))
+		fillupContent ();
+	    checkIfRange (rh);
+	} catch (CacheException e) {
+	    logger.log (Level.WARNING, "Failed cache operation", e);
+	}
 
 	boolean mc = getMayCache ();
 	// in cache?
@@ -576,7 +587,11 @@ public class Connection {
 	} else {
 	    // retry...
 	    request.removeHeader ("If-None-Match");
-	    proxy.getCache ().remove (request);
+	    try {
+		proxy.getCache ().remove (request);
+	    } catch (CacheException e) {
+		logger.log (Level.WARNING, "Failed to remove entry", e);
+	    }
 	    handleRequest ();
 	    return true;
 	}

@@ -2,6 +2,7 @@ package rabbit.cache;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /** A cache, mostly works like a map in lookup, insert and delete.
  *  A cache may be persistent over sessions. 
@@ -54,7 +55,7 @@ public interface Cache<K, V> {
      * @param k the key.
      * @return the NCacheEntry or null (if not found).
      */ 
-    CacheEntry<K, V> getEntry (K k);
+    CacheEntry<K, V> getEntry (K k) throws CacheException;
 
     /** Get the file name for a cache entry. 
      * @param id the id of the cache entry
@@ -79,20 +80,21 @@ public interface Cache<K, V> {
     /** Insert a CacheEntry into the cache.
      * @param ent the CacheEntry to store.
      */
-    void addEntry (CacheEntry<K, V> ent);
+    void addEntry (CacheEntry<K, V> ent) throws CacheException;
 
     /** Signal that a cache entry have changed.
      */
-    void entryChanged (CacheEntry<K, V> ent, K newKey, V newValue);
+    void entryChanged (CacheEntry<K, V> ent, K newKey, V newValue)
+	throws CacheException;
 
     /** Remove the Entry with key o from the cache.
      * @param k the key for the CacheEntry.
      */
-    void remove (K k);
+    void remove (K k) throws CacheException;
 
     /** Clear the Cache from files. 
      */
-    void clear ();
+    void clear () throws CacheException;
 
     /** Get the CacheEntries in the cache.
      * @return an Enumeration of the CacheEntries.
@@ -108,4 +110,7 @@ public interface Cache<K, V> {
      *  to be stopped when this method is called.
      */
     void stop ();
+
+    /** Get the logger of this cache */
+    Logger getLogger ();
 }

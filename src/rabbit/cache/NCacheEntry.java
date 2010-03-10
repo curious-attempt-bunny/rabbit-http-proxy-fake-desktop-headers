@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-/** 
- *  A cached object.
+/** A cached object.
+ *
+ * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
     private static final long serialVersionUID = 20050430;
@@ -47,8 +48,12 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
     /** Get the key were holding data for
      * @return the keyobject
      */
-    public K getKey () {
-	return key.getData ();
+    public K getKey () throws CacheException {
+	try {
+	    return key.getData ();
+	} catch (IOException e) {
+	    throw new CacheException ("Failed to get key data", e);
+	}
     }   
     
     /** Get the date this object was cached.
@@ -122,8 +127,12 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
      * @param cache the NCache this entry lives in. 
      * @return the the hooked data.
      */
-    public V getDataHook (Cache<K, V> cache) {
-	return datahook.getData (cache, this);
+    public V getDataHook (Cache<K, V> cache) throws CacheException {
+	try {
+	    return datahook.getData (cache, this, cache.getLogger ());
+	} catch (IOException e) {
+	    throw new CacheException ("Failed to get data hook", e);
+	}
     }
 
     /** Set the hooked data.

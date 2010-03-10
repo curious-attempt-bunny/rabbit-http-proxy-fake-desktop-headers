@@ -1,15 +1,16 @@
 package rabbit.cache;
 
 import java.io.Serializable;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import org.khelekore.rnio.impl.Closer;
 
 /** A class to store cache data to a file.
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -24,47 +25,39 @@ class FileData<T> implements Serializable {
     
     /** Read the data from disk. 
      */
-    protected T readData (String name, FileHandler<T> fh) {
-	InputStream is = null;
+    protected T readData (String name, FileHandler<T> fh, Logger logger)
+	throws IOException {
+	File f = new File (name);
+	if (!f.exists())
+	    return null;
+	FileInputStream fis = new FileInputStream (f);
 	try {
-	    File f = new File (name);
-	    if (!f.exists())
-		return null;
-	    FileInputStream fis = new FileInputStream (f);
-	    is = new GZIPInputStream (fis);
-	    return fh.read (is);
-	} catch (IOException e) {
-	    e.printStackTrace ();
+	    InputStream is = new GZIPInputStream (fis);
+	    try {
+		return fh.read (is);
+	    } finally {
+		Closer.close (is, logger);
+	    }
 	} finally {
-	    closeIt (is);
+	    Closer.close (fis, logger);
 	}
-	return null;
     }
 
-    protected long writeData (String name, FileHandler<T> fh, T data) {
-	OutputStream os = null;
+    protected long writeData (String name, FileHandler<T> fh, T data,
+			      Logger logger) throws IOException {
 	File f = new File (name);
+	FileOutputStream fos = new FileOutputStream (f);
 	try {
-	    FileOutputStream fos = new FileOutputStream (f);
-	    os = new GZIPOutputStream (fos);
-	    fh.write (os, data);
-	} catch (IOException e) {
-	    e.printStackTrace ();
-	    return 0;
+	    OutputStream os = new GZIPOutputStream (fos);
+	    try {
+		fh.write (os, data);
+	    } finally {
+		Closer.close (os, logger);
+	    }
 	} finally {
-	    closeIt (os);
+	    Closer.close (fos, logger);
 	}
 	fileSize = f.length ();
 	return fileSize;
-    }
-    
-    private void closeIt (Closeable c) {
-	if (c != null) {
-	    try {
-		c.close ();
-	    } catch (IOException e) {
-		e.printStackTrace ();
-	    }
-	}
     }    
 }

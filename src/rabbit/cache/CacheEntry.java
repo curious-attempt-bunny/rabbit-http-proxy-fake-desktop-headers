@@ -14,7 +14,7 @@ public interface CacheEntry<K, V> {
     /** Get the key were holding data for
      * @return the key object
      */
-    K getKey ();
+    K getKey () throws CacheException;
 
     /** Get the date this object was cached.
      * @return a date (millis since the epoch).
@@ -58,7 +58,7 @@ public interface CacheEntry<K, V> {
      * @param cache the Cache this entry lives in. 
      * @return the the hooked data.
      */
-    V getDataHook (Cache<K, V> cache);
+    V getDataHook (Cache<K, V> cache) throws CacheException;
 
     /** Sets the data hook for this cache object.
      *  Since it is not always possible to make the key hold this...

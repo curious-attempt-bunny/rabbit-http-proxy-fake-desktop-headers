@@ -3,8 +3,10 @@ package rabbit.meta;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
 import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
+import rabbit.cache.CacheException;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.HtmlPage;
 
@@ -15,11 +17,11 @@ import rabbit.proxy.HtmlPage;
 public class CacheStatus extends BaseMetaHandler {
     private static final int NUMBER_OF_ENTRIES = 256;
 
-    protected String getPageHeader () {
+    @Override protected String getPageHeader () {
 	return "Cache status";
     }
 
-    protected PageCompletion addPageInformation (StringBuilder sb) {
+    @Override protected PageCompletion addPageInformation (StringBuilder sb) {
 	addStatus (sb);
 	return PageCompletion.PAGE_DONE;
     }    
@@ -88,7 +90,13 @@ public class CacheStatus extends BaseMetaHandler {
 	    count++; // 1-4 5-8
 	    if (count < start || count > end)
 		continue;
-	    HttpHeader lheader = lister.getKey ();
+	    HttpHeader lheader = null;
+	    try {
+		lheader = lister.getKey ();
+	    } catch (CacheException e) {
+		logger.log (Level.WARNING, 
+			    "Failed to get key: " + lister, e);
+	    }
 	    if (lheader == null)
 		continue;
 	    // reading the data hook will cause lots of file reading... 

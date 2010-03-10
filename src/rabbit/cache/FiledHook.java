@@ -1,5 +1,8 @@
 package rabbit.cache;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
 /** A class to store the cache entrys data hook on file. 
  *  A Http Header is a big thing so it is nice to write it to disk. 
  *
@@ -19,9 +22,11 @@ class FiledHook<V> extends FileData<V> {
     
     /** Get the hooked data. 
      */
-    public <K> V getData (Cache<K, V> cache, CacheEntry<K, V> entry) {
-	return readData (getFileName (cache, entry), 
-			 cache.getHookFileHandler ());
+    public <K> V getData (Cache<K, V> cache, CacheEntry<K, V> entry,
+			  Logger logger) throws IOException {
+	return readData (getFileName (cache, entry),
+			 cache.getHookFileHandler (), 
+			 logger);
     }
 
     /** Set the hooked data. 
@@ -29,7 +34,9 @@ class FiledHook<V> extends FileData<V> {
     protected <K> long storeHook (Cache<K, V> cache, 
 				  CacheEntry<K, V> entry, 
 				  FileHandler<V> fh, 
-				  V hook) {
-	return writeData (getFileName (cache, entry), fh, hook);
+				  V hook,
+				  Logger logger) 
+	throws IOException {
+	return writeData (getFileName (cache, entry), fh, hook, logger);
     }    
 }

@@ -5,7 +5,8 @@ version 4.5 (20xx-yy-zz) Created rnio as a separate project out of
 	a few typos in the javadoc. Renamed Coder to Base64 since that is
 	all it handles. Made it possible for filters to see the client
 	request body. Fixed some cross site scripting problems with the
-	generated error pages.
+	generated error pages. Changed the cache so that it throws
+	CacheException if an operation fails.
 
 version 4.4 (2010-01-04) Made it possible to restrict sql authentication to
 	one ip only. Moved the image conversion to separate package and

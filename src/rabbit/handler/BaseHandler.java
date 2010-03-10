@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
+import rabbit.cache.CacheException;
 import rabbit.http.ContentRangeParser;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
@@ -273,7 +274,14 @@ public class BaseHandler
 	    response.setHeader ("Content-Length", "" + filesize);
 	}
 	removePrivateParts (response);
-	cache.addEntry (entry);
+	try {
+	    cache.addEntry (entry);
+	} catch (CacheException e) {
+	    getLogger ().log (Level.WARNING, 
+			      "Failed to add cache entry: "  + 
+			      request.getRequestURI (),
+			      e);
+	}
     }
 
     /** Try to use the resource size to decide if we may cache or not.
@@ -327,7 +335,8 @@ public class BaseHandler
 
     private void updateRange (CacheEntry<HttpHeader, HttpHeader> old,
 			      PartialCacher pc,
-			      Cache<HttpHeader, HttpHeader> cache) {
+			      Cache<HttpHeader, HttpHeader> cache) 
+	throws CacheException {
 	HttpHeader oldRequest = old.getKey ();
 	HttpHeader oldResponse = old.getDataHook (cache);
 	String cr = oldResponse.getHeader ("Content-Range");
@@ -371,7 +380,14 @@ public class BaseHandler
 	    PartialCacher pc =
 		new PartialCacher (oldName, response);
 	    cacheChannel = pc.getChannel ();
-	    updateRange (oldEntry, pc, cache);
+	    try {
+		updateRange (oldEntry, pc, cache);
+	    } catch (CacheException e) {
+		getLogger ().log (Level.WARNING,
+				  "Failed to update range: " + 
+				  request.getRequestURI (),
+				  e);
+	    }
 	    return;
 	}
 	entry.setDataHook (response);
@@ -393,8 +409,15 @@ public class BaseHandler
 	    }
 	    String entryName = cache.getEntryName (entry.getId (), false, null);
 	    if (response.getStatusCode ().equals ("206")) {
-		CacheEntry<HttpHeader, HttpHeader> oldEntry =
-		    cache.getEntry (request);
+		CacheEntry<HttpHeader, HttpHeader> oldEntry = null;
+		try {
+		    oldEntry = cache.getEntry (request);
+		} catch (CacheException e) {
+		    getLogger ().log (Level.WARNING,
+				      "Failed to get old entry: " +
+				      request.getRequestURI (),
+				      e);
+		}
 		try {
 		    setupPartial (oldEntry, entry, entryName, cache);
 		} catch (IOException e) {
