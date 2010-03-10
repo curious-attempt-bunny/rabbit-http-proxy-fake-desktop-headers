@@ -17,16 +17,16 @@ import org.khelekore.rnio.impl.Closer;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class SimpleUserHandler {  // TODO: implements interface.
+public class SimpleUserHandler {
     private String userFile = null;
     private Map<String, String> users = new HashMap<String, String> ();
-    private final Logger logger = 
+    private final Logger logger =
 	Logger.getLogger (getClass ().getName ());
 
     public SimpleUserHandler () {
     }
 
-    /** Set the file to use for users, will read the files. 
+    /** Set the file to use for users, will read the files.
      *  Will discard any previous loaded users.
      * @param userFile the filename to read the users from.
      */
@@ -38,10 +38,10 @@ public class SimpleUserHandler {  // TODO: implements interface.
 	    fr = new FileReader (userFile);
 	    users = loadUsers (fr);
 	} catch (FileNotFoundException e) {
-	    logger.log (Level.WARNING, 
+	    logger.log (Level.WARNING,
 			"could not load the users file: '" + userFile, e);
 	} catch (IOException e) {
-	    logger.log (Level.WARNING, 
+	    logger.log (Level.WARNING,
 			"Error while loading the users file: '" + userFile, e);
 	} finally {
 	    Closer.close (fr, logger);
@@ -51,7 +51,7 @@ public class SimpleUserHandler {  // TODO: implements interface.
     /** Load the users from the given Reader.
      * @param r the Reader with the users.
      */
-    public Map<String, String> loadUsers (Reader r) 
+    public Map<String, String> loadUsers (Reader r)
 	throws IOException {
 	BufferedReader br = new BufferedReader (r);
 	String line;
@@ -71,14 +71,14 @@ public class SimpleUserHandler {  // TODO: implements interface.
      * @param r the Reader with the users.
      */
     public void saveUsers (Reader r) throws IOException {
-	if (userFile == null) 
+	if (userFile == null)
 	    return;
 	BufferedReader br = new BufferedReader (r);
 	PrintWriter fw = null;
 	try {
 	    fw = new PrintWriter (new FileWriter (userFile));
 	    String line;
-	    while ((line = br.readLine ()) != null) 
+	    while ((line = br.readLine ()) != null)
 		fw.println (line);
 	    fw.flush ();
 	} finally {
@@ -99,7 +99,7 @@ public class SimpleUserHandler {  // TODO: implements interface.
     public void setUsers (Map<String, String> users) {
 	this.users = users;
     }
-    
+
     /** Check if a user/password combination is valid.
      * @param username the username.
      * @param password the decrypted password.
@@ -109,6 +109,6 @@ public class SimpleUserHandler {  // TODO: implements interface.
 	if (username == null)
 	    return false;
 	String pass = users.get (username);
-	return (pass != null && password != null && pass.equals (password));	
+	return (pass != null && password != null && pass.equals (password));
     }
 }

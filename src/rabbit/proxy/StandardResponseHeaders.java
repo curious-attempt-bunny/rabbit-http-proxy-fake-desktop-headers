@@ -1,7 +1,5 @@
 package rabbit.proxy;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -9,9 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import rabbit.html.HtmlEscapeUtils;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
 import rabbit.util.Config;
+import rabbit.util.StackTraceUtil;
 
 /** A class that can create standard response headers.
  *
@@ -120,8 +120,9 @@ class StandardResponseHeaders implements HttpGenerator {
 	// in most cases we should have a header out already, but to be sure...
 	HttpHeader header = getHeader ("HTTP/1.1 400 Bad Request ");
 	String page = HtmlPage.getPageHeader (con, "400 Bad Request") +
-	    "Unable to handle request:<br><b><XMP>\n" +
-	    exception + "</XMP></b></body></html>\n";
+	    "Unable to handle request:<br><b><pre>\n" +
+	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
+	    "</pre></b></body></html>\n";
 	header.setContent (page);
 	return header;
     }
@@ -144,8 +145,8 @@ class StandardResponseHeaders implements HttpGenerator {
 	header.setHeader (type + "-Authenticate",
 			  "Basic realm=\"" + realm + "\"");
 	String page = HtmlPage.getPageHeader (con, na) +
-	    "access to: <b>" + url +
-	    " </b><br>requires some authentication\n</body></html>\n";
+	    "Access to: <b>" + HtmlEscapeUtils.escapeHtml (url.toString ()) +
+	    "</b><br>requires some authentication\n</body></html>\n";
 	header.setContent (page);
 	return header;
     }
@@ -169,7 +170,8 @@ class StandardResponseHeaders implements HttpGenerator {
 	// in most cases we should have a header out already, but to be sure...
 	HttpHeader header = getHeader ("HTTP/1.1 404 File not found");
 	String page = HtmlPage.getPageHeader (con, "404 File not found") +
-	    "File '" + file + "' not found.</body></html>";
+	    "File '" + HtmlEscapeUtils.escapeHtml (file) +
+	    "' not found.</body></html>";
 	header.setContent (page);
 	return header;
     }
@@ -215,7 +217,8 @@ class StandardResponseHeaders implements HttpGenerator {
 	HttpHeader header = getHeader (sh);
 	String shh = "416 Requested Range Not Satisfiable";
 	String page = HtmlPage.getPageHeader (con, shh) +
-	    "Request out of range: " + exception +
+	    "Request out of range: " +
+	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
 	    ".</b>\n</body></html>\n";
 	header.setContent (page);
 	return header;
@@ -229,17 +232,11 @@ class StandardResponseHeaders implements HttpGenerator {
 	HttpHeader header = getHeader ("HTTP/1.1 417 Expectation failed");
 	String sh = "417 Expectation failed";
 	String page = HtmlPage.getPageHeader (con, sh) +
-	    "RabbIT does not handle the '" + expectation +
+	    "RabbIT does not handle the '" +
+	    HtmlEscapeUtils.escapeHtml (expectation) +
 	    "' kind of expectations yet.</b>\n</body></html>\n";
 	header.setContent (page);
 	return header;
-    }
-
-    private String getStackTrace (Throwable t) {
-	StringWriter sw = new StringWriter ();
-	PrintWriter sos = new PrintWriter (sw);
-	t.printStackTrace (sos);
-	return sw.toString ();
     }
 
     /** Get a 500 Internal Server Error header for the given exception.
@@ -251,7 +248,6 @@ class StandardResponseHeaders implements HttpGenerator {
 	// normally this only thrashes the page... Too bad.
 	HttpHeader header = getHeader ("HTTP/1.1 500 Internal Server Error ");
 	Properties props = System.getProperties ();
-
 	HttpProxy proxy = con.getProxy ();
 	Config config = proxy.getConfig ();
 	String sh = "500 Internal Server Error";
@@ -280,8 +276,9 @@ class StandardResponseHeaders implements HttpGenerator {
 	    "os.name: " + props.getProperty ("os.name") + "<br>\n" +
 	    "os.version: " + props.getProperty ("os.version") + "<br>\n" +
 	    "os.arch: " + props.getProperty ("os.arch") + "<br>\n" +
-	    "Error is:<BR><XMP>\n" + getStackTrace (exception) +
-	    "</XMP><br><hr noshade>\n</body></html>\n";
+	    "Error is:<BR><pre>\n" + 
+	    StackTraceUtil.getStackTrace (exception) +
+	    "</pre><br><hr noshade>\n</body></html>\n";
 	header.setContent (page);
 	return header;
     }
@@ -300,12 +297,8 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    public HttpHeader get504 (Throwable exception, String requestLine) {
+    public HttpHeader get504 (Throwable exception, String uri) {
 	HttpHeader header = getHeader ("HTTP/1.1 504 Gateway Time-out ");
-
-	HttpHeader hh = new HttpHeader ();
-	hh.setRequestLine (requestLine);
-	String uri = hh.getRequestURI ();
 	try {
 	    URL u = new URL (uri);
 	    StringBuilder content =
@@ -316,8 +309,11 @@ class StandardResponseHeaders implements HttpGenerator {
 		String suf = placeTransformers[i][1];
 		String place = getPlace (u, pre, suf);
 		if (place != null && !places.contains (place)) {
-		    content.append ("<li><a href=\"" + place + "\">" +
-				    place + "</a></li>\n");
+		    content.append ("<li><a href=\"" + 
+				    HtmlEscapeUtils.escapeHtml (place) +
+				    "\">" +
+				    HtmlEscapeUtils.escapeHtml (place) +
+				    "</a></li>\n");
 		    places.add (place);
 		}
 	    }

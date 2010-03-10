@@ -1,8 +1,6 @@
 package rabbit.proxy;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -19,6 +17,7 @@ import rabbit.cache.CacheEntry;
 import rabbit.handler.BaseHandler;
 import rabbit.handler.Handler;
 import rabbit.handler.MultiPartHandler;
+import rabbit.html.HtmlEscapeUtils;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.HttpHeaderListener;
@@ -30,6 +29,7 @@ import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.util.Counter;
+import rabbit.util.StackTraceUtil;
 
 /** The base connection class for rabbit.
  *
@@ -284,8 +284,8 @@ public class Connection {
 	final RequestHandler rh = new RequestHandler (this);
 	if (proxy.getCache ().getMaxSize () > 0) {
 	    // memory consistency is guarded by the underlying SynchronousQueue
-	    TaskIdentifier ti = 
-		new DefaultTaskIdentifier (getClass ().getSimpleName () + 
+	    TaskIdentifier ti =
+		new DefaultTaskIdentifier (getClass ().getSimpleName () +
 					   ".fillInCacheEntries: ",
 					   request.getRequestURI ());
 	    getNioHandler ().runThreadTask (new Runnable () {
@@ -351,7 +351,7 @@ public class Connection {
     void webConnectionSetupFailed (RequestHandler rh, Exception cause) {
 	if (cause instanceof UnknownHostException)
 	    // do we really want this in the log?
-	    logger.warning (cause.toString () + ": " + 
+	    logger.warning (cause.toString () + ": " +
 			    request.getRequestURI ());
 	else
 	    logger.warning ("Failed to set up web connection to: " +
@@ -559,7 +559,7 @@ public class Connection {
 	    nmh.updateHeader (rh);
 	    setMayCache (false);
 	    try {
-		HttpHeader res304 = 
+		HttpHeader res304 =
 		    nmh.is304 (request, getHttpGenerator (), rh);
 		if (res304 != null) {
 		    sendAndClose (res304);
@@ -699,7 +699,7 @@ public class Connection {
 	StringBuilder error =
 	    new StringBuilder (HtmlPage.getPageHeader (this, "400 Bad Request") +
 			       "Unable to handle request:<br><b>" +
-			       message +
+			       HtmlEscapeUtils.escapeHtml (message) +
 			       "</b></body></html>\n");
 	header.setContent (error.toString ());
 	sendAndClose (header);
@@ -717,14 +717,10 @@ public class Connection {
 		     extraInfo + e.toString () :
 		     e.toString ());
 	HttpHeader header = null;
-	if (!dnsError) {
-	    StringWriter sw = new StringWriter ();
-	    PrintWriter ps = new PrintWriter (sw);
-	    e.printStackTrace (ps);
-	    message = sw.toString ();
-	}
+	if (!dnsError)
+	    message = StackTraceUtil.getStackTrace (e);
 	if (statuscode == 504)
-	    header = getHttpGenerator ().get504 (e, requestLine);
+	    header = getHttpGenerator ().get504 (e, request.getRequestURI ());
 	else
 	    header = getHttpGenerator ().getHeader ("HTTP/1.0 400 Bad Request");
 
@@ -735,11 +731,14 @@ public class Connection {
 	    sb.append ("Server not found");
 	else
 	    sb.append ("Unable to handle request");
-	sb.append (":<br><b>" + e.getMessage () +
+	sb.append (":<br><b>" + HtmlEscapeUtils.escapeHtml (e.getMessage ()) +
 		   (header.getContent () != null ?
-		    "<br>" + header.getContent () :
+		    "<br>" +
+		    HtmlEscapeUtils.escapeHtml (header.getContent ()) :
 		    "") +
-		   "</b><br><xmp>" + message + "</xmp></body></html>\n");
+		   "</b><br><xmp>" +
+		   HtmlEscapeUtils.escapeHtml (message) +
+		   "</xmp></body></html>\n");
 	header.setContent (sb.toString ());
 	sendAndClose (header);
     }
@@ -1108,7 +1107,7 @@ public class Connection {
 	}
 
 	public void failed (Exception e) {
-	    status = 
+	    status =
 		"Response sending failed: " + e + ", logging and closing.";
 	    logger.log (Level.INFO, "Exception when sending http header", e);
 	    logAndClose (null);

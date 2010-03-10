@@ -390,7 +390,6 @@ public class HttpProxy implements Resolver {
 
     /** Run the proxy in a separate thread. */
     public void stop () {
-	// TODO: what level do we want here?
 	logger.severe ("HttpProxy.stop() called, shutting down");
 	synchronized (this) {
 	    closeSocket ();

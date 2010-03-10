@@ -41,7 +41,7 @@ public class HtmlParser {
     private HtmlBlock block;
     /** A pending comment (script or style data). */
     private Token pendingComment = null;
-    
+
     /** This indicates the start of a block. */
     public final static int START        = 0;
     /** This indicate a String value was found. */
@@ -77,7 +77,7 @@ public class HtmlParser {
 	csDecoder = cs.newDecoder ();
     }
 
-    /** Restores all internal variables to start positions 
+    /** Restores all internal variables to start positions
      */
     private void init () {
 	nextToken = START;
@@ -117,7 +117,7 @@ public class HtmlParser {
 	}
 	index = startIndex;
     }
-    
+
     /** Get a String describing the token.
      * @param token the token type (like STRING).
      * @return a String describing the token (like &quot;STRING&quot;)
@@ -141,7 +141,7 @@ public class HtmlParser {
 	case MT:
 	    return "MT";
 	case EQUALS:
-	    return "EQUALS"; 
+	    return "EQUALS";
 	case COMMENT:
 	    return "COMMENT";
 	case END:
@@ -152,15 +152,15 @@ public class HtmlParser {
 	    return "unknown";
 	}
     }
-    
+
     /** Scan a String from the block.
      * @throws HtmlParseException if an error occurs.
      * @return STRING
      */
-    private int scanString () { 
+    private int scanString () {
 	int endindex = length;
 	int startindex = index - 1;
-	
+
 	if (tagmode) {
 	loop:
 	    while (index < length) {
@@ -190,14 +190,14 @@ public class HtmlParser {
 	    }
 	}
 	if (tagmode) {
-	    stringValue = 
+	    stringValue =
 		new String (pagepart, startindex, (endindex - startindex));
 	} else {
 	    stringLength = (endindex - startindex);
-	}	    
+	}
 	return STRING;
     }
-    
+
     /** Scan a quoted tring from the block. The first character is
      *  treated as the quotation character.
      * @throws HtmlParseException if an error occurs.
@@ -240,7 +240,7 @@ public class HtmlParser {
 		pagepart[index + 1] == '-' &&
 		pagepart[index + 2] == '-');
     }
-    
+
     /** Scan a comment from the block, that is the string up to and
      *	including &quot;-->&quot;.
      * @return COMMENT or END.
@@ -275,7 +275,7 @@ public class HtmlParser {
      */
     private int match (int token) throws HtmlParseException {
 	int ts;
-	
+
 	if (nextToken != token)
 	    throw new HtmlParseException ("Token: " + getTokenString (token) +
 					  " != " + getTokenString (nextToken));
@@ -293,8 +293,9 @@ public class HtmlParser {
 	    case '\t':
 	    case '\n':
 	    case '\r':
-		// TODO evaluate strategy here, a continue here may result 
-		// in RabbIT cutting out whitespaces from the html-page.
+		// A continue here may result in RabbIT cutting out
+		// whitespaces from the html-page, but this seems to have
+		// worked well for quite a few years.
 		continue;
 	    case '<':
 		ts = tagStart;
@@ -311,7 +312,7 @@ public class HtmlParser {
 		return nextToken = EQUALS;
 	    case '"':
 		if (tagmode)
-		    return nextToken = scanQuotedString ();	
+		    return nextToken = scanQuotedString ();
 		// else fallthrough...
 	    case '\'':
 		if (tagmode)
@@ -332,12 +333,12 @@ public class HtmlParser {
 	while (nextToken == EQUALS) {
 	    match (EQUALS);
 	    if (nextToken == STRING ||
-		nextToken == SQSTRING || 
+		nextToken == SQSTRING ||
 		nextToken == DQSTRING) {
 		String val = stringValue;
 		match (nextToken);
-		return val;		   
-	    }	    
+		return val;
+	    }
 	    return "";
 	}
 	return null;
@@ -355,26 +356,26 @@ public class HtmlParser {
      */
     private void arglist (Tag tag) throws HtmlParseException {
 	String key = null;
-	
+
 	//System.err.println ("parsing arglist for tag: '" + tag + "'");
 	while (true) {
-	    //System.err.println ("nextToken: " + nextToken + " => " + 
+	    //System.err.println ("nextToken: " + nextToken + " => " +
 	    //                    getTokenString (nextToken));
 	    switch (nextToken) {
 	    case MT:
 		tagmode = false;
 		// ok, this is kinda ugly but safer this way
-		if (tag.getLowerCaseType () != null && 
+		if (tag.getLowerCaseType () != null &&
 		    (tag.getLowerCaseType ().equals ("script") ||
 		     tag.getLowerCaseType ().equals ("style"))) {
 		    Token text = scanCommentUntilEnd (tag.getLowerCaseType ());
 		    if (text != null) {
 			setPendingComment (text);
 		    } else {
-			tagmode = false;	    
+			tagmode = false;
 			return;
 		    }
-		} else {		
+		} else {
 		    match (MT);
 		}
 		return;
@@ -389,7 +390,7 @@ public class HtmlParser {
 	    case DQSTRING:
 		String ttype = tag.getType ();
 		if (ttype != null && ttype.charAt (0) == '!') {
-		    // Handle <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 
+		    // Handle <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01
 		    //         Transitional//EN">
 		    // and similar cases.
 		    tag.addArg (stringValue, null, false);
@@ -399,9 +400,9 @@ public class HtmlParser {
 		    /* usually from javascript being sent as html. */
 		    /* This is what we used to do, keep for a while.
 		    //System.err.println ("hmmm, strange arglist..: " + tag);
-		    // this is probably due to something like: 
+		    // this is probably due to something like:
 		    // ... framespacing="0"">
-		    // we backstep and change the second '"' to a blank and 
+		    // we backstep and change the second '"' to a blank and
 		    // restart from that point...
 		    index -= stringValue.length ();
 		    pagepart[index] = ' ';
@@ -410,10 +411,10 @@ public class HtmlParser {
 		    */
 		}
 		break;
-	    case LT:   
-		// I consider this an error (in the html of the page) 
+	    case LT:
+		// I consider this an error (in the html of the page)
 		// but handle it anyway.
-		String type = tag.getLowerCaseType ();	       
+		String type = tag.getLowerCaseType ();
 		if (type == null ||              // <<</font.... etc
 		    stringValue == null) {         // <table.. width=100% <tr>
 		    tagmode = false;
@@ -422,11 +423,11 @@ public class HtmlParser {
 		// fall through.
 	    default:
 		//System.err.println ("hmmm, default arglist..: " + tag);
-		// this is probably due to something like: 
+		// this is probably due to something like:
 		// <img src=someimagead;ad=40;valu=560>
-		// we will break at '=' and split the tag to something like: 
+		// we will break at '=' and split the tag to something like:
 		// <img src=someimagead;ad = 40;valu=560> if we change it.
-		// the html is already broken so should we fix it? 
+		// the html is already broken so should we fix it?
 		// we ignore for now..
 		if (stringValue != null)
 		    tag.addArg (stringValue, null, false);
@@ -463,7 +464,7 @@ public class HtmlParser {
 	if (i > -1) {
 	    stringLength = j - startvalue;
 	    index = j;
-	    Token text = new Token (pagepart, TokenType.COMMENT, 
+	    Token text = new Token (pagepart, TokenType.COMMENT,
 				    startvalue, stringLength);
 	    return text;
 	}
@@ -474,11 +475,11 @@ public class HtmlParser {
     /** Scan a tag from the block.
      * @param ltagStart the index of the last tag started.
      */
-    private void tag (int ltagStart) throws HtmlParseException {		
+    private void tag (int ltagStart) throws HtmlParseException {
 	Tag tag = new Tag ();
 	Token token = new Token (tag, false);
 	switch (nextToken) {
-	case STRING: 
+	case STRING:
 	    tag.setType (stringValue);
 	    match (STRING);
 	    arglist (tag);
@@ -492,14 +493,14 @@ public class HtmlParser {
 	    }
 	    break;
 	case MT:
-	    tagmode = false;			
+	    tagmode = false;
 	    match (MT);
 	    break;
 	case END:
 	    block.setRest (lastTagStart);
-	    tagmode = false;	    
+	    tagmode = false;
 	    return;
-	default: 
+	default:
 	    arglist (tag);
 	}
     }
@@ -521,7 +522,7 @@ public class HtmlParser {
 		match (LT);
 		tag (lastTagStart);
 		break;
-	    case COMMENT: 
+	    case COMMENT:
 		block.addToken (getToken (TokenType.COMMENT));
 		match (COMMENT);
 		break;
@@ -544,7 +545,7 @@ public class HtmlParser {
 	nextToken = START;
 	match (START);
 	page ();
-	
+
 	return block;
     }
 }

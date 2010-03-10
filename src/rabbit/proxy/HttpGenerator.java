@@ -99,5 +99,5 @@ public interface HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    HttpHeader get504 (Throwable exception, String requestLine);
+    HttpHeader get504 (Throwable exception, String requestURL);
 }

@@ -38,9 +38,9 @@ import rabbit.util.SProperties;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class BaseHandler 
-    implements Handler, HandlerFactory, HttpHeaderSentListener, BlockListener, 
-               BlockSentListener {
+public class BaseHandler
+    implements Handler, HandlerFactory, HttpHeaderSentListener, BlockListener,
+	       BlockSentListener {
     /** The Connection handling the request.*/
     protected Connection con;
     /** The traffic logger handler. */
@@ -58,7 +58,7 @@ public class BaseHandler
     protected CacheEntry<HttpHeader, HttpHeader> entry = null;
     /** The cache channel. */
     protected WritableByteChannel cacheChannel;
-    
+
     /** May we cache this request. */
     protected boolean mayCache;
     /** May we filter this request */
@@ -75,22 +75,22 @@ public class BaseHandler
 
     /** For creating the factory.
      */
-    public BaseHandler () {	
+    public BaseHandler () {
     }
-    
+
     /** Create a new BaseHandler for the given request.
      * @param con the Connection handling the request.
      * @param request the actual request made.
      * @param clientHandle the client side buffer.
      * @param response the actual response.
      * @param content the resource.
-     * @param mayCache May we cache this request? 
+     * @param mayCache May we cache this request?
      * @param mayFilter May we filter this request?
      * @param size the size of the data beeing handled.
      */
-    public BaseHandler (Connection con, TrafficLoggerHandler tlh, 
+    public BaseHandler (Connection con, TrafficLoggerHandler tlh,
 			HttpHeader request, BufferHandle clientHandle,
-			HttpHeader response, ResourceSource content, 
+			HttpHeader response, ResourceSource content,
 			boolean mayCache, boolean mayFilter, long size) {
 	this.con = con;
 	this.tlh = tlh;
@@ -105,12 +105,12 @@ public class BaseHandler
 	this.size = size;
     }
 
-    public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh, 
-				   HttpHeader header, BufferHandle bufHandle, 
-				   HttpHeader webHeader, 
-				   ResourceSource content, boolean mayCache, 
+    public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
+				   HttpHeader header, BufferHandle bufHandle,
+				   HttpHeader webHeader,
+				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
-	return new BaseHandler (con, tlh, header, bufHandle, webHeader, content, 
+	return new BaseHandler (con, tlh, header, bufHandle, webHeader, content,
 				mayCache, mayFilter, size);
     }
 
@@ -119,12 +119,12 @@ public class BaseHandler
     }
 
     /** Handle the request.
-     * A request is made in these steps: 
+     * A request is made in these steps:
      * <xmp>
-     * sendHeader (); 
-     * addCache (); 
+     * sendHeader ();
+     * addCache ();
      * prepare ();
-     * send (); 
+     * send ();
      * finishData ();
      * finish ();
      * </xmp>
@@ -135,11 +135,11 @@ public class BaseHandler
     public void handle () {
 	if (request.isDot9Request ())
 	    send ();
-	else 
+	else
 	    sendHeader ();
     }
 
-    /** 
+    /**
      * ®return false if this handler never modifies the content.
      */
     public boolean changesContentSize () {
@@ -148,15 +148,15 @@ public class BaseHandler
 
     protected void sendHeader () {
 	try {
-	    HttpHeaderSender hhs = 
-		new HttpHeaderSender (con.getChannel (), con.getNioHandler (), 
+	    HttpHeaderSender hhs =
+		new HttpHeaderSender (con.getChannel (), con.getNioHandler (),
 				      tlh.getClient (), response, false, this);
 	    hhs.sendHeader ();
 	} catch (IOException e) {
 	    failed (e);
 	}
     }
-    
+
     public void httpHeaderSent () {
 	addCache ();
 	prepare ();
@@ -167,7 +167,7 @@ public class BaseHandler
      */
     protected void prepare () {
 	send ();
-    }    
+    }
 
     /** This method is used to finish the data for the resource being sent.
      *  This method will send an end chunk if needed and then call finish
@@ -187,7 +187,7 @@ public class BaseHandler
 	    finish (true);
 	}
     }
-    
+
     private void removePrivateParts (HttpHeader header, String type) {
 	for (String val : header.getHeaders ("Cache-Control")) {
 	    int j = val.indexOf (type);
@@ -199,7 +199,7 @@ public class BaseHandler
 		    header.removeHeader (t);
 		}
 	    }
-	}		
+	}
     }
 
     private void removePrivateParts (HttpHeader header) {
@@ -207,15 +207,15 @@ public class BaseHandler
 	removePrivateParts (header, "no-cache=");
     }
 
-    /** Mark the current response as a partial response. 
+    /** Mark the current response as a partial response.
      */
     protected void setPartialContent (long got, long shouldbe) {
 	response.setHeader ("RabbIT-Partial", "" + shouldbe);
     }
-    
+
     /** Close nesseccary channels and adjust the cached files.
      *  If you override this one, remember to call super.finish ()!
-     * @param good if true then the connection may be restarted, 
+     * @param good if true then the connection may be restarted,
      *             if false then the connection may not be restared
      */
     protected void finish (boolean good) {
@@ -223,19 +223,19 @@ public class BaseHandler
 	try {
 	    if (content != null)
 		content.release ();
-	    if (cacheChannel != null) { 
+	    if (cacheChannel != null) {
 		try {
 		    cacheChannel.close ();
 		} catch (IOException e) {
 		    failed (e);
 		}
 	    }
-	    
+
 	    finishCache ();
-	    if (response != null 
+	    if (response != null
 		&& response.getHeader ("Content-Length") != null)
 		con.setContentLength (response.getHeader ("Content-length"));
-	    
+
 	    ok = true;
 	} finally {
 	    // and clean up...
@@ -247,20 +247,20 @@ public class BaseHandler
 	}
 	// Not sure why we need this, seems to call finish multiple times.
 	if (con != null) {
-	    if (good && ok) 
+	    if (good && ok)
 		con.logAndRestart ();
-	    else 
+	    else
 		con.logAndClose (null);
 	}
 	tlh = null;
 	con = null;
 	if (clientHandle != null)
-	    clientHandle.possiblyFlush (); 
+	    clientHandle.possiblyFlush ();
 	clientHandle = null;
     }
 
     private void finishCache () {
-	if (entry == null || !mayCache) 
+	if (entry == null || !mayCache)
 	    return;
 	Cache<HttpHeader, HttpHeader> cache = con.getProxy ().getCache ();
 	String entryName = cache.getEntryName (entry.getId (), false, null);
@@ -271,24 +271,24 @@ public class BaseHandler
 	if (cl == null) {
 	    response.removeHeader ("Transfer-Encoding");
 	    response.setHeader ("Content-Length", "" + filesize);
-	}		
+	}
 	removePrivateParts (response);
 	cache.addEntry (entry);
     }
 
-    /** Try to use the resource size to decide if we may cache or not. 
-     *  If the size is known and the size is bigger than the maximum cache 
-     *  size, then we dont want to cache the resource. 
+    /** Try to use the resource size to decide if we may cache or not.
+     *  If the size is known and the size is bigger than the maximum cache
+     *  size, then we dont want to cache the resource.
      */
     protected boolean mayCacheFromSize () {
 	Cache<HttpHeader, HttpHeader>  cache = con.getProxy ().getCache ();
-	if ((size > 0 && size > cache.getMaxSize ()) || 
+	if ((size > 0 && size > cache.getMaxSize ()) ||
 	    (cache.getMaxSize () == 0))
 	    return false;
 	return true;
     }
 
-    /** Check if this handler may force the cached resource to be 
+    /** Check if this handler may force the cached resource to be
      *  less than the cache max size.
      * @return true
      */
@@ -296,7 +296,7 @@ public class BaseHandler
 	return true;
     }
 
-    /** Set the expire time on the cache entry. 
+    /** Set the expire time on the cache entry.
      *  If the expire time is 0 then the cache is not written.
      */
     private void setCacheExpiry () {
@@ -309,15 +309,15 @@ public class BaseHandler
 	    if (exp != null) {
 		long now = System.currentTimeMillis ();
 		if (now > exp.getTime ()) {
-		    getLogger ().config ("expire date in the past: '" + 
+		    getLogger ().config ("expire date in the past: '" +
 					 expires + "'");
 		    entry = null;
 		    return;
 		}
 		entry.setExpires (exp.getTime ());
 	    } else {
-		getLogger ().config ("unable to parse expire date: '" + 
-				     expires + "' for URI: '" + 
+		getLogger ().config ("unable to parse expire date: '" +
+				     expires + "' for URI: '" +
 				     request.getRequestURI () + "'");
 		entry = null;
 		return;
@@ -325,9 +325,9 @@ public class BaseHandler
 	}
     }
 
-    private void updateRange (CacheEntry<HttpHeader, HttpHeader> old, 
-			      PartialCacher pc, 
-			      Cache<HttpHeader, HttpHeader> cache) {	
+    private void updateRange (CacheEntry<HttpHeader, HttpHeader> old,
+			      PartialCacher pc,
+			      Cache<HttpHeader, HttpHeader> cache) {
 	HttpHeader oldRequest = old.getKey ();
 	HttpHeader oldResponse = old.getDataHook (cache);
 	String cr = oldResponse.getHeader ("Content-Range");
@@ -345,16 +345,16 @@ public class BaseHandler
 	    long total = crp.getTotal ();
 	    String t = total < 0 ? "*" : Long.toString (total);
 	    if (end == pc.getStart () - 1) {
-		oldRequest.setHeader ("Range", 
+		oldRequest.setHeader ("Range",
 				      "bytes=" + start + "-" + end);
-		oldResponse.setHeader ("Content-Range", 
-				       "bytes " + start + "-" + 
+		oldResponse.setHeader ("Content-Range",
+				       "bytes " + start + "-" +
 				       pc.getEnd () + "/" + t);
 	    } else {
-		oldRequest.addHeader ("Range", 
+		oldRequest.addHeader ("Range",
 				      "bytes=" + start + "-" + end);
-		oldResponse.addHeader ("Content-Range", 
-				       "bytes " + start + "-" + 
+		oldResponse.addHeader ("Content-Range",
+				       "bytes " + start + "-" +
 				       pc.getEnd () + "/" + t);
 	    }
 	    cache.entryChanged (old, oldRequest, oldResponse);
@@ -362,20 +362,20 @@ public class BaseHandler
     }
 
     private void setupPartial (CacheEntry<HttpHeader, HttpHeader> oldEntry,
-			       CacheEntry<HttpHeader, HttpHeader> entry, 
-			       String entryName, 
-			       Cache<HttpHeader, HttpHeader> cache) 
+			       CacheEntry<HttpHeader, HttpHeader> entry,
+			       String entryName,
+			       Cache<HttpHeader, HttpHeader> cache)
 	throws IOException {
 	if (oldEntry != null) {
 	    String oldName = cache.getEntryName (oldEntry.getId (), true, null);
-	    PartialCacher pc = 
+	    PartialCacher pc =
 		new PartialCacher (oldName, response);
 	    cacheChannel = pc.getChannel ();
 	    updateRange (oldEntry, pc, cache);
 	    return;
 	}
 	entry.setDataHook (response);
-	PartialCacher pc = 
+	PartialCacher pc =
 	    new PartialCacher (entryName, response);
 	cacheChannel = pc.getChannel ();
     }
@@ -388,30 +388,30 @@ public class BaseHandler
 	    entry = cache.newEntry (request);
 	    setCacheExpiry ();
 	    if (entry == null) {
-		getLogger ().config ("Expiry =< 0 set on entry, will not cache");				     
+		getLogger ().config ("Expiry =< 0 set on entry, will not cache");
 		return;
 	    }
 	    String entryName = cache.getEntryName (entry.getId (), false, null);
 	    if (response.getStatusCode ().equals ("206")) {
-		CacheEntry<HttpHeader, HttpHeader> oldEntry = 
+		CacheEntry<HttpHeader, HttpHeader> oldEntry =
 		    cache.getEntry (request);
 		try {
 		    setupPartial (oldEntry, entry, entryName, cache);
 		} catch (IOException e) {
-		    getLogger ().log (Level.WARNING, 
+		    getLogger ().log (Level.WARNING,
 				      "Got IOException, not updating cache",
 				      e);
 		    entry = null;
-		    cacheChannel = null;		    
+		    cacheChannel = null;
 		}
 	    } else {
 		entry.setDataHook (response);
 		try {
-		    FileOutputStream cacheStream = 
+		    FileOutputStream cacheStream =
 			new FileOutputStream (entryName);
-		    /* TODO: implement this: 
+		    /* TODO: implement this:
 		       if (mayRestrictCacheSize ())
-		       cacheStream = new MaxSizeOutputStream (cacheStream, 
+		       cacheStream = new MaxSizeOutputStream (cacheStream,
 		       cache.getMaxSize ());
 		    */
 		    cacheChannel = cacheStream.getChannel ();
@@ -441,13 +441,13 @@ public class BaseHandler
     }
 
     protected void send () {
-	if (mayTransfer () 
-	    && content.length () > 0 
+	if (mayTransfer ()
+	    && content.length () > 0
 	    && content.supportsTransfer ()) {
 	    TransferListener tl = new ContentTransferListener ();
-	    TransferHandler th = 
+	    TransferHandler th =
 		new TransferHandler (con.getNioHandler (), content,
-				     con.getChannel (), 
+				     con.getChannel (),
 				     tlh.getCache (), tlh.getClient (), tl);
 	    th.transfer ();
 	} else {
@@ -477,17 +477,17 @@ public class BaseHandler
     public void bufferRead (BufferHandle bufHandle) {
 	if (con == null) {
 	    // not sure why this can happen, client has closed connection.
-	    return; 
+	    return;
 	}
 	try {
-	    // TODO: do this in another thread? 
+	    // TODO: do this in another thread?
 	    ByteBuffer buffer = bufHandle.getBuffer ();
 	    if (cacheChannel != null)
 		writeCache (buffer);
 	    totalRead += buffer.remaining ();
-	    BlockSender bs = 
-		new BlockSender (con.getChannel (), con.getNioHandler (), 
-				 tlh.getClient (), bufHandle, 
+	    BlockSender bs =
+		new BlockSender (con.getChannel (), con.getNioHandler (),
+				 tlh.getClient (), bufHandle,
 				 con.getChunking (), this);
 	    bs.write ();
 	} catch (IOException e) {
@@ -498,7 +498,7 @@ public class BaseHandler
     public void blockSent () {
 	content.addBlockListener (BaseHandler.this);
     }
-    
+
     public void finishedRead () {
 	if (size > 0 && totalRead != size)
 	    setPartialContent (totalRead, size);
@@ -511,10 +511,10 @@ public class BaseHandler
 	}
 	public void failed (Exception cause) {
 	    BaseHandler.this.failed (cause);
-	}			
+	}
 	public void timeout () {
 	    BaseHandler.this.timeout ();
-	}			
+	}
     }
 
     String getStackTrace (Exception cause) {
@@ -528,17 +528,17 @@ public class BaseHandler
 	try {
 	    FileHelper.delete (f);
 	} catch (IOException e) {
-	    getLogger ().log (Level.WARNING, 
+	    getLogger ().log (Level.WARNING,
 			      "Failed to delete file",
 			      e);
-	}	
+	}
     }
 
     protected void removeCache () {
 	if (cacheChannel != null) {
 	    try {
 		cacheChannel.close ();
-		Cache<HttpHeader, HttpHeader> cache = 
+		Cache<HttpHeader, HttpHeader> cache =
 		    con.getProxy ().getCache ();
 		String entryName = cache.getEntryName (entry.getId (), false, null);
 		File f = new File (entryName);
@@ -546,14 +546,14 @@ public class BaseHandler
 		entry = null;
 	    } catch (IOException e) {
 		getLogger ().log (Level.WARNING,
-				  "failed to remove cache entry: ", 
+				  "failed to remove cache entry: ",
 				  e);
 	    } finally {
 		cacheChannel = null;
-	    } 
+	    }
 	}
     }
-    
+
     public void failed (Exception cause) {
 	if (con != null) {
 	    String st = null;
@@ -564,13 +564,13 @@ public class BaseHandler
 		    st = ioe.toString () + ", probably cancelled pipeline";
 		else if ("Connection reset by peer".equals (msg))
 		    st = ioe.toString () + ", client aborted connection";
-		else 
+		else
 		    st = getStackTrace (cause);
 	    } else {
 		st = getStackTrace (cause);
 	    }
 	    getLogger ().warning ("BaseHandler: error handling request: " +
-				  request.getRequestURI () + ": " + 
+				  request.getRequestURI () + ": " +
 				  st);
 	    con.setStatusCode ("500");
 	    String ei = con.getExtraInfo ();
