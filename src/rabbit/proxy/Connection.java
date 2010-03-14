@@ -746,13 +746,12 @@ public class Connection {
 	    sb.append ("Server not found");
 	else
 	    sb.append ("Unable to handle request");
+	// if we have any content it should already be escaped so do 
+	// not escape here
 	sb.append (":<br><b>" + HtmlEscapeUtils.escapeHtml (e.getMessage ()) +
 		   (header.getContent () != null ?
-		    "<br>" +
-		    HtmlEscapeUtils.escapeHtml (header.getContent ()) :
-		    "") +
-		   "</b><br><xmp>" +
-		   HtmlEscapeUtils.escapeHtml (message) +
+		    "<br>" + header.getContent () : "") +
+		   "</b><br><xmp>" + message +
 		   "</xmp></body></html>\n");
 	header.setContent (sb.toString ());
 	sendAndClose (header);
