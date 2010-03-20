@@ -1,5 +1,6 @@
 package rabbit.filter;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import rabbit.http.HttpHeader;
@@ -21,12 +22,12 @@ public class HttpSnoop implements HttpFilter {
      * @param con the Connection handling the request.
      * @return This method always returns null.
      */
-    public HttpHeader doHttpInFiltering (SocketChannel socket, 
+    public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
 	if (mode == SnoopMode.NORMAL) {
 	    System.out.println (con.getRequestLine ());
 	} else {
-	    System.out.println (header.toString ());
+	    System.out.print (header.toString ());
 	    if (mode == SnoopMode.FULL) {
 		ClientResourceHandler crh = con.getClientResourceHandler ();
 		if (crh != null)
@@ -45,25 +46,35 @@ public class HttpSnoop implements HttpFilter {
 	public void resouceDataRead (BufferHandle bufHandle) {
 	    ByteBuffer buf = bufHandle.getBuffer ();
 	    buf = buf.duplicate ();
-	    // TODO: format data better
-	    System.out.println (header.getRequestLine () + "\n" + buf);				
+	    byte[] data = new byte[buf.remaining ()];
+	    buf.get (data);
+	    try {
+		// TODO: better handling of charset,
+		// TODO: for now we use latin-1 since that has no
+		// TOdO: invalid characters.
+		String s = new String (data, "ISO-8859-1");
+		System.out.println (header.getRequestLine () +
+				    " request content:\n" + s);
+	    } catch (UnsupportedEncodingException e) {
+		throw new RuntimeException ("Failed to get charset", e);
+	    }
 	}
     }
-    
+
     /** test if a socket/header combination is valid or return a new HttpHeader.
      * @param socket the Socket that made the request.
      * @param header the actual request made.
      * @param con the Connection handling the request.
      * @return This method always returns null.
      */
-    public HttpHeader doHttpOutFiltering (SocketChannel socket, 
+    public HttpHeader doHttpOutFiltering (SocketChannel socket,
 					  HttpHeader header, Connection con) {
 	if (mode == SnoopMode.REQUEST_LINE) {
-	    System.out.println (con.getRequestLine () + "\n" + 
+	    System.out.println (con.getRequestLine () + "\n" +
 				header.getStatusLine ());
 	} else {
-	    System.out.println (con.getRequestLine () + "\n" + 
-				header.toString ());
+	    System.out.print (con.getRequestLine () + "\n" +
+			      header.toString ());
 	}
 	return null;
     }
