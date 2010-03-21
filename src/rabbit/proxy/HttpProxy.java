@@ -307,7 +307,7 @@ public class HttpProxy implements Resolver {
 	String section = getClass ().getName ();
 	int tport = getInt (section, "port", 9666);
 	int cpus = Runtime.getRuntime ().availableProcessors ();
-	int selectorThreads = getInt (section, "num_selector_threads", cpus);
+	int threads = getInt (section, "num_selector_threads", cpus);
 	String bindIP = config.getProperty (section, "listen_ip");
 	if (tport != port) {
 	    try {
@@ -326,8 +326,9 @@ public class HttpProxy implements Resolver {
 		}
 		ExecutorService es = Executors.newCachedThreadPool ();
 		StatisticsHolder sh = new BasicStatisticsHolder ();
+		Long timeout = Long.valueOf (15000);
 		nioHandler = 
-		    new MultiSelectorNioHandler (es, sh, selectorThreads);
+		    new MultiSelectorNioHandler (es, sh, threads, timeout);
 		AcceptorListener listener =
 		    new ProxyConnectionAcceptor (acceptorId++, this);
 		Acceptor acceptor = new Acceptor (ssc, nioHandler, listener);

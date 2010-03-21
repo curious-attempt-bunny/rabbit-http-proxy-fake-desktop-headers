@@ -62,7 +62,8 @@ public class SimpleWebServer {
 	dir = dir.getCanonicalFile ();
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
-	nioHandler = new MultiSelectorNioHandler (es, sh, 4);
+	nioHandler = 
+	    new MultiSelectorNioHandler (es, sh, 4, Long.valueOf (15000));
     }
 
     /** Start serving requests. 
