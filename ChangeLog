@@ -1,4 +1,4 @@
-version 4.5 (20xx-yy-zz) Created rnio as a separate project out of
+version 4.5 (2010-03-23) Created rnio as a separate project out of
 	the rabbit.nio package and made rabbit use rnio. Use URLDeocder
 	instead of home written method. Use utf-8 for meta pages by
 	default. Add a few missing javadoc package descriptions and fixed
