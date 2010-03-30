@@ -492,10 +492,12 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      */
     @SuppressWarnings( "unchecked" )
     private void readCacheIndex () {
-	fileNo = 0;
-	currentSize = 0;
-	htab = new HashMap<FiledKey<K>, CacheEntry<K, V>> ();
-	vec = new ArrayList<CacheEntry<K, V>> ();
+	long fileNo = 0;
+	long currentSize = 0;
+	Map<FiledKey<K>, CacheEntry<K, V>> htab = 
+	    new HashMap<FiledKey<K>, CacheEntry<K, V>> ();
+	List<CacheEntry<K, V>> vec = 
+	    new ArrayList<CacheEntry<K, V>> ();
 	try {
 	    String name = dir + File.separator + CACHEINDEX;
 	    FileInputStream fis = new FileInputStream (name);
@@ -516,6 +518,12 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    htab = hh;
 	    vec = (List<CacheEntry<K, V>>)is.readObject ();
 	    is.close ();
+
+	    // Only set internal state if we managed to get it all.
+	    this.fileNo = fileNo;
+	    this.currentSize = currentSize;
+	    this.htab = htab;
+	    this.vec = vec;
 	} catch (IOException e) {
 	    logger.log (Level.WARNING,
 			"Couldnt read " + dir + File.separator + CACHEINDEX +
