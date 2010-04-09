@@ -54,7 +54,7 @@ abstract class ResourceHandlerBase implements ClientResourceHandler {
 	if (resourceListeners == null)
 	    return;
 	for (ClientResourceListener crl : resourceListeners) {
-	    crl.resouceDataRead (bufHandle);
+	    crl.resourceDataRead (bufHandle);
 	}
     }
     

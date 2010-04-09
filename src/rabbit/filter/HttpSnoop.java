@@ -43,7 +43,7 @@ public class HttpSnoop implements HttpFilter {
 	    this.header = header;
 	}
 
-	public void resouceDataRead (BufferHandle bufHandle) {
+	public void resourceDataRead (BufferHandle bufHandle) {
 	    ByteBuffer buf = bufHandle.getBuffer ();
 	    buf = buf.duplicate ();
 	    byte[] data = new byte[buf.remaining ()];

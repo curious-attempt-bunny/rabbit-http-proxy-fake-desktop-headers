@@ -7,5 +7,5 @@ import rabbit.io.BufferHandle;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public interface ClientResourceListener {
-    void resouceDataRead (BufferHandle bufHandle);
+    void resourceDataRead (BufferHandle bufHandle);
 }
