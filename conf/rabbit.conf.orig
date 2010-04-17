@@ -47,6 +47,9 @@ logo=http://$proxy/FileSender/public/smallRabbIT4.png
 #StrictHTTP=true
 StrictHTTP=false
 
+# The factory that creates the HttpGenerator 
+http_generator_factory=rabbit.proxy.StandardHttpGeneratorFactory
+
 
 [logging]
 # RabbIT uses standard java.util.logging to log things, you 

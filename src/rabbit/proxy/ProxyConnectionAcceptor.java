@@ -36,8 +36,7 @@ public class ProxyConnectionAcceptor implements AcceptorListener {
 	    sc.close ();
 	} else {
 	    BufferHandler bh = proxy.getBufferHandler ();
-	    Connection c = 
-		new Connection (getId (), sc, proxy, bh);
+	    Connection c = new Connection (getId (), sc, proxy, bh);
 	    c.readRequest ();
 	}
     }

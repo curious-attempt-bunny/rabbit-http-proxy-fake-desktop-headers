@@ -129,6 +129,8 @@ public class HttpProxy implements Resolver {
     /** The total traffic in and out of this proxy. */
     private TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
 
+    private HttpGeneratorFactory hgf;
+
     public HttpProxy () throws UnknownHostException {
 	localhost = InetAddress.getLocalHost ();
     }
@@ -275,6 +277,23 @@ public class HttpProxy implements Resolver {
 	conhandler.setup (config.getProperties (p));
     }
 
+    private void setupHttpGeneratorFactory () {
+	String def = StandardHttpGeneratorFactory.class.getName ();
+	String hgfClass = config.getProperty (getClass ().getName (), 
+					      "http_generator_factory", def);
+	try {
+	    Class<? extends HttpGeneratorFactory> clz =
+		Class.forName (hgfClass).asSubclass (HttpGeneratorFactory.class);
+	    hgf = clz.newInstance ();
+	} catch (Exception e) {
+	    logger.log (Level.WARNING,
+			"Unable to create the http generator " +
+			"factory, will fall back to the default one.",
+			e);
+	    hgf = new StandardHttpGeneratorFactory ();
+	}
+    }
+
     private void setConfig (Config config) {
 	this.config = config;
 	setupLogging ();
@@ -291,6 +310,7 @@ public class HttpProxy implements Resolver {
 	loadClasses ();
 	openSocket ();
 	setupConnectionHandler ();
+	setupHttpGeneratorFactory ();
 	logger.info (VERSION + ": Configuration loaded: ready for action.");
     }
 
@@ -613,5 +633,9 @@ public class HttpProxy implements Resolver {
 
     protected BufferHandler getBufferHandler () {
 	return bufferHandler;
+    }
+
+    public HttpGeneratorFactory getHttpGeneratorFactory () {
+	return hgf;
     }
 }

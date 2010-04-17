@@ -89,7 +89,7 @@ public class Connection {
 
     private ClientResourceHandler clientResourceHandler;
 
-    private StandardResponseHeaders responseHandler;
+    private HttpGenerator responseHandler;
 
     private TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
 
@@ -103,8 +103,8 @@ public class Connection {
 	this.requestHandle = new CacheBufferHandle (bufHandler);
 	this.bufHandler = bufHandler;
 	proxy.addCurrentConnection (this);
-	responseHandler =
-	    new StandardResponseHeaders (proxy.getServerIdentity (), this);
+	HttpGeneratorFactory hgf = proxy.getHttpGeneratorFactory ();
+	responseHandler = hgf.create (proxy.getServerIdentity (), this);
     }
 
     // For logging and status
