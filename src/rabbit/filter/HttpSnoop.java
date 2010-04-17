@@ -24,7 +24,7 @@ public class HttpSnoop implements HttpFilter {
      */
     public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
-	if (mode == SnoopMode.NORMAL) {
+	if (mode == SnoopMode.REQUEST_LINE) {
 	    System.out.println (con.getRequestLine ());
 	} else {
 	    System.out.print (header.toString ());
