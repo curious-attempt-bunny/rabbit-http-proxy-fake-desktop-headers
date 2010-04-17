@@ -18,10 +18,13 @@ import rabbit.httpio.FileResourceSource;
 import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.FileHelper;
+import rabbit.io.SimpleBufferHandle;
 import rabbit.proxy.Connection;
 import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
+import rabbit.zip.GZipUnpackListener;
+import rabbit.zip.GZipUnpacker;
 
 /** This handler first downloads the image runs convert on it and
  *  then serves the smaller image.
@@ -179,19 +182,69 @@ public class ImageHandler extends BaseHandler {
      * @throws IOException if reading of the image fails.
      */
     protected void readImage () throws IOException {
-	content.addBlockListener (new ImageReader ());
+	String enc = response.getHeader ("Content-Encoding");
+	boolean unzip = "gzip".equalsIgnoreCase (enc); 
+	if (unzip)
+	    response.removeHeader ("Content-Encoding");
+	content.addBlockListener (new ImageReader (unzip));
     }
 
-    private class ImageReader implements BlockListener {
+    private class ImageReader implements BlockListener, GZipUnpackListener {
+	private boolean unzip;
+	private GZipUnpacker gzu;
+	private byte[] buffer;
+
+	public ImageReader (boolean unzip) {
+	    this.unzip = unzip;
+	    if (unzip) {
+		gzu = new GZipUnpacker (this, false);
+		buffer = new byte[4096];
+	    }
+	}
+
 	public void bufferRead (final BufferHandle bufHandle) {
 	    TaskIdentifier ti =
 		new DefaultTaskIdentifier (getClass ().getSimpleName (),
 					   request.getRequestURI ());
 	    con.getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {
-			writeImageData (bufHandle);
+			if (unzip) {
+			    unpackData (bufHandle);
+			} else {
+			    writeImageData (bufHandle);
+			}
 		    }
 		}, ti);
+	}
+
+	public byte[] getBuffer () {
+	    return buffer;
+	}
+
+	private void unpackData (BufferHandle bufHandle) {
+	    ByteBuffer buf = bufHandle.getBuffer ();
+	    totalRead += buf.remaining ();
+	    byte[] arr;
+	    int off = 0;
+	    int len = buf.remaining ();
+	    if (buf.hasArray ()) {
+		arr = buf.array ();
+		off = buf.position ();
+	    } else {
+		arr = new byte[len];
+		buf.get (arr);
+	    }
+	    gzu.setInput (arr, off, len);
+	}
+
+	public void unpacked (byte[] arr, int off, int len) {
+	    ByteBuffer buf = ByteBuffer.wrap (arr, off, len);
+	    BufferHandle bh = new SimpleBufferHandle (buf);
+	    writeImageData (bh);
+	}
+
+	public void finished () {
+	    finishedRead ();
 	}
 
 	private void writeImageData (BufferHandle bufHandle) {
@@ -201,7 +254,14 @@ public class ImageHandler extends BaseHandler {
 		totalRead += buf.remaining ();
 		buf.position (buf.limit ());
 		bufHandle.possiblyFlush ();
-		content.addBlockListener (this);
+		if (gzu == null) {
+		    content.addBlockListener (this);
+		} else {
+		    if (gzu.needsInput ())
+			content.addBlockListener (this);
+		    else
+			gzu.handleCurrentData ();
+		} 
 	    } catch (IOException e) {
 		failed (e);
 	    }

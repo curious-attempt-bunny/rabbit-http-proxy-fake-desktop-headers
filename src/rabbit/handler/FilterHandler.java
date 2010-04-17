@@ -149,7 +149,7 @@ public class FilterHandler extends GZipHandler {
     }
 
     private class GZListener implements GZipUnpackListener {
-	private byte[] buffer;
+	private byte[] buffer = new byte[4096];
 	public void unpacked (byte[] buf, int off, int len) {
 	    handleArray (buf, off, len);
 	}
@@ -160,8 +160,6 @@ public class FilterHandler extends GZipHandler {
 	}
 
 	public byte[] getBuffer () {
-	    if (buffer == null)
-		buffer = new byte[4096];
 	    return buffer;
 	}
 
@@ -199,14 +197,17 @@ public class FilterHandler extends GZipHandler {
 	}
 	ByteBuffer buf = bufHandle.getBuffer ();
 	byte[] arr;
-	if (buf.isDirect ()) {
-	    arr = new byte[buf.remaining ()];
-	    buf.get (arr);
-	} else {
+	int off = 0;
+	int len = buf.remaining ();
+	if (buf.hasArray ()) {
 	    arr = buf.array ();
+	    off = buf.position ();
+	} else {
+	    arr = new byte[len];
+	    buf.get (arr);
 	}
 	bufHandle.possiblyFlush ();
-	forwardArrayToHandler (arr, 0, arr.length);
+	forwardArrayToHandler (arr, off, len);
     }
 
     private void forwardArrayToHandler (byte[] arr, int off, int len) {

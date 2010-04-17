@@ -1,6 +1,8 @@
 version 4.6 (20xx-yy-zz) Reading a broken cache index now results
 	in an empty cache instead of a cache with no files, but a big
-	size. Made it possible to configure what HttpGenerator to use.
+	size. Made it possible to configure what HttpGenerator to
+	use. ImageHandler now detects and unpacks images that have a
+	content encoding set to gzip.
 
 version 4.5 (2010-03-23) Created rnio as a separate project out of
 	the rabbit.nio package and made rabbit use rnio. Use URLDeocder
