@@ -1,0 +1,6 @@
+# This directory holds error pages
+# The error pages are the actual content, the header is generated 
+# by rabbit internally.
+
+# Each template file should be named by the error code, like "504"
+# for the Gateway timeout page.

@@ -47,8 +47,15 @@ logo=http://$proxy/FileSender/public/smallRabbIT4.png
 #StrictHTTP=true
 StrictHTTP=false
 
-# The factory that creates the HttpGenerator 
+# The factory that creates the HttpGenerator. There are a few different
+# factories in rabbit:
+# rabbit.proxy.StandardHttpGeneratorFactory
+# rabbit.proxy.FileTemplateHttpGeneratorFactory
+#
+# The factory will have the setup method called with the properties
+# of the section for the class name of the factory
 http_generator_factory=rabbit.proxy.StandardHttpGeneratorFactory
+#http_generator_factory=rabbit.proxy.FileTemplateHttpGeneratorFactory
 
 
 [logging]
@@ -109,6 +116,15 @@ usepipelining=false
 # Here you can specify an ip that will be used for outgoing 
 # connections.
 #bind_ip=192.168.0.123
+
+
+[rabbit.proxy.StandardHttpGeneratorFactory]
+# No parameters
+
+
+[rabbit.proxy.FileTemplateHttpGeneratorFactory]
+error_pages=htdocs/error_pages
+
 
 [Handlers]
 # This section sets up the content handlers.

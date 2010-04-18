@@ -30,7 +30,8 @@ import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.util.Counter;
-import rabbit.util.StackTraceUtil;
+
+import static rabbit.http.StatusCode.*;
 
 /** The base connection class for rabbit.
  *
@@ -617,18 +618,18 @@ public class Connection {
 	if (rh.getEntry () != null && rh.isConditional () && !mustRevalidate)
 	    handleStaleEntry (rh);
 	else
-	    doError (504, e);
+	    doGateWayTimeout (e);
     }
 
     private void handleStaleEntry (RequestHandler rh) {
 	setMayCache (false);
 	try {
 	    setupCachedEntry (rh);
-	    rh.getWebHeader ().addHeader ("Warning",
-				    "110 RabbIT \"Response is stale\"");
+	    HttpHeader wh = rh.getWebHeader ();
+	    wh.addHeader ("Warning", "110 RabbIT \"Response is stale\"");
 	    resourceEstablished (rh);
 	} catch (IOException ex) {
-	    doError (504, ex);
+	    doGateWayTimeout (ex);
 	    return;
 	}
     }
@@ -710,9 +711,9 @@ public class Connection {
      */
     void doError (int status, String message) {
 	this.statusCode = Integer.toString (status);
-	HttpHeader header = responseHandler.getHeader ("HTTP/1.0 400 Bad Request");
+	HttpHeader header = responseHandler.getHeader (_400);
 	StringBuilder error =
-	    new StringBuilder (HtmlPage.getPageHeader (this, "400 Bad Request") +
+	    new StringBuilder (HtmlPage.getPageHeader (this, _400) +
 			       "Unable to handle request:<br><b>" +
 			       HtmlEscapeUtils.escapeHtml (message) +
 			       "</b></body></html>\n");
@@ -724,36 +725,13 @@ public class Connection {
      * @param statuscode the status code of the error.
      * @param e the exception to tell the client.
      */
-    private void doError (int statuscode, Exception e) {
-	String message = "";
-	boolean dnsError = (e instanceof UnknownHostException);
-	this.statusCode = Integer.toString (statuscode);
+    private void doGateWayTimeout (Exception e) {
+	this.statusCode = "504";
 	extraInfo = (extraInfo != null ?
 		     extraInfo + e.toString () :
 		     e.toString ());
-	HttpHeader header = null;
-	if (!dnsError)
-	    message = StackTraceUtil.getStackTrace (e);
-	if (statuscode == 504)
-	    header = getHttpGenerator ().get504 (e, request.getRequestURI ());
-	else
-	    header = getHttpGenerator ().getHeader ("HTTP/1.0 400 Bad Request");
-
-	StringBuilder sb = new StringBuilder ();
-	sb.append (HtmlPage.getPageHeader (this, statuscode + " " +
-					   header.getReasonPhrase ()));
-	if (dnsError)
-	    sb.append ("Server not found");
-	else
-	    sb.append ("Unable to handle request");
-	// if we have any content it should already be escaped so do 
-	// not escape here
-	sb.append (":<br><b>" + HtmlEscapeUtils.escapeHtml (e.getMessage ()) +
-		   (header.getContent () != null ?
-		    "<br>" + header.getContent () : "") +
-		   "</b><br><xmp>" + message +
-		   "</xmp></body></html>\n");
-	header.setContent (sb.toString ());
+	HttpHeader header = 
+	    getHttpGenerator ().get504 (e, request.getRequestURI ());
 	sendAndClose (header);
     }
 

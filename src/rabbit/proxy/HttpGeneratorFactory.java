@@ -1,5 +1,7 @@
 package rabbit.proxy;
 
+import rabbit.util.SProperties;
+
 /** The factory for the HttpGenerators used by rabbit.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -11,4 +13,9 @@ public interface HttpGeneratorFactory {
      */
     HttpGenerator create (String serverIdentity, 
 			  Connection connection);
+
+    /** Setup this factory.
+     * @param props the config parameters
+     */
+    void setup (SProperties props);
 }

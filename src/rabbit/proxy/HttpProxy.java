@@ -273,8 +273,8 @@ public class HttpProxy implements Resolver {
 	    return;
 	}
 	conhandler = new ConnectionHandler (counter, this, nioHandler);
-	String p = conhandler.getClass ().getName ();
-	conhandler.setup (config.getProperties (p));
+	String section = conhandler.getClass ().getName ();
+	conhandler.setup (config.getProperties (section));
     }
 
     private void setupHttpGeneratorFactory () {
@@ -292,6 +292,8 @@ public class HttpProxy implements Resolver {
 			e);
 	    hgf = new StandardHttpGeneratorFactory ();
 	}
+	String section = hgf.getClass ().getName ();
+	hgf.setup (config.getProperties (section));
     }
 
     private void setConfig (Config config) {

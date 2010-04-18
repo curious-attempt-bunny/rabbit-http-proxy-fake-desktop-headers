@@ -1,5 +1,6 @@
 package rabbit.proxy;
 
+import rabbit.http.StatusCode;
 import rabbit.util.SProperties;
 
 /** This class is intended to be used as a template for metapages.
@@ -29,6 +30,14 @@ public class HtmlPage {
 		"\" link=\"" + config.getProperty ("bodylink") +
 		"\" alink=\"" + config.getProperty ("bodyalink") +
 		"\" vlink=\"" + config.getProperty ("bodyvlink") + "\">\n");
+    }
+
+    /** return a HTMLheader.
+     * @param title the title of this page.
+     * @return a HTMLHeader.
+     */
+    public static String getPageHeader (Connection con, StatusCode type) {
+	return getPageHeader (con, type.getDescription ());
     }
 
     /** return a HTMLheader.

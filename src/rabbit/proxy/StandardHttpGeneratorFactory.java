@@ -1,5 +1,7 @@
 package rabbit.proxy;
 
+import rabbit.util.SProperties;
+
 /** A HttpGeneratorFactory that creates StandardResponseHeaders 
  *  instances.
  *
@@ -8,5 +10,9 @@ package rabbit.proxy;
 public class StandardHttpGeneratorFactory implements HttpGeneratorFactory {
     public HttpGenerator create (String identity, Connection con) {
 	return new StandardResponseHeaders (identity, con);
+    }
+
+    public void setup (SProperties props) {
+	// nothing to do
     }
 }
