@@ -495,7 +495,7 @@ public class Connection {
 							getMayFilter (),
 							rh.getSize ());
 	    if (handler == null) {
-		doError (500, "Something fishy with that handler....");
+		doError (500, "Failed to find handler");
 	    } else {
 		finalFixesOnWebHeader (rh, handler);
 		// HTTP/0.9 does not support HEAD, so webheader should be valid.
@@ -711,13 +711,8 @@ public class Connection {
      */
     void doError (int status, String message) {
 	this.statusCode = Integer.toString (status);
-	HttpHeader header = responseHandler.getHeader (_400);
-	StringBuilder error =
-	    new StringBuilder (HtmlPage.getPageHeader (this, _400) +
-			       "Unable to handle request:<br><b>" +
-			       HtmlEscapeUtils.escapeHtml (message) +
-			       "</b></body></html>\n");
-	header.setContent (error.toString ());
+	HttpHeader header =
+	    getHttpGenerator ().get400 (new IOException (message));
 	sendAndClose (header);
     }
 
