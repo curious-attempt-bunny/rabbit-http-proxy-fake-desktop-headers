@@ -323,7 +323,7 @@ public class Connection {
 		setMayUseCache (false);
 
 	    // Add headers to send If-None-Match, or If-Modified-Since
-	    rh.setConditional (rh.getCond ().checkConditional (this, request, 
+	    rh.setConditional (rh.getCond ().checkConditional (this, request,
 							       rh,
 							       mustRevalidate));
 	    if (partialContent (rh))
@@ -725,7 +725,7 @@ public class Connection {
 	extraInfo = (extraInfo != null ?
 		     extraInfo + e.toString () :
 		     e.toString ());
-	HttpHeader header = 
+	HttpHeader header =
 	    getHttpGenerator ().get504 (e, request.getRequestURI ());
 	sendAndClose (header);
     }
