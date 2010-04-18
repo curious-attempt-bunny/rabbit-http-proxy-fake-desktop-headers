@@ -18,7 +18,6 @@ import rabbit.cache.CacheException;
 import rabbit.handler.BaseHandler;
 import rabbit.handler.Handler;
 import rabbit.handler.MultiPartHandler;
-import rabbit.html.HtmlEscapeUtils;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.HttpHeaderListener;
@@ -30,8 +29,6 @@ import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.util.Counter;
-
-import static rabbit.http.StatusCode.*;
 
 /** The base connection class for rabbit.
  *
