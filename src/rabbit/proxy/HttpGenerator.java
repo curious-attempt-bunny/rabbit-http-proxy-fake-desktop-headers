@@ -2,7 +2,6 @@ package rabbit.proxy;
 
 import java.net.URL;
 import rabbit.http.HttpHeader;
-import rabbit.http.StatusCode;
 
 /** An interface describing the methods for http header generation.
  *
@@ -14,12 +13,6 @@ public interface HttpGenerator {
      * @return a new HttpHeader.
      */
     HttpHeader getHeader ();
-
-    /** Get a new HttpHeader initialized with some data.
-     * @param statusLine the statusline of the response.
-     * @return a new HttpHeader.
-     */
-    HttpHeader getHeader (StatusCode sc);
 
     /** Get a 200 Ok header
      * @return a 200 HttpHeader .
