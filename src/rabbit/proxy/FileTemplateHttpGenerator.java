@@ -111,23 +111,25 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 		t.setText (StackTraceUtil.getStackTrace (thrown));
     }
 
+    private void replace (HtmlBlock block, String tag, String value) {
+	if (value != null)
+	    replaceTemplate (block, tag, HtmlEscapeUtils.escapeHtml (value));
+    }
+
     private void replaceTemplates (StatusCode sc,
 				   HtmlBlock block,
 				   TemplateData td)
 	throws IOException{
-	String url = HtmlEscapeUtils.escapeHtml (td.url);
-	replaceTemplate (block, "%url%", url);
-	String ex = HtmlEscapeUtils.escapeHtml (td.thrown.toString ());
-	replaceTemplate (block, "%exception%", ex);
-	String filename = HtmlEscapeUtils.escapeHtml (td.file);
-	replaceTemplate (block, "%exception%", filename);
-	String expectation = HtmlEscapeUtils.escapeHtml (td.expectation);
-	replaceTemplate (block, "%expectation%", expectation);
-	String realm = HtmlEscapeUtils.escapeHtml (td.realm);
-	replaceTemplate (block, "%realm%", realm);
-
-	replacePlaces (block, "%places%", new URL (td.url));
-	replaceStackTrace (block, "%stackTrace%", td.thrown);
+	replace (block, "%url%", td.url);
+	if (td.thrown != null) {
+	    replace (block, "%exception%", td.thrown.toString ());
+	    replaceStackTrace (block, "%stackTrace%", td.thrown);
+	}
+	replace (block, "%filename%", td.file);
+	replace (block, "%expectation%", td.expectation);
+	replace (block, "%realm%", td.realm);
+	if (td.url != null)
+	    replacePlaces (block, "%places%", new URL (td.url));
 
 	HttpProxy proxy = getProxy ();
 	String sproxy =
