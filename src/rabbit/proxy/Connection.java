@@ -723,7 +723,7 @@ public class Connection {
 		     extraInfo + e.toString () :
 		     e.toString ());
 	HttpHeader header =
-	    getHttpGenerator ().get504 (e, request.getRequestURI ());
+	    getHttpGenerator ().get504 (request.getRequestURI (), e);
 	sendAndClose (header);
     }
 

@@ -5,11 +5,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.khelekore.rnio.impl.Closer;
+import rabbit.html.HtmlBlock;
+import rabbit.html.HtmlEscapeUtils;
+import rabbit.html.HtmlParseException;
+import rabbit.html.HtmlParser;
+import rabbit.html.Tag;
+import rabbit.html.TagType;
+import rabbit.html.Token;
+import rabbit.html.TokenType;
 import rabbit.http.HttpHeader;
 import rabbit.http.StatusCode;
+import rabbit.util.StackTraceUtil;
 
 import static rabbit.http.StatusCode.*;
 
@@ -37,12 +47,138 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	return getFile (sc).exists ();
     }
 
-    private String replaceText (StatusCode sc, String template) {
-	// TODO: replace
-	return template;
+    private boolean match (Token t, TagType type) {
+	if (t.getType () == TokenType.TAG)
+	    return t.getTag ().getTagType () == type;
+	return false;
     }
 
-    private HttpHeader getTemplated (StatusCode sc) {
+    private void replaceValue (Tag tag, String attribute,
+			       String match, String replacer) {
+	String attr = tag.getAttribute (attribute);
+	if (attr != null) {
+	    boolean found = false;
+	    int idx = 0;
+	    // only expect to find zero or one
+	    while ((idx = attr.indexOf (match)) > -1) {
+		found = true;
+		attr = attr.substring(0, idx) + replacer +
+		    attr.substring (idx + match.length ());
+	    }
+	    if (found)
+		tag.setAttribute (attribute, attr);
+	}
+    }
+
+    private void replaceLinks (HtmlBlock block,
+			       String match,
+			       String replacer) {
+	for (Token t : block.getTokens ()) {
+	    if (match (t, TagType.A))
+		replaceValue (t.getTag (), "href", match, replacer);
+	    else if (match (t, TagType.IMG))
+		replaceValue (t.getTag (), "src", match, replacer);
+	}
+    }
+
+    private boolean isTagOfType (Token token, String type) {
+	if (token.getType () == TokenType.TAG) {
+	    Tag tag = token.getTag ();
+	    if (tag.getLowerCaseType ().equals (type))
+		return true;
+	}
+	return false;
+    }
+
+    private void replaceTemplate (HtmlBlock block,
+				  String tagType,
+				  String text) {
+	for (Token t : block.getTokens ())
+	    if (isTagOfType (t, tagType))
+		t.setText (text);
+    }
+
+    private void replacePlaces (HtmlBlock block, String tag, URL url) {
+	for (Token t : block.getTokens ())
+	    if (isTagOfType (t, tag))
+		t.setText (getPlaces (url).toString ());
+    }
+
+    private void replaceStackTrace (HtmlBlock block, String tag,
+				    Throwable thrown) {
+	for (Token t : block.getTokens ())
+	    if (isTagOfType (t, tag))
+		t.setText (StackTraceUtil.getStackTrace (thrown));
+    }
+
+    private void replaceTemplates (StatusCode sc,
+				   HtmlBlock block,
+				   TemplateData td)
+	throws IOException{
+	String url = HtmlEscapeUtils.escapeHtml (td.url);
+	replaceTemplate (block, "%url%", url);
+	String ex = HtmlEscapeUtils.escapeHtml (td.thrown.toString ());
+	replaceTemplate (block, "%exception%", ex);
+	String filename = HtmlEscapeUtils.escapeHtml (td.file);
+	replaceTemplate (block, "%exception%", filename);
+	String expectation = HtmlEscapeUtils.escapeHtml (td.expectation);
+	replaceTemplate (block, "%expectation%", expectation);
+	String realm = HtmlEscapeUtils.escapeHtml (td.realm);
+	replaceTemplate (block, "%realm%", realm);
+
+	replacePlaces (block, "%places%", new URL (td.url));
+	replaceStackTrace (block, "%stackTrace%", td.thrown);
+
+	HttpProxy proxy = getProxy ();
+	String sproxy =
+	    proxy.getHost ().getHostName () + ":" + proxy.getPort ();
+	replaceLinks (block, "$proxy", sproxy);
+    }
+
+    private static class TemplateData {
+	private final String url;
+	private final Throwable thrown;
+	private final String file;
+	private final String expectation;
+	private final String realm;
+
+	public TemplateData (String url, Throwable thrown, String file,
+			     String expectation, String realm) {
+	    this.url = url;
+	    this.thrown = thrown;
+	    this.file = file;
+	    this.expectation = expectation;
+	    this.realm = realm;
+	}
+    }
+
+    public static TemplateData getTemplateData () {
+	return new TemplateData (null, null, null, null, null);
+    }
+
+    public static TemplateData getTemplateData (Throwable thrown) {
+	return new TemplateData (null, thrown, null, null, null);
+    }
+
+    public static TemplateData getTemplateData (URL url) {
+	return new TemplateData (url.toString (), null, null, null, null);
+    }
+
+    public static TemplateData getExpectionationData (String expectation) {
+	return new TemplateData (null, null, null, expectation, null);
+    }
+
+    public static TemplateData getURLExceptionData (String url,
+						    Throwable thrown) {
+	return new TemplateData (url, thrown, null, null, null);
+    }
+
+    public static TemplateData getURLRealmData (URL url, String realm) {
+	return new TemplateData (url.toString (), null, null, null, realm);
+    }
+
+    private HttpHeader getTemplated (StatusCode sc,
+				     TemplateData td) {
 	HttpHeader ret = getHeader (sc);
 	File f = getFile (sc);
 	try {
@@ -52,15 +188,20 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 		DataInputStream dis = new DataInputStream (fis);
 		try {
 		    dis.readFully (buf);
-		    String s = new String (buf, "UTF-8");
-		    s = replaceText (sc, s);
-		    ret.setContent (s);
+		    Charset utf8 = Charset.forName ("UTF-8");
+		    HtmlParser parser = new HtmlParser (utf8);
+		    parser.setText (buf);
+		    HtmlBlock block = parser.parse ();
+		    replaceTemplates (sc, block, td);
+		    ret.setContent (block.toString ());
 		} finally {
 		    Closer.close (dis, logger);
 		}
 	    } finally {
 		Closer.close (fis, logger);
 	    }
+	} catch (HtmlParseException e) {
+	    logger.log (Level.WARNING, "Failed to read template", e);
 	} catch (IOException e) {
 	    logger.log (Level.WARNING, "Failed to read template", e);
 	}
@@ -69,67 +210,68 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 
     @Override public HttpHeader get400 (Exception exception) {
 	if (hasFile (_400))
-	    return getTemplated (_400);
+	    return getTemplated (_400, getTemplateData (exception));
 	return super.get400 (exception);
     }
 
-    @Override public HttpHeader get401 (String realm, URL url) {
+    @Override public HttpHeader get401 (URL url, String realm) {
 	if (hasFile (_401))
-	    return getTemplated (_401);
-	return super.get401 (realm, url);
+	    return getTemplated (_401, getURLRealmData (url, realm));
+	return super.get401 (url, realm);
     }
 
     @Override public HttpHeader get403 () {
 	if (hasFile (_403))
-	    return getTemplated (_403);
+	    return getTemplated (_403, getTemplateData ());
 	return super.get403 ();
     }
 
     @Override public HttpHeader get404 (String file) {
 	if (hasFile (_404))
-	    return getTemplated (_404);
+	    return getTemplated (_404, getTemplateData ());
 	return super.get404 (file);
     }
 
-    @Override public HttpHeader get407 (String realm, URL url) {
+    @Override public HttpHeader get407 (URL url, String realm) {
 	if (hasFile (_407))
-	    return getTemplated (_407);
-	return super.get407 (realm, url);
+	    return getTemplated (_407, getURLRealmData (url, realm));
+	return super.get407 (url, realm);
     }
 
     @Override public HttpHeader get412 () {
 	if (hasFile (_412))
-	    return getTemplated (_412);
+	    return getTemplated (_412, getTemplateData ());
 	return super.get412 ();
     }
 
     @Override public HttpHeader get414 () {
 	if (hasFile (_414))
-	    return getTemplated (_414);
+	    return getTemplated (_414, getTemplateData ());
 	return super.get414 ();
     }
 
     @Override public HttpHeader get416 (Throwable exception) {
 	if (hasFile (_416))
-	    return getTemplated (_416);
+	    return getTemplated (_416, getTemplateData (exception));
 	return super.get416 (exception);
     }
 
     @Override public HttpHeader get417 (String expectation) {
 	if (hasFile (_417))
-	    return getTemplated (_417);
+	    return getTemplated (_417,
+				 getExpectionationData (expectation));
 	return super.get417 (expectation);
     }
 
     @Override public HttpHeader get500 (Throwable exception) {
 	if (hasFile (_500))
-	    return getTemplated (_500);
+	    return getTemplated (_500, getTemplateData (exception));
 	return super.get500 (exception);
     }
 
-    @Override public HttpHeader get504 (Throwable exception, String uri) {
+    @Override public HttpHeader get504 (String url, Throwable exception) {
 	if (hasFile (_504))
-	    return getTemplated (_504);
-	return super.get504 (exception, uri);
+	    return getTemplated (_504, getURLExceptionData (url, exception));
+	return super.get504 (url, exception);
     }
 }

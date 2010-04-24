@@ -330,10 +330,17 @@ public class HttpProxy implements Resolver {
 	int tport = getInt (section, "port", 9666);
 	int cpus = Runtime.getRuntime ().availableProcessors ();
 	int threads = getInt (section, "num_selector_threads", cpus);
+
 	String bindIP = config.getProperty (section, "listen_ip");
 	if (tport != port) {
 	    try {
 		closeSocket ();
+		ExecutorService es = Executors.newCachedThreadPool ();
+		StatisticsHolder sh = new BasicStatisticsHolder ();
+		Long timeout = Long.valueOf (15000);
+		nioHandler =
+		    new MultiSelectorNioHandler (es, sh, threads, timeout);
+
 		port = tport;
 		ssc = ServerSocketChannel.open ();
 		ssc.configureBlocking (false);
@@ -346,11 +353,6 @@ public class HttpProxy implements Resolver {
 				 " on inet address: " + ia);
 		    ssc.socket ().bind (new InetSocketAddress (ia, port));
 		}
-		ExecutorService es = Executors.newCachedThreadPool ();
-		StatisticsHolder sh = new BasicStatisticsHolder ();
-		Long timeout = Long.valueOf (15000);
-		nioHandler = 
-		    new MultiSelectorNioHandler (es, sh, threads, timeout);
 		AcceptorListener listener =
 		    new ProxyConnectionAcceptor (acceptorId++, this);
 		Acceptor acceptor = new Acceptor (ssc, nioHandler, listener);

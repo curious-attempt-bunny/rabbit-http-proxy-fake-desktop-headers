@@ -24,7 +24,6 @@ public interface HttpGenerator {
      * @param header the current HttpHeader.
      */
     HttpHeader get206 (String ifRange, HttpHeader header);
-
     /** Get a 304 Not Modified header for the given old header
      * @param oldresp the cached header.
      * @return a 304 HttpHeader .
@@ -38,11 +37,11 @@ public interface HttpGenerator {
     HttpHeader get400 (Exception exception);
 
     /** Get a 401 Authentication Required for the given realm and url.
-     * @param realm the realm that requires auth.
      * @param url the URL of the request made.
+     * @param realm the realm that requires auth.
      * @return a suitable HttpHeader.
      */
-    HttpHeader get401 (String realm, URL url);
+    HttpHeader get401 (URL url, String realm);
 
     /** Get a 403 Forbidden header.
      * @return a HttpHeader.
@@ -59,7 +58,7 @@ public interface HttpGenerator {
      * @param url the URL of the request made.
      * @return a suitable HttpHeader.
      */
-    HttpHeader get407 (String realm, URL url);
+    HttpHeader get407 (URL url, String realm);
 
     /** Get a 412 Precondition Failed header.
      * @return a suitable HttpHeader.
@@ -93,5 +92,5 @@ public interface HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    HttpHeader get504 (Throwable exception, String requestURL);
+    HttpHeader get504 (String requestURL, Throwable exception);
 }

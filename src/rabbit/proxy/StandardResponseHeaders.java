@@ -23,13 +23,25 @@ import static rabbit.http.StatusCode.*;
  */
 class StandardResponseHeaders implements HttpGenerator {
     /** The identity of the server. */
-    private String serverIdentity;
+    private final String serverIdentity;
     /** The connection handling the response. */
-    private Connection con;
+    private final Connection con;
 
     public StandardResponseHeaders (String serverIdentity, Connection con) {
 	this.serverIdentity = serverIdentity;
 	this.con = con;
+    }
+
+    public String getServerIdentity () {
+	return serverIdentity;
+    }
+
+    public Connection getConnection () {
+	return con;
+    }
+
+    public HttpProxy getProxy () {
+	return con.getProxy ();
     }
 
     /** Get a new HttpHeader. This is the same as
@@ -136,7 +148,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param url the URL of the request made.
      * @return a suitable HttpHeader.
      */
-    public HttpHeader get401 (String realm, URL url) {
+    public HttpHeader get401 (URL url, String realm) {
 	return getAuthorizationHeader (realm, url, _401, "WWW");
     }
 
@@ -182,7 +194,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param url the URL of the request made.
      * @return a suitable HttpHeader.
      */
-    public HttpHeader get407 (String realm, URL url) {
+    public HttpHeader get407 (URL url, String realm) {
 	return getAuthorizationHeader (realm, url, _407, "Proxy");
     }
 
@@ -243,7 +255,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	// normally this only thrashes the page... Too bad.
 	HttpHeader header = getHeader (_500);
 	Properties props = System.getProperties ();
-	HttpProxy proxy = con.getProxy ();
+	HttpProxy proxy = getProxy ();
 	Config config = proxy.getConfig ();
 	String page = HtmlPage.getPageHeader (con, _500) +
 	    "You have found a bug in RabbIT please report this" +
@@ -291,38 +303,23 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    public HttpHeader get504 (Throwable e, String uri) {
+    public HttpHeader get504 (String uri, Throwable e) {
 	HttpHeader header = getHeader (_504);
 	try {
 	    boolean dnsError = (e instanceof UnknownHostException);
 	    URL u = new URL (uri);
-	    StringBuilder content = 
+	    StringBuilder content =
 		new StringBuilder (HtmlPage.getPageHeader (con, _504));
 	    if (dnsError)
 		content.append ("Server not found");
 	    else
 		content.append ("Unable to handle request");
 
-	    content.append (":<br><b>" + 
+	    content.append (":<br><b>" +
 			    HtmlEscapeUtils.escapeHtml (e.getMessage ()));
 
-	    content.append ("\n\n<br>Did you mean to go to: <ul>");
-	    Set<String> places = new HashSet<String> ();
-	    for (int i = 0; i < placeTransformers.length; i++) {
-		String pre = placeTransformers[i][0];
-		String suf = placeTransformers[i][1];
-		String place = getPlace (u, pre, suf);
-		if (place != null && !places.contains (place)) {
-		    content.append ("<li><a href=\"" +
-				    HtmlEscapeUtils.escapeHtml (place) +
-				    "\">" +
-				    HtmlEscapeUtils.escapeHtml (place) +
-				    "</a></li>\n");
-		    places.add (place);
-		}
-	    }
-	    content.append ("</ul>");
-
+	    content.append ("\n\n<br>Did you mean to go to: ");
+	    content.append (getPlaces (u));
 	    String message = "";
 	    if (!dnsError)
 		message = "<xmp>" + StackTraceUtil.getStackTrace (e) + "</xmp>";
@@ -334,6 +331,27 @@ class StandardResponseHeaders implements HttpGenerator {
 	}
 
 	return header;
+    }
+
+    public StringBuilder getPlaces (URL u) {
+	StringBuilder content = new StringBuilder ();
+	content.append ("<ul>");
+	Set<String> places = new HashSet<String> ();
+	for (int i = 0; i < placeTransformers.length; i++) {
+	    String pre = placeTransformers[i][0];
+	    String suf = placeTransformers[i][1];
+	    String place = getPlace (u, pre, suf);
+	    if (place != null && !places.contains (place)) {
+		content.append ("<li><a href=\"" +
+				HtmlEscapeUtils.escapeHtml (place) +
+				"\">" +
+				HtmlEscapeUtils.escapeHtml (place) +
+				"</a></li>\n");
+		places.add (place);
+	    }
+	}
+	content.append ("</ul>");
+	return content;
     }
 
     private String getPlace (URL u, String hostPrefix, String hostSuffix) {

@@ -157,12 +157,12 @@ public class HttpBaseFilter implements HttpFilter {
 					      con.getPassword ()) 
 		    && !isPublic (url)) {
 		    HttpHeader ret = null;
+		    String realm = uhost + ":" + urlport;
 		    if (proxyRequest)
-			ret = con.getHttpGenerator ().get407 (uhost + ":" + 
-							      urlport, url);
+			ret = con.getHttpGenerator ().get407 (url, realm);
+
 		    else 
-			ret = con.getHttpGenerator ().get401 (uhost + ":" +
-							      urlport, url);
+			ret = con.getHttpGenerator ().get401 (url, realm);
 		    return ret;
 		}
 		con.setMeta (true);
