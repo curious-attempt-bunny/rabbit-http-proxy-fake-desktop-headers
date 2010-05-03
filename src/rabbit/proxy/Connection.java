@@ -93,7 +93,7 @@ public class Connection {
 
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
-    /** Create a new Connection 
+    /** Create a new Connection
      * @param id the ConnectionId of this connection.
      * @param channel the SocketChannel to the client.
      * @param proxy the HttpProxy that this connection belongs to.
@@ -363,7 +363,7 @@ public class Connection {
 	}
     }
 
-    void webConnectionSetupFailed (RequestHandler rh, Exception cause) {
+    public void webConnectionSetupFailed (RequestHandler rh, Exception cause) {
 	if (cause instanceof UnknownHostException)
 	    // do we really want this in the log?
 	    logger.warning (cause.toString () + ": " +
@@ -400,7 +400,7 @@ public class Connection {
 	    (auth.startsWith ("NTLM") || auth.startsWith ("Negotiate"));
     }
 
-    void webConnectionEstablished (RequestHandler rh) {
+    public void webConnectionEstablished (RequestHandler rh) {
 	getProxy ().markForPipelining (rh.getWebConnection ());
 	if (!request.isDot9Request ())
 	    setMayCacheFromCC (rh);
@@ -712,7 +712,7 @@ public class Connection {
      * @param status the status code of the error.
      * @param message the error message to tell the client.
      */
-    void doError (int status, String message) {
+    public void doError (int status, String message) {
 	this.statusCode = Integer.toString (status);
 	HttpHeader header =
 	    getHttpGenerator ().get400 (new IOException (message));
@@ -744,6 +744,8 @@ public class Connection {
 	}
     }
 
+    /** Get the SocketChannel to the client
+     */
     public SocketChannel getChannel () {
 	return channel;
     }
@@ -775,7 +777,7 @@ public class Connection {
 	return proxy.getConnectionLogger ();
     }
 
-    Counter getCounter () {
+    public Counter getCounter () {
 	return proxy.getCounter ();
     }
 
@@ -818,6 +820,9 @@ public class Connection {
 	return keepalive;
     }
 
+    /** Get the name of the user that is currently authorized.
+     * @return a username, may be null if the user is not know/authorized
+     */
     public String getUserName () {
 	return userName;
     }
@@ -826,6 +831,9 @@ public class Connection {
 	this.userName = userName;
     }
 
+    /** Get the name of the user that is currently authorized.
+     * @return a username, may be null if the user is not know/authorized
+     */
     public String getPassword () {
 	return password;
     }
@@ -834,7 +842,8 @@ public class Connection {
 	this.password = password;
     }
 
-    // For logging and status
+    /** Get the request line of the request currently being handled
+     */
     public String getRequestLine () {
 	return requestLine;
     }
@@ -847,7 +856,7 @@ public class Connection {
     }
 
     // Get debug info for use in 500 error response
-    String getDebugInfo () {
+    public String getDebugInfo () {
 	return
 	    "status: " + getStatus ()  + "\n" +
 	    "started: " + new Date (getStarted ()) + "\n" +
@@ -866,7 +875,7 @@ public class Connection {
      *  We modify the request header to hold HTTP/1.1 since that is
      *  what rabbit uses, but the real client may have sent a 1.0 header.
      */
-    String getRequestVersion () {
+    public String getRequestVersion () {
 	return requestVersion;
     }
 
@@ -1029,7 +1038,7 @@ public class Connection {
 	}
     }
 
-    boolean useFullURI () {
+    public boolean useFullURI () {
 	return proxy.isProxyConnected ();
     }
 
@@ -1050,8 +1059,10 @@ public class Connection {
 	}
     }
 
-    // Send response and close
-    void sendAndClose (HttpHeader header) {
+    /** Send a request and then close this connection.
+     * @param header the HttpHeader to send before closing down.
+     */
+    public void sendAndClose (HttpHeader header) {
 	status = "Sending response and closing.";
 	// Set status and content length
 	setStatusesFromHeader (header);
@@ -1068,6 +1079,8 @@ public class Connection {
 	}
     }
 
+    /** Log the current request and close/end this connection
+     */
     public void logAndClose (RequestHandler rh) {
 	if (rh != null && rh.getWebConnection () != null) {
 	    proxy.releaseWebConnection (rh.getWebConnection ());
@@ -1076,6 +1089,8 @@ public class Connection {
 	closeDown ();
     }
 
+    /** Log the current request and start to listen for a new request.
+     */
     public void logAndRestart () {
 	logConnection ();
 	if (getKeepalive ())
