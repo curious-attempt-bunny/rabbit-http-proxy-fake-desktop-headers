@@ -33,7 +33,8 @@ public class HtmlPage {
     }
 
     /** return a HTMLheader.
-     * @param title the title of this page.
+     * @param con the Connection handling the request
+     * @param type the StatusCode of the request
      * @return a HTMLHeader.
      */
     public static String getPageHeader (Connection con, StatusCode type) {
