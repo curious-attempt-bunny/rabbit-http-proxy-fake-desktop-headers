@@ -93,6 +93,12 @@ public class Connection {
 
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
+    /** Create a new Connection 
+     * @param id the ConnectionId of this connection.
+     * @param channel the SocketChannel to the client.
+     * @param proxy the HttpProxy that this connection belongs to.
+     * @param bufHandler the BufferHandler to use for getting ByteBuffers.
+     */
     public Connection (ConnectionId id,	SocketChannel channel,
 		       HttpProxy proxy, BufferHandler bufHandler) {
 	this.id = id;
