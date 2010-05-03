@@ -27,7 +27,8 @@ ifndef JDFLAGS
 JDFLAGS := -windowtitle "$(PROJECT_NAME)" -doctitle "$(PROJECT_NAME)" -use -version -author \
 -overview $(SRCDIR)/rabbit/overview.html \
 -encoding ISO-8859-1 \
--link http://java.sun.com/javase/6/docs/api
+-link http://java.sun.com/javase/6/docs/api \
+-link http://www.khelekore.org/rnio/javadoc/
 endif
 
 # Class file destination base directory
