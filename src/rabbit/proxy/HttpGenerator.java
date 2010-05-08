@@ -86,7 +86,7 @@ public interface HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    HttpHeader get500 (Throwable exception);
+    HttpHeader get500 (String requestURL, Throwable exception);
 
     /** Get a 504 Gateway Timeout for the given exception.
      * @param exception the Exception made.

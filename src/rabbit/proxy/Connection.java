@@ -169,7 +169,8 @@ public class Connection {
 	extraInfo =
 	    extraInfo != null ? extraInfo + t.toString () : t.toString ();
 	logger.log (Level.WARNING, "Internal Error", t);
-	HttpHeader internalError = getHttpGenerator ().get500 (t);
+	HttpHeader internalError =
+	    getHttpGenerator ().get500 (request.getRequestURI (), t);
 	// Send response and close
 	sendAndClose (internalError);
     }

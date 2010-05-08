@@ -120,10 +120,11 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 				   HtmlBlock block,
 				   TemplateData td)
 	throws IOException{
+	System.err.println ("trying to replace url: " + td.url);
 	replace (block, "%url%", td.url);
 	if (td.thrown != null) {
 	    replace (block, "%exception%", td.thrown.toString ());
-	    replaceStackTrace (block, "%stackTrace%", td.thrown);
+	    replaceStackTrace (block, "%stacktrace%", td.thrown);
 	}
 	replace (block, "%filename%", td.file);
 	replace (block, "%expectation%", td.expectation);
@@ -265,10 +266,10 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	return super.get417 (expectation);
     }
 
-    @Override public HttpHeader get500 (Throwable exception) {
+    @Override public HttpHeader get500 (String url, Throwable exception) {
 	if (hasFile (_500))
-	    return getTemplated (_500, getTemplateData (exception));
-	return super.get500 (exception);
+	    return getTemplated (_500, getURLExceptionData (url, exception));
+	return super.get500 (url, exception);
     }
 
     @Override public HttpHeader get504 (String url, Throwable exception) {

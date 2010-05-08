@@ -250,7 +250,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
-    public HttpHeader get500 (Throwable exception) {
+    public HttpHeader get500 (String url, Throwable exception) {
 	// in most cases we should have a header out already, but to be sure...
 	// normally this only thrashes the page... Too bad.
 	HttpHeader header = getHeader (_500);
