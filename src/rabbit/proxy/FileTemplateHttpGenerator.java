@@ -120,7 +120,6 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 				   HtmlBlock block,
 				   TemplateData td)
 	throws IOException{
-	System.err.println ("trying to replace url: " + td.url);
 	replace (block, "%url%", td.url);
 	if (td.thrown != null) {
 	    replace (block, "%exception%", td.thrown.toString ());
@@ -155,28 +154,30 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	}
     }
 
-    public static TemplateData getTemplateData () {
-	return new TemplateData (null, null, null, null, null);
+    public TemplateData getTemplateData () {
+	return new TemplateData (getConnection ().getRequestURI (), null,
+				 null, null, null);
     }
 
-    public static TemplateData getTemplateData (Throwable thrown) {
-	return new TemplateData (null, thrown, null, null, null);
+    public TemplateData getTemplateData (Throwable thrown) {
+	return new TemplateData (getConnection ().getRequestURI (), thrown,
+				 null, null, null);
     }
 
-    public static TemplateData getTemplateData (URL url) {
+    public TemplateData getTemplateData (URL url) {
 	return new TemplateData (url.toString (), null, null, null, null);
     }
 
-    public static TemplateData getExpectionationData (String expectation) {
-	return new TemplateData (null, null, null, expectation, null);
+    public TemplateData getExpectionationData (String expectation) {
+	return new TemplateData (getConnection ().getRequestURI (),
+				 null, null, expectation, null);
     }
 
-    public static TemplateData getURLExceptionData (String url,
-						    Throwable thrown) {
+    public TemplateData getURLExceptionData (String url, Throwable thrown) {
 	return new TemplateData (url, thrown, null, null, null);
     }
 
-    public static TemplateData getURLRealmData (URL url, String realm) {
+    public TemplateData getURLRealmData (URL url, String realm) {
 	return new TemplateData (url.toString (), null, null, null, realm);
     }
 
