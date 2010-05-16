@@ -1043,20 +1043,25 @@ public class Connection {
 	return proxy.isProxyConnected ();
     }
 
-    private class SendAndRestartListener implements HttpHeaderSentListener {
-	public void httpHeaderSent () {
-	    logConnection ();
-	    readRequest ();
-	}
-
+    private abstract class SendAndDoListener implements HttpHeaderSentListener {
 	public void timeout () {
+	    status = "Response sending timed out, logging and closing.";
 	    logger.info ("Timeout when sending http header");
 	    logAndClose (null);
 	}
 
 	public void failed (Exception e) {
+	    status =
+		"Response sending failed: " + e + ", logging and closing.";
 	    logger.log (Level.INFO, "Exception when sending http header", e);
 	    logAndClose (null);
+	}
+    }
+
+    private class SendAndRestartListener extends SendAndDoListener {
+	public void httpHeaderSent () {
+	    logConnection ();
+	    readRequest ();
 	}
     }
 
@@ -1100,22 +1105,9 @@ public class Connection {
 	    closeDown ();
     }
 
-    private class SendAndCloseListener implements HttpHeaderSentListener {
+    private class SendAndCloseListener extends SendAndDoListener {
 	public void httpHeaderSent () {
 	    status = "Response sent, logging and closing.";
-	    logAndClose (null);
-	}
-
-	public void timeout () {
-	    status = "Response sending timed out, logging and closing.";
-	    logger.info ("Timeout when sending http header");
-	    logAndClose (null);
-	}
-
-	public void failed (Exception e) {
-	    status =
-		"Response sending failed: " + e + ", logging and closing.";
-	    logger.log (Level.INFO, "Exception when sending http header", e);
 	    logAndClose (null);
 	}
     }
