@@ -189,6 +189,11 @@ public class ImageHandler extends BaseHandler {
 	content.addBlockListener (new ImageReader (unzip));
     }
 
+    private TaskIdentifier getTaskIdentifier (Object o, String method) {
+	String gid = o.getClass ().getSimpleName () + "." + method;
+	return new DefaultTaskIdentifier (gid, request.getRequestURI ());
+    }
+
     private class ImageReader implements BlockListener, GZipUnpackListener {
 	private boolean unzip;
 	private GZipUnpacker gzu;
@@ -203,9 +208,7 @@ public class ImageHandler extends BaseHandler {
 	}
 
 	public void bufferRead (final BufferHandle bufHandle) {
-	    TaskIdentifier ti =
-		new DefaultTaskIdentifier (getClass ().getSimpleName (),
-					   request.getRequestURI ());
+	    TaskIdentifier ti = getTaskIdentifier (this, "bufferRead");
 	    con.getNioHandler ().runThreadTask (new Runnable () {
 		    public void run () {
 			if (unzip) {
@@ -292,11 +295,7 @@ public class ImageHandler extends BaseHandler {
      * @throws IOException if conversion fails.
      */
     protected void convertImage () {
-	TaskIdentifier ti =
-	    new DefaultTaskIdentifier (getClass ().getSimpleName () +
-				       ".convertImage",
-				       request.getRequestURI ());
-
+	TaskIdentifier ti = getTaskIdentifier (this, "convertImage");
 	con.getNioHandler ().runThreadTask (new Runnable () {
 		public void run () {
 		    try {
