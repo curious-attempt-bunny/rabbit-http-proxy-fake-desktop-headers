@@ -47,8 +47,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private long fileNo = 0;
     private long currentSize = 0;
     private String dir = null;
-    private Map<FiledKey<K>, CacheEntry<K, V>> htab = null;
-    private List<CacheEntry<K, V>> vec = null;
+    private Map<FiledKey<K>, NCacheEntry<K, V>> htab = null;
+    private List<NCacheEntry<K, V>> vec = null;
 
     private File tempdir = null;
     private final Object dirLock = new Object ();
@@ -71,8 +71,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	throws IOException {
 	this.fhk = fhk;
 	this.fhv = fhv;
-	htab = new HashMap<FiledKey<K>, CacheEntry<K, V>> ();
-	vec = new ArrayList<CacheEntry<K, V>> ();
+	htab = new HashMap<FiledKey<K>, NCacheEntry<K, V>> ();
+	vec = new ArrayList<NCacheEntry<K, V>> ();
 	setup (props);
     }
 
@@ -212,20 +212,16 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     /** Check that the data hook exists.
      */
-    private boolean checkHook (CacheEntry<K, V> e) {
-	if (e instanceof NCacheEntry) {
-	    NCacheEntry<K, V> ne = (NCacheEntry<K, V>)e;
-	    FiledHook<V> hook = ne.getRealDataHook ();
-	    if (hook != null) {
-		String entryName = getEntryName (e.getId (), true, "hook");
-		File f = new File (entryName);
-		if (!f.exists ())
-		    return false;
-	    }
-	    // no hook is legal.
-	    return true;
+    private boolean checkHook (NCacheEntry<K, V> e) {
+	FiledHook<V> hook = e.getRealDataHook ();
+	if (hook != null) {
+	    String entryName = getEntryName (e.getId (), true, "hook");
+	    File f = new File (entryName);
+	    if (!f.exists ())
+		return false;
 	}
-	return false;
+	// no hook is legal.
+	return true;
     }
 
     /** Get the CacheEntry assosiated with given object.
@@ -233,7 +229,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      * @return the CacheEntry or null (if not found).
      */
     public CacheEntry<K, V> getEntry (K k) throws CacheException {
-	CacheEntry<K, V> ent;
+	NCacheEntry<K, V> ent;
 	r.lock ();
 	try {
 	    ent = htab.get (new MemoryKey<K> (k));
@@ -308,6 +304,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     public void addEntry (CacheEntry<K, V> ent) throws CacheException {
 	if (ent == null)
 	    return;
+	NCacheEntry<K, V> nent = (NCacheEntry<K, V>)ent;
+	addEntry (nent);
+    }
+
+    private void addEntry (NCacheEntry<K, V> ent) throws CacheException {
 	File cfile = new File (getEntryName (ent.getId (), false, null));
 	if (!cfile.exists()) {
 	    return;
@@ -341,11 +342,10 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	ent.setSize (cfile.length ());
 	ent.setCacheTime (System.currentTimeMillis ());
 
-	NCacheEntry<K, V> nent = (NCacheEntry<K, V>)ent;
 	K realKey = ent.getKey ();
 	FiledKey<K> fk = new FiledKey<K> ();
 	try {
-	    storeHook (nent);
+	    storeHook (ent);
 	    fk.storeKey (this, ent, realKey, logger);
 	} catch (IOException e) {
 	    // TODO: do we need to clean anything up?
@@ -353,7 +353,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	}
 	w.lock ();
 	try {
-	    nent.setKey (fk);
+	    ent.setKey (fk);
 	    remove (realKey);
 	    htab.put (fk, ent);
 	    currentSize +=
@@ -366,7 +366,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	changed = true;
     }
 
-    private void storeHook (NCacheEntry<K, V> nent) 
+    private void storeHook (NCacheEntry<K, V> nent)
 	throws IOException, CacheException {
 	V hook = nent.getDataHook (this);
 	if (hook != null) {
@@ -378,7 +378,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     /** Signal that a cache entry have changed.
      */
-    public void entryChanged (CacheEntry<K, V> ent, K newKey, V newHook) 
+    public void entryChanged (CacheEntry<K, V> ent, K newKey, V newHook)
 	throws CacheException {
 	NCacheEntry<K, V> nent = (NCacheEntry<K, V>)ent;
 	FiledHook<V> fh = new FiledHook<V> ();
@@ -482,10 +482,16 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     /** Get the CacheEntries in the cache.
      *  Note! some entries may be invalid if you have a corruct cache.
-     * @return an Enumeration of the CacheEntries.
+     * @return a Collection of the CacheEntries.
      */
-    public Collection<CacheEntry<K, V>> getEntries () {
-	return htab.values ();
+    public Collection<NCacheEntry<K, V>> getEntries () {
+	// Defensive copy so that nothing happen when the user iterates
+	r.lock ();
+	try {
+	    return new ArrayList<NCacheEntry<K, V>> (htab.values ());
+	} finally {
+	    r.unlock ();
+	}
     }
 
     /** Read the info from an old cache.
@@ -494,10 +500,10 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private void readCacheIndex () {
 	long fileNo = 0;
 	long currentSize = 0;
-	Map<FiledKey<K>, CacheEntry<K, V>> htab = 
-	    new HashMap<FiledKey<K>, CacheEntry<K, V>> ();
-	List<CacheEntry<K, V>> vec = 
-	    new ArrayList<CacheEntry<K, V>> ();
+	Map<FiledKey<K>, NCacheEntry<K, V>> htab =
+	    new HashMap<FiledKey<K>, NCacheEntry<K, V>> ();
+	List<NCacheEntry<K, V>> vec =
+	    new ArrayList<NCacheEntry<K, V>> ();
 	try {
 	    String name = dir + File.separator + CACHEINDEX;
 	    FileInputStream fis = new FileInputStream (name);
@@ -506,8 +512,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    fileNo = is.readLong ();
 	    currentSize = is.readLong ();
 	    int size = is.readInt ();
-	    Map<FiledKey<K>, CacheEntry<K, V>> hh =
-		new HashMap<FiledKey<K>, CacheEntry<K, V>> ((int)(size * 1.2));
+	    Map<FiledKey<K>, NCacheEntry<K, V>> hh =
+		new HashMap<FiledKey<K>, NCacheEntry<K, V>> ((int)(size * 1.2));
 	    for (int i = 0; i < size; i++) {
 		FiledKey<K> fk = (FiledKey<K>)is.readObject ();
 		fk.setCache (this);
@@ -516,7 +522,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		hh.put (fk, entry);
 	    }
 	    htab = hh;
-	    vec = (List<CacheEntry<K, V>>)is.readObject ();
+	    vec = (List<NCacheEntry<K, V>>)is.readObject ();
 	    is.close ();
 
 	    // Only set internal state if we managed to get it all.
@@ -555,7 +561,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		os.writeLong (fileNo);
 		os.writeLong (currentSize);
 		os.writeInt (htab.size ());
-		for (Map.Entry<FiledKey<K>, CacheEntry<K, V>> me :
+		for (Map.Entry<FiledKey<K>, NCacheEntry<K, V>> me :
 			 htab.entrySet ()) {
 		    os.writeObject (me.getKey ());
 		    os.writeObject (me.getValue ());
@@ -602,7 +608,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		    if (exp < milis)
 			remove (ce.getKey ());
 		} catch (CacheException e) {
-		    logger.log (Level.WARNING, 
+		    logger.log (Level.WARNING,
 				"Failed to remove expired entry", e);
 		}
 	    }
@@ -619,7 +625,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		try {
 		    remove (vec.get (0).getKey ());
 		} catch (CacheException e) {
-		    logger.log (Level.WARNING, 
+		    logger.log (Level.WARNING,
 				"Failed to remove entry", e);
 		} finally {
 		    w.unlock ();

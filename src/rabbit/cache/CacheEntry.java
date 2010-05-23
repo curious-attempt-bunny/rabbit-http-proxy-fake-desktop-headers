@@ -21,11 +21,6 @@ public interface CacheEntry<K, V> {
      */
     long getCacheTime ();
 
-    /** Set the date this object was cached.
-     * @param date the date.
-     */
-    void setCacheTime (long date);
-
     /** Get the size of our file
      * @return the size of our data
      */

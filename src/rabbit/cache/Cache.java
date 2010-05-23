@@ -99,7 +99,7 @@ public interface Cache<K, V> {
     /** Get the CacheEntries in the cache.
      * @return an Enumeration of the CacheEntries.
      */    
-    Collection<CacheEntry<K, V>> getEntries ();
+    Collection<? extends CacheEntry<K, V>> getEntries ();
 
     /** Make sure that the cache is written to the disk.
      */
