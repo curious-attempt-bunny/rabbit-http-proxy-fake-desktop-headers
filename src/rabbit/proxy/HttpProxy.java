@@ -52,7 +52,7 @@ import rabbit.util.SProperties;
 public class HttpProxy implements Resolver {
 
     /** Current version */
-    public static final String VERSION = "RabbIT proxy version 4.6";
+    public static final String VERSION = "RabbIT proxy version 4.7";
 
     /** The current config of this proxy. */
     private Config config;

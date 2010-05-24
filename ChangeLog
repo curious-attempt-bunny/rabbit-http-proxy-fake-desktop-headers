@@ -1,3 +1,5 @@
+version 4.7 (20xx-yy-zz)
+
 version 4.6 (2010-05-24) Reading a broken cache index now results
 	in an empty cache instead of a cache with no files, but a big
 	size. Made it possible to configure what HttpGenerator to
