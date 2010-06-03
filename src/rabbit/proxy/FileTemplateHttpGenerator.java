@@ -143,47 +143,55 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	private final String file;
 	private final String expectation;
 	private final String realm;
+	private final String realmType;
 
 	public TemplateData (String url, Throwable thrown, String file,
-			     String expectation, String realm) {
+			     String expectation, String realm, String realmType) {
 	    this.url = url;
 	    this.thrown = thrown;
 	    this.file = file;
 	    this.expectation = expectation;
 	    this.realm = realm;
+	    this.realmType = realmType;
 	}
     }
 
     public TemplateData getTemplateData () {
 	return new TemplateData (getConnection ().getRequestURI (), null,
-				 null, null, null);
+				 null, null, null, null);
     }
 
     public TemplateData getTemplateData (Throwable thrown) {
 	return new TemplateData (getConnection ().getRequestURI (), thrown,
-				 null, null, null);
+				 null, null, null, null);
     }
 
     public TemplateData getTemplateData (URL url) {
-	return new TemplateData (url.toString (), null, null, null, null);
+	return new TemplateData (url.toString (), null, 
+				 null, null, null, null);
     }
 
     public TemplateData getExpectionationData (String expectation) {
 	return new TemplateData (getConnection ().getRequestURI (),
-				 null, null, expectation, null);
+				 null, null, expectation, null, null);
     }
 
     public TemplateData getURLExceptionData (String url, Throwable thrown) {
-	return new TemplateData (url, thrown, null, null, null);
+	return new TemplateData (url, thrown, null, null, null, null);
     }
 
-    public TemplateData getURLRealmData (URL url, String realm) {
-	return new TemplateData (url.toString (), null, null, null, realm);
+    public TemplateData getURLRealmData (URL url, String realm, 
+					 String realmType) {
+	return new TemplateData (url.toString (), null, null, null, 
+				 realm, realmType);
     }
 
     private HttpHeader getTemplated (StatusCode sc,
 				     TemplateData td) {
 	HttpHeader ret = getHeader (sc);
+	if (td.realm != null)
+	    ret.setHeader (td.realmType + "-Authenticate",
+			   "Basic realm=\"" + td.realm + "\"");
 	File f = getFile (sc);
 	try {
 	    FileInputStream fis = new FileInputStream (f);
@@ -220,7 +228,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 
     @Override public HttpHeader get401 (URL url, String realm) {
 	if (hasFile (_401))
-	    return getTemplated (_401, getURLRealmData (url, realm));
+	    return getTemplated (_401, getURLRealmData (url, realm, "WWW"));
 	return super.get401 (url, realm);
     }
 
@@ -238,7 +246,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 
     @Override public HttpHeader get407 (URL url, String realm) {
 	if (hasFile (_407))
-	    return getTemplated (_407, getURLRealmData (url, realm));
+	    return getTemplated (_407, getURLRealmData (url, realm, "Proxy"));
 	return super.get407 (url, realm);
     }
 
