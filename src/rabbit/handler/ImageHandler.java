@@ -122,14 +122,18 @@ public class ImageHandler extends BaseHandler {
 	// and do not want a cache...
     }
 
+    private void removeConvertedFile () {
+	if (convertedFile != null && convertedFile.exists ()) {
+	    deleteFile (convertedFile);
+	    convertedFile = null;
+	}
+    }
+
     /** clear up the mess we made (remove intermediate files etc).
      */
     @Override protected void finish (boolean good) {
 	try {
-	    if (convertedFile != null) {
-		deleteFile (convertedFile);
-		convertedFile = null;
-	    }
+	    removeConvertedFile ();
 	} finally {
 	    super.finish (good);
 	}
@@ -139,10 +143,7 @@ public class ImageHandler extends BaseHandler {
      */
     @Override protected void removeCache () {
 	super.removeCache ();
-	if (convertedFile != null) {
-	    deleteFile (convertedFile);
-	    convertedFile = null;
-	}
+	removeConvertedFile ();
     }
 
 
@@ -377,7 +378,7 @@ public class ImageHandler extends BaseHandler {
     protected ImageConversionResult 
     internalConvertImage (File input, String entryName) throws IOException {
 	long origSize = size;
-	convertedFile = new File (entryName + ".c");
+	File convertedFile = new File (entryName + ".c");
 	File typeFile = new File (entryName + ".type");
 	imageConverter.convertImage (input, convertedFile, 
 				     request.getRequestURI ());
