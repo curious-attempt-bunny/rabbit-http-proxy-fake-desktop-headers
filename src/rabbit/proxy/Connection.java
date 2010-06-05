@@ -1,6 +1,7 @@
 package rabbit.proxy;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -28,6 +29,8 @@ import rabbit.httpio.RequestLineTooLongException;
 import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
+import rabbit.io.ProxyChain;
+import rabbit.io.Resolver;
 import rabbit.util.Counter;
 
 /** The base connection class for rabbit.
@@ -357,7 +360,10 @@ public class Connection {
 	if (rh.getContent () == null) {
 	    status = "Handling request - setting up web connection";
 	    // no usable cache entry so get the resource from the net.
-	    SWC swc = new SWC (this, request, tlh, clientResourceHandler, rh);
+	    ProxyChain pc = proxy.getProxyChain ();
+	    Resolver r = pc.getResolver (request.getRequestURI ());
+	    SWC swc =
+		new SWC (this, r, request, tlh, clientResourceHandler, rh);
 	    swc.establish ();
 	} else {
 	    resourceEstablished (rh);
@@ -734,7 +740,7 @@ public class Connection {
 	sendAndClose (header);
     }
 
-    private void checkAndHandleSSL (BufferHandle bh) {
+    private void checkAndHandleSSL (BufferHandle bh) throws IOException {
 	status = "Handling ssl request";
 	SSLHandler sslh = new SSLHandler (proxy, this, request, tlh);
 	if (sslh.isAllowed ()) {
@@ -1037,10 +1043,6 @@ public class Connection {
 		closeDown ();
 	    }
 	}
-    }
-
-    public boolean useFullURI () {
-	return proxy.isProxyConnected ();
     }
 
     private abstract class SendAndDoListener implements HttpHeaderSentListener {

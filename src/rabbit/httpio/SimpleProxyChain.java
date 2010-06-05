@@ -1,0 +1,24 @@
+package rabbit.httpio;
+
+import java.net.URL;
+import org.khelekore.rnio.NioHandler;
+import rabbit.io.ProxyChain;
+import rabbit.io.Resolver;
+import rabbit.dns.DNSHandler;
+
+/** A default implementation of a ProxyChain that always return 
+ *  the same SimpleResolver.
+ *
+ * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
+ */
+public class SimpleProxyChain implements ProxyChain {
+    private final Resolver resolver;
+
+    public SimpleProxyChain (NioHandler nio, DNSHandler dnsHandler) {
+	resolver = new SimpleResolver (nio, dnsHandler);
+    }
+
+    public Resolver getResolver (String url) {
+	return resolver;
+    }
+}

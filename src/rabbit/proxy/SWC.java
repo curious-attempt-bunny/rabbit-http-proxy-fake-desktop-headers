@@ -13,6 +13,7 @@ import rabbit.httpio.HttpHeaderSentListener;
 import rabbit.httpio.WebConnectionResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.ConnectionHandler;
+import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
 
@@ -25,6 +26,7 @@ public class SWC implements HttpHeaderSentListener,
 			    HttpHeaderListener, WebConnectionListener,
 			    ClientResourceTransferredListener {
     private final Connection con;
+    private final Resolver resolver;
     private final HttpHeader header;
     private final TrafficLoggerHandler tlh;
     private final ClientResourceHandler crh;
@@ -39,10 +41,11 @@ public class SWC implements HttpHeaderSentListener,
     private Exception lastException;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
-    public SWC (Connection con, HttpHeader header,
+    public SWC (Connection con, Resolver resolver, HttpHeader header,
 		TrafficLoggerHandler tlh, ClientResourceHandler crh,
 		RequestHandler rh) {
 	this.con = con;
+	this.resolver = resolver;
 	this.header = header;
 	this.tlh = tlh;
 	this.crh = crh;
@@ -84,11 +87,15 @@ public class SWC implements HttpHeaderSentListener,
 	    HttpHeaderSender hhs =
 		new HttpHeaderSender (wc.getChannel (), con.getNioHandler (),
 				      tlh.getNetwork (), header,
-				      con.useFullURI (), this);
+				      useFullURI (), this);
 	    hhs.sendHeader ();
 	} catch (IOException e) {
 	    failed (e);
 	}
+    }
+
+    public boolean useFullURI () throws IOException {
+	return resolver.isProxyConnected ();
     }
 
     public void httpHeaderSent () {

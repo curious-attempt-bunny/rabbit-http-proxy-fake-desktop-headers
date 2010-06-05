@@ -1,6 +1,7 @@
 package rabbit.proxy;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +12,8 @@ import rabbit.httpio.HttpResponseListener;
 import rabbit.httpio.HttpResponseReader;
 import rabbit.io.BufferHandle;
 import rabbit.io.CacheBufferHandle;
+import rabbit.io.ProxyChain;
+import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
 import rabbit.util.Base64;
@@ -24,6 +27,7 @@ class SSLHandler implements TunnelDoneListener {
     private final Connection con;
     private final HttpHeader request;
     private final TrafficLoggerHandler tlh;
+    private final Resolver resolver;
     private SocketChannel channel;
     private BufferHandle bh;
     private BufferHandle sbh;
@@ -31,11 +35,14 @@ class SSLHandler implements TunnelDoneListener {
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
     public SSLHandler (HttpProxy proxy, Connection con,
-		       HttpHeader request, TrafficLoggerHandler tlh) {
+		       HttpHeader request, TrafficLoggerHandler tlh)
+	throws IOException {
 	this.proxy = proxy;
 	this.con = con;
 	this.request = request;
 	this.tlh = tlh;
+	ProxyChain pc = con.getProxy ().getProxyChain ();
+	resolver = pc.getResolver (request.getRequestURI ());
     }
 
     /** Are we allowed to proxy ssl-type connections ?
@@ -72,8 +79,8 @@ class SSLHandler implements TunnelDoneListener {
     public void handle (SocketChannel channel, BufferHandle bh) {
 	this.channel = channel;
 	this.bh = bh;
-	if (proxy.isProxyConnected ()) {
-	    String auth = proxy.getProxyAuthString ();
+	if (resolver.isProxyConnected ()) {
+	    String auth = resolver.getProxyAuthString ();
 	    // it should look like this (using RabbIT:RabbIT):
 	    // Proxy-authorization: Basic UmFiYklUOlJhYmJJVA==
 	    if (auth != null && !auth.equals (""))
@@ -95,7 +102,7 @@ class SSLHandler implements TunnelDoneListener {
 
 	public void connectionEstablished (WebConnection wce) {
 	    wc = wce;
-	    if (proxy.isProxyConnected ()) {
+	    if (resolver.isProxyConnected ()) {
 		request.setRequestURI (uri); // send correct connect to next proxy.
 		setupChain ();
 	    } else {
@@ -145,7 +152,7 @@ class SSLHandler implements TunnelDoneListener {
 					tlh.getNetwork (),
 					con.getBufferHandler (), request,
 					proxy.getStrictHttp (),
-					proxy.isProxyConnected (), cr);
+					resolver.isProxyConnected (), cr);
 	    hrr.sendRequestAndWaitForResponse ();
 	} catch (IOException e) {
 	    warn ("IOException when waiting for chained response", e);

@@ -31,7 +31,7 @@ public class ConnectionHandler {
     private final Counter counter;
 
     // The resolver to use
-    private final Resolver resolver;
+    private final ProxyChain proxyChain;
 
     // The available connections.
     private final Map<Address, List<WebConnection>> activeConnections;
@@ -51,10 +51,10 @@ public class ConnectionHandler {
     // the socket binder
     private SocketBinder socketBinder = new DefaultBinder ();
 
-    public ConnectionHandler (Counter counter, Resolver resolver,
+    public ConnectionHandler (Counter counter, ProxyChain proxyChain,
 			      NioHandler nioHandler) {
 	this.counter = counter;
-	this.resolver = resolver;
+	this.proxyChain = proxyChain;
 	this.nioHandler = nioHandler;
 
 	activeConnections = new HashMap<Address, List<WebConnection>> ();
@@ -94,6 +94,7 @@ public class ConnectionHandler {
 	    wcl.failed (e);
 	    return;
 	}
+	Resolver resolver = proxyChain.getResolver (requri);
 	int port = url.getPort () > 0 ? url.getPort () : 80;
 	final int rport = resolver.getConnectPort (port);
 

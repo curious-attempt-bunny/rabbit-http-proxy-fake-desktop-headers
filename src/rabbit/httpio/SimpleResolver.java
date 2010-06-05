@@ -4,11 +4,10 @@ import java.net.URL;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.dns.DNSHandler;
-import rabbit.dns.DNSJavaHandler;
 import rabbit.io.InetAddressListener;
 import rabbit.io.Resolver;
 
-/** A simple resolver that uses the dnsjava resolver. 
+/** A simple resolver that uses the given dns handler.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -16,10 +15,8 @@ public class SimpleResolver implements Resolver {
     private final DNSHandler dnsHandler;
     private final NioHandler tr;
 
-    public SimpleResolver (NioHandler tr) {
-	DNSJavaHandler jh = new DNSJavaHandler ();
-	jh.setup (null);
-	dnsHandler = jh;
+    public SimpleResolver (NioHandler tr, DNSHandler dnsHandler) {
+	this.dnsHandler = dnsHandler;
 	this.tr = tr;
     }
 

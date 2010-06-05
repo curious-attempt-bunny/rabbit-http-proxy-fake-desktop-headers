@@ -9,16 +9,17 @@ import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
+import rabbit.dns.DNSJavaHandler;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.HttpResponseListener;
 import rabbit.httpio.HttpResponseReader;
-import rabbit.httpio.SimpleResolver;
+import rabbit.httpio.SimpleProxyChain;
 import rabbit.httpio.WebConnectionResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.BufferHandler;
 import rabbit.io.CachingBufferHandler;
 import rabbit.io.ConnectionHandler;
-import rabbit.io.Resolver;
+import rabbit.io.ProxyChain;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
 import rabbit.util.Counter;
@@ -45,9 +46,11 @@ public class ClientBase {
 	nioHandler =
 	    new MultiSelectorNioHandler (es, sh, 4, Long.valueOf (15000));
 	nioHandler.start ();
-	Resolver resolver = new SimpleResolver (nioHandler);
+	DNSJavaHandler jh = new DNSJavaHandler ();
+	jh.setup (null);
+	ProxyChain proxyChain = new SimpleProxyChain (nioHandler, jh);
 	connectionHandler =
-	    new ConnectionHandler (counter, resolver, nioHandler);
+	    new ConnectionHandler (counter, proxyChain, nioHandler);
 
 	bufHandler = new CachingBufferHandler ();
     }
