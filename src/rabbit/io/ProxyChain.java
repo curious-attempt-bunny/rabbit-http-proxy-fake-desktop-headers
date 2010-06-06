@@ -1,6 +1,5 @@
 package rabbit.io;
 
-import java.net.URL;
 import rabbit.io.Resolver;
 
 /** Interface to be able to handle different connection strategies

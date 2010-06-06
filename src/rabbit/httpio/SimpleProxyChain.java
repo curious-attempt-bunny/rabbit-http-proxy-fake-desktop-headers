@@ -1,6 +1,5 @@
 package rabbit.httpio;
 
-import java.net.URL;
 import org.khelekore.rnio.NioHandler;
 import rabbit.io.ProxyChain;
 import rabbit.io.Resolver;
