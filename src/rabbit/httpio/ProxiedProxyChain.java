@@ -1,7 +1,6 @@
 package rabbit.httpio;
 
 import java.net.InetAddress;
-import java.net.URL;
 import rabbit.io.ProxyChain;
 import rabbit.io.Resolver;
 

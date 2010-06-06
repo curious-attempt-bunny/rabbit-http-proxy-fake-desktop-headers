@@ -33,6 +33,9 @@ proxyauth=
 
 # If you need more than simple proxy chaining (fully on or fully off)
 # you can specify a ProxyChainFactory class and use that instead.
+# If you want to connect directly to inside net and to use a proxy
+# when you connect to then internet you can use
+# proxy_chain_factory=rabbit.httpio.InOutProxyChainFactory
 proxy_chain_factory=
 
 # This is the small logo to use.

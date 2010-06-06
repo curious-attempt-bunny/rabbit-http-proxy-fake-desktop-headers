@@ -204,7 +204,8 @@ public class HttpProxy {
 		Class.forName (pcf).asSubclass (ProxyChainFactory.class);
 	    ProxyChainFactory factory = clz.newInstance ();
 	    SProperties props = config.getProperties (pcf);
-	    return factory.getProxyChain (props);
+	    return 
+		factory.getProxyChain (props, nioHandler, dnsHandler, logger);
 	} catch (Exception e) {
 	    logger.log (Level.WARNING,
 			"Unable to create the proxy chain " +
@@ -214,6 +215,7 @@ public class HttpProxy {
 	return null;
     }
 
+    /* TODO: remove this method, only kept for backwards compability. */
     private ProxyChain setupProxiedProxyChain (String pname, String pport,
 					       String pauth) {
 	try {
@@ -240,8 +242,7 @@ public class HttpProxy {
 	    config.getProperty (sec, "proxy_chain_factory", "").trim ();
 	String pname = config.getProperty (sec, "proxyhost", "").trim ();
 	String pport = config.getProperty (sec, "proxyport", "").trim ();
-	String pauth =
-	    config.getProperty (getClass ().getName (), "proxyauth");
+	String pauth = config.getProperty (sec, "proxyauth");
 
 	if (!"".equals(pcf)) {
 	    proxyChain = setupProxyChainFromFactory (pcf);

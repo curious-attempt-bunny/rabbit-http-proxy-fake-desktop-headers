@@ -1,9 +1,9 @@
 package rabbit.httpio;
 
 import org.khelekore.rnio.NioHandler;
+import rabbit.dns.DNSHandler;
 import rabbit.io.ProxyChain;
 import rabbit.io.Resolver;
-import rabbit.dns.DNSHandler;
 
 /** A default implementation of a ProxyChain that always return 
  *  the same SimpleResolver.
