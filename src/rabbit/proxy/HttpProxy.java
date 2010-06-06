@@ -36,6 +36,7 @@ import rabbit.io.BufferHandler;
 import rabbit.io.CachingBufferHandler;
 import rabbit.io.ConnectionHandler;
 import rabbit.io.ProxyChain;
+import rabbit.io.ProxyChainFactory;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
 import rabbit.util.Config;
@@ -197,28 +198,55 @@ public class HttpProxy {
 	}
     }
 
+    private ProxyChain setupProxyChainFromFactory (String pcf) {
+	try {
+	    Class<? extends ProxyChainFactory> clz =
+		Class.forName (pcf).asSubclass (ProxyChainFactory.class);
+	    ProxyChainFactory factory = clz.newInstance ();
+	    SProperties props = config.getProperties (pcf);
+	    return factory.getProxyChain (props);
+	} catch (Exception e) {
+	    logger.log (Level.WARNING,
+			"Unable to create the proxy chain " +
+			"will fall back to the default one.",
+			e);
+	}
+	return null;
+    }
+
+    private ProxyChain setupProxiedProxyChain (String pname, String pport,
+					       String pauth) {
+	try {
+	    InetAddress proxy = dnsHandler.getInetAddress (pname);
+	    try {
+		int port = Integer.parseInt (pport);
+		return new ProxiedProxyChain (proxy, port, pauth);
+	    } catch (NumberFormatException e) {
+		logger.severe ("Strange proxyport: '" + pport +
+			       "', will not chain");
+	    }
+	} catch (UnknownHostException e) {
+	    logger.severe ("Unknown proxyhost: '" + pname +
+			   "', will not chain");
+	}
+	return null;
+    }
+
     /** Configure the chained proxy rabbit is using (if any).
      */
     private void setupProxyConnection () {
 	String sec = getClass ().getName ();
-	String pname = config.getProperty (sec, "proxyhost", "");
-	String pport = config.getProperty (sec, "proxyport", "");
+	String pcf =
+	    config.getProperty (sec, "proxy_chain_factory", "").trim ();
+	String pname = config.getProperty (sec, "proxyhost", "").trim ();
+	String pport = config.getProperty (sec, "proxyport", "").trim ();
 	String pauth =
 	    config.getProperty (getClass ().getName (), "proxyauth");
-	if (!pname.equals ("") && !pport.equals ("")) {
-	    try {
-		InetAddress proxy = dnsHandler.getInetAddress (pname);
-		try {
-		    int port = Integer.parseInt (pport.trim ());
-		    proxyChain = new ProxiedProxyChain (proxy, port, pauth);
-		} catch (NumberFormatException e) {
-		    logger.severe ("Strange proxyport: '" + pport +
-				   "', will not chain");
-		}
-	    } catch (UnknownHostException e) {
-		logger.severe ("Unknown proxyhost: '" + pname +
-			       "', will not chain");
-	    }
+
+	if (!"".equals(pcf)) {
+	    proxyChain = setupProxyChainFromFactory (pcf);
+	} else if (!pname.equals ("") && !pport.equals ("")) {
+	    proxyChain = setupProxiedProxyChain (pname, pport, pauth);
 	}
 	if (proxyChain == null)
 	    proxyChain = new SimpleProxyChain (nioHandler, dnsHandler);

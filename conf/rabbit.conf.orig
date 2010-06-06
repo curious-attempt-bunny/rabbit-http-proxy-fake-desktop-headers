@@ -31,6 +31,10 @@ proxyport=
 # This is a string on the format "myuserid:mypassword"
 proxyauth=
 
+# If you need more than simple proxy chaining (fully on or fully off)
+# you can specify a ProxyChainFactory class and use that instead.
+proxy_chain_factory=
+
 # This is the small logo to use.
 # It is used in meta pages and other places.
 # Use $proxy to have RabbIT serve the image.

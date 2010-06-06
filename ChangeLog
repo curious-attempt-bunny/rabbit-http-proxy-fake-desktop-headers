@@ -1,7 +1,8 @@
 version 4.7 (20xx-yy-zz) Fixed the problem 401 and 407 responses when
 	using FileTemplateHttpGeneratorFactory. Added a proxy chain
 	selector to make it it possible to use different connections
-	strategies depending on the request uri.
+	strategies depending on the request uri. Made it possible to
+	specify a ProxyChainFactory in rabbit.conf.
 
 version 4.6 (2010-05-24) Reading a broken cache index now results
 	in an empty cache instead of a cache with no files, but a big
