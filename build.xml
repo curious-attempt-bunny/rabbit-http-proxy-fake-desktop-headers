@@ -22,6 +22,14 @@
       </fileset>
     </path>
 
+    <pathconvert property="mf.classpath" pathsep=" ">
+      <path refid="project.classpath"/>
+      <chainedmapper>
+	<flattenmapper/>
+	<globmapper from="*" to="../libs/*"/>
+      </chainedmapper>
+    </pathconvert>
+
     <target name="init">
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
@@ -42,7 +50,16 @@
 
     <target name="dist.bin" depends="compile" description="generate the binary distribution">
         <mkdir dir="${dist}/jars"/>
-        <jar jarfile="${dist}/jars/rabbit${major_version}.jar" basedir="${build}"/>
+        <copy todir="${build}">
+            <fileset file="Help.txt"/>
+        </copy>
+
+        <jar jarfile="${dist}/jars/rabbit${major_version}.jar" basedir="${build}">
+          <manifest>
+            <attribute name="Main-Class" value="rabbit.proxy.ProxyStarter"/>
+	    <attribute name="Class-Path" value="${mf.classpath}" />
+          </manifest>
+	</jar>
 
         <javadoc sourcepath="${src}" destdir="${dist}/htdocs/javadoc" classpathref="project.classpath"/>
 
@@ -54,7 +71,7 @@
             <fileset dir="libs"/>
         </copy>
 
-        <copy todir="${dist}/libs">
+        <copy todir="${dist}/logs">
             <fileset dir="logs"/>
         </copy>
 

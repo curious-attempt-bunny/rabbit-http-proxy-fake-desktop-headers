@@ -4,7 +4,9 @@ version 4.7 (20xx-yy-zz) Fixed the problem 401 and 407 responses when
 	strategies depending on the request uri. Made it possible to
 	specify a ProxyChainFactory in rabbit.conf. Added a
 	ProxyChainFactory that uses direct access to internal networks and
-	uses a chained proxy for external access.
+	uses a chained proxy for external access. Made sure that the ant
+	based build got valid Main-Class and a Class-Path entries and that
+	the Help.txt was included in the jar.
 
 version 4.6 (2010-05-24) Reading a broken cache index now results
 	in an empty cache instead of a cache with no files, but a big
