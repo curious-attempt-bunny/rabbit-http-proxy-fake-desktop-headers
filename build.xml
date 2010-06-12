@@ -61,7 +61,20 @@
           </manifest>
 	</jar>
 
-        <javadoc sourcepath="${src}" destdir="${dist}/htdocs/javadoc" classpathref="project.classpath"/>
+        <javadoc sourcepath="${src}" 
+		 destdir="${dist}/htdocs/javadoc" 
+		 classpathref="project.classpath"
+		 windowtitle="RabbIT/${major_version}"
+		 doctitle="RabbIT/${major_version}"
+		 overview="${src}/rabbit/overview.html"
+		 encoding="iso-8859-1"
+		 author="true"
+		 version="true"
+		 use="true"
+		 >
+	  <link href="http://java.sun.com/javase/6/docs/api"/>
+	  <link href="http://www.khelekore.org/rnio/javadoc"/>
+	  </javadoc>
 
         <copy todir="${dist}/conf">
             <fileset dir="conf"/>
