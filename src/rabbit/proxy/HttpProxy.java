@@ -123,7 +123,7 @@ public class HttpProxy {
     private List<Connection> connections = new ArrayList<Connection> ();
 
     /** The total traffic in and out of this proxy. */
-    private TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
+    private final TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
 
     private HttpGeneratorFactory hgf;
 
@@ -186,7 +186,7 @@ public class HttpProxy {
 	int threads = getInt (section, "num_selector_threads", cpus);
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
-	Long timeout = Long.valueOf (15000);
+	Long timeout = 15000L;
 	try {
 	    nioHandler =
 		new MultiSelectorNioHandler (es, sh, threads, timeout);

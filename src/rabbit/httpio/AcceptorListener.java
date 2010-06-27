@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public interface AcceptorListener {
-    /** A conneciton has been accepted 
+    /** A connection has been accepted
      * @param sc the new socket channel, will already be set to non blocking mode
      */
     void connectionAccepted (SocketChannel sc) throws IOException;

@@ -20,7 +20,7 @@ import org.khelekore.rnio.impl.Closer;
 import rabbit.util.IPAccess;
 import rabbit.util.SProperties;
 
-/** This is a class that filters access based on ip adress.
+/** This is a class that filters access based on ip address.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -85,7 +85,7 @@ public class AccessFilter implements IPAccessFilter {
 	List<IPAccess> allowed = new ArrayList<IPAccess> ();
 	List<IPAccess> denied = new ArrayList<IPAccess> ();
 	LineNumberReader br = new LineNumberReader (r);
-	String line = null;
+	String line;
 	while ((line = br.readLine ()) != null) {
 	    // remove comments....
 	    int index = line.indexOf ('#');

@@ -127,8 +127,7 @@ public class TagType {
     }
     
     public static TagType getTagType (String type) {
-	TagType t = types.get (type);
-	return t;
+	return types.get (type);
     }
 
     @Override public String toString () {

@@ -67,30 +67,29 @@ class HttpHeaderFilterer {
     private void loadHttpFilters (String filters, List<HttpFilter> ls,
 				  Config config, HttpProxy proxy) {
 	String[] filterArray = filters.split (",");
-	for (int i = 0; i < filterArray.length; i++) {
-	    String className = filterArray[i];
-	    Logger log = Logger.getLogger (getClass ().getName ());
-	    try {
-		className = className.trim ();
-		Class<? extends HttpFilter> cls = 
-		    Class.forName (className).asSubclass (HttpFilter.class);
-		HttpFilter hf = cls.newInstance ();
-		hf.setup (config.getProperties (className));
-		ls.add (hf);
-	    } catch (ClassNotFoundException ex) {
-		log.log (Level.WARNING, 
-			 "Could not load http filter class: '" + 
-			 className + "'", ex);
-	    } catch (InstantiationException ex) {
-		log.log (Level.WARNING, 
-			 "Could not instansiate http filter: '" + 
-			 className + "'", ex);
-	    } catch (IllegalAccessException ex) {
-		log.log (Level.WARNING, 
-			 "Could not access http filter: '" + 
-			 className + "'", ex);
-	    }
-	}
+        for (String className : filterArray) {
+            Logger log = Logger.getLogger(getClass().getName());
+            try {
+                className = className.trim();
+                Class<? extends HttpFilter> cls =
+		    Class.forName(className).asSubclass(HttpFilter.class);
+                HttpFilter hf = cls.newInstance();
+                hf.setup(config.getProperties(className));
+                ls.add(hf);
+            } catch (ClassNotFoundException ex) {
+                log.log(Level.WARNING,
+                        "Could not load http filter class: '" +
+			className + "'", ex);
+            } catch (InstantiationException ex) {
+                log.log(Level.WARNING,
+                        "Could not instansiate http filter: '" +
+			className + "'", ex);
+            } catch (IllegalAccessException ex) {
+                log.log(Level.WARNING,
+                        "Could not access http filter: '" +
+			className + "'", ex);
+            }
+        }
     }
 
     public List<HttpFilter> getHttpInFilters () {

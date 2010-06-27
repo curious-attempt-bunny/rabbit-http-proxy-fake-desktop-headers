@@ -76,13 +76,7 @@ public class ProxyAuth implements HttpFilter {
     }
 
     private boolean hasValidCache (String token, AuthUserInfo ce) {
-	if (ce == null)
-	    return false;
-	if (!ce.stillValid ())
-	    return false;
-	if (!ce.correctToken (token))
-	    return false;
-	return true;
+        return ce != null && ce.stillValid() && ce.correctToken(token);
     }
 
     private void storeInCache (String user, String token,

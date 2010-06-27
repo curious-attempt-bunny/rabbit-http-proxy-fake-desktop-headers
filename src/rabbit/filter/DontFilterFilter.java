@@ -36,18 +36,18 @@ public class DontFilterFilter implements HttpFilter {
      */
     public HttpHeader doHttpInFiltering (SocketChannel socket, 
 					 HttpHeader header, Connection con) {
-	Matcher m = null;
+	Matcher m;
 	if( pattern != null) {
 	    m = pattern.matcher (header.getRequestURI ());
 	    if (m.find ())
-		con.setMayFilter (false);
+		con.setFilteringNotAllowed();
 	}
 
 	String ua = header.getHeader ("User-Agent");
 	if (ua != null && uap != null) {
 	    m = uap.matcher (ua);
 	    if (m.find ())
-		con.setMayFilter (false);
+		con.setFilteringNotAllowed();
 	}
 	return null;
     }

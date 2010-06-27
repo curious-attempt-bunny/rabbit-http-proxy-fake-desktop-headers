@@ -22,7 +22,6 @@ public class GZipHandler extends BaseHandler {
     private boolean compressionFinished = false;
     private boolean compressedDataFinished = false;
     private GZipPacker packer = null;
-    private GZipPackListener pl = null;
 
     /** For creating the factory.
      */
@@ -96,7 +95,7 @@ public class GZipHandler extends BaseHandler {
     @Override
     protected void prepare () {
 	if (isCompressing) {
-	    pl = new PListener ();
+	    GZipPackListener pl = new PListener ();
 	    packer = new GZipPacker (pl);
 	    if (!packer.needsInput ())
 		packer.handleCurrentData ();
@@ -256,10 +255,7 @@ public class GZipHandler extends BaseHandler {
 	super.setup (prop);
 	if (prop != null) {
 	    String comp = prop.getProperty ("compress", "true");
-	    if (comp.equalsIgnoreCase ("false"))
-		compress = false;
-	    else
-		compress = true;
+	    compress = !comp.equalsIgnoreCase ("false");
 	}
     }
 }

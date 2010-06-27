@@ -74,7 +74,7 @@ public class SQLAuthenticator implements Authenticator {
     }
 
     private Connection initConnection () throws SQLException {
-	Connection con = null;
+	Connection con;
 	if (dbuser != null && !dbuser.isEmpty () &&
 	    dbpwd != null && !dbpwd.isEmpty ())
 	    con = DriverManager.getConnection (url, dbuser, dbpwd);
@@ -112,8 +112,7 @@ public class SQLAuthenticator implements Authenticator {
 	    ResultSet rs = ps.executeQuery ();
 	    try {
 		if (rs.next ()) {
-		    String ret = rs.getString (1);
-		    return ret;
+		    return rs.getString (1);
 		}
 	    } finally {
 		rs.close ();

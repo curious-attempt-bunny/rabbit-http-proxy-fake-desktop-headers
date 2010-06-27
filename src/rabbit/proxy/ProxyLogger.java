@@ -30,7 +30,7 @@ public class ProxyLogger implements ConnectionLogger {
     new SimpleDateFormat ("dd/MMM/yyyy:HH:mm:ss 'GMT'");
 
     /** The monitor for sdf. */
-    private Object sdfMonitor = new Object ();
+    private final Object sdfMonitor = new Object ();
 
     /** The distance to GMT in milis. */
     private long offset;
@@ -94,9 +94,8 @@ public class ProxyLogger implements ConnectionLogger {
 				   "org.khelekore.rnio");
 	    eh.info ("Log level set to: " + eh.getLevel ());
 	}
-	Logger ah = getLogger (config, "access", new AccessFormatter (),
+	accessLog = getLogger (config, "access", new AccessFormatter (),
 			       "rabbit_access");
-	accessLog = ah;
     }
 
     private static class AccessFormatter extends Formatter {

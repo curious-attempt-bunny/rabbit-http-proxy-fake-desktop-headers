@@ -13,13 +13,13 @@ import java.util.Locale;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class HttpDateParser {
-    private static SimpleDateFormat sdf1 = 
+    private static final SimpleDateFormat sdf1 =
     new SimpleDateFormat ("EE',' dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-    private static SimpleDateFormat sdf2 = 
+    private static final SimpleDateFormat sdf2 =
     new SimpleDateFormat ("EEEE, dd-MMM-yy HH:mm:ss 'GMT'", Locale.US);
-    private static SimpleDateFormat sdf3 = 
+    private static final SimpleDateFormat sdf3 =
     new SimpleDateFormat ("EE MMM d HH:mm:ss yyyy", Locale.US);
-    private static SimpleDateFormat sdf4 = 
+    private static final SimpleDateFormat sdf4 = 
     new SimpleDateFormat ("EE MMM  d HH:mm:ss yyyy", Locale.US);
 
     private static long offset;

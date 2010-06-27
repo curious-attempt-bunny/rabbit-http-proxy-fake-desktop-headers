@@ -26,7 +26,7 @@ public class RandomCacheResourceSource extends CacheResourceSource {
     private long currentIndex = 0;
     private long totalSize;
 
-    private enum State { SEND_HEADER, SEND_DATA };
+    private enum State { SEND_HEADER, SEND_DATA }
     private State state = State.SEND_HEADER;
 
     public RandomCacheResourceSource (Cache<HttpHeader, HttpHeader> cache,

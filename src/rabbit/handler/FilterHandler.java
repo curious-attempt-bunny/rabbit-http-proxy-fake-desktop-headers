@@ -41,7 +41,6 @@ public class FilterHandler extends GZipHandler {
     private Iterator<ByteBuffer> sendBlocks = null;
 
     private GZipUnpacker gzu = null;
-    private GZListener gzListener = null;
 
     // For creating the factory.
     public FilterHandler () {
@@ -112,11 +111,9 @@ public class FilterHandler extends GZipHandler {
     private void setupRepacking (String ce) {
 	ce = ce.toLowerCase ();
 	if (ce.equals ("gzip")) {
-	    gzListener = new GZListener ();
-	    gzu = new GZipUnpacker (gzListener, false);
+	    gzu = new GZipUnpacker (new GZListener (), false);
 	} else if (ce.equals("deflate")) {
-	    gzListener = new GZListener ();
-	    gzu = new GZipUnpacker (gzListener, true);
+	    gzu = new GZipUnpacker (new GZListener (), true);
 	} else {
 	    getLogger ().warning ("Do not know how to handle encoding: " + ce);
 	}

@@ -355,7 +355,7 @@ public class HtmlParser {
      * @param tag the Tag that have the arguments.
      */
     private void arglist (Tag tag) throws HtmlParseException {
-	String key = null;
+	String key;
 
 	//System.err.println ("parsing arglist for tag: '" + tag + "'");
 	while (true) {
@@ -437,7 +437,7 @@ public class HtmlParser {
     }
     /** Is this tag at the scan position? */
     private boolean sameTag (String tag, int j) {
-	int i = -1;
+	int i;
 	for (i = 0; i < tag.length () && i < length; i++) {
 	    char lb = Character.toLowerCase (tag.charAt (i));
 	    char pb = Character.toLowerCase (pagepart[j + i]);
@@ -464,9 +464,8 @@ public class HtmlParser {
 	if (i > -1) {
 	    stringLength = j - startvalue;
 	    index = j;
-	    Token text = new Token (pagepart, TokenType.COMMENT,
-				    startvalue, stringLength);
-	    return text;
+	    return new Token (pagepart, TokenType.COMMENT,
+			      startvalue, stringLength);
 	}
 	block.setRest (lastTagStart);
 	return null;

@@ -110,7 +110,9 @@ public class BodyFilter extends SimpleTagFilter {
 	sb.append (url.getHost ());
 	sb.append ((url.getPort () > 0) ? ":" + url.getPort () : "");
 	sb.append (url.getFile ());
-	sb.append (((url.getRef() != null) ? "#" + url.getRef () : "") + "\"");
+	if (url.getRef() != null)
+	    sb.append ("#").append (url.getRef ());
+	sb.append ("\"");
 	return sb.toString ();
     }
 }

@@ -21,7 +21,7 @@ public class RevalidateFilter implements HttpFilter {
 					 HttpHeader header, 
 					 Connection con) {
 	if (alwaysRevalidate || needsRevalidation (header.getRequestURI ())) {
-	    con.setMustRevalidate (true);
+	    con.setMustRevalidate ();
 	}
 	return null;
     }

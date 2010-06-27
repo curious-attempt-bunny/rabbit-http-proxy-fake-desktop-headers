@@ -19,7 +19,7 @@ import rabbit.util.Config;
  */
 public class AdFilter extends HtmlFilter {
     /** the image we replace ads with */
-    protected static final String ADREPLACER = 
+    private static final String ADREPLACER =
     "http://$proxy/FileSender/public/NoAd.gif";
 
     /** the actual imagelink. */
@@ -38,25 +38,25 @@ public class AdFilter extends HtmlFilter {
      */
     public AdFilter (Connection con, HttpHeader request, HttpHeader response) {
 	super (con, request, response);
-	int idx = -1;	
+	int idx;
 	HttpProxy proxy = con.getProxy ();
-	adreplacer = proxy.getConfig ().getProperty (getClass ().getName (), 
-						     "adreplacer", 
+	adreplacer = proxy.getConfig ().getProperty (getClass ().getName (),
+						     "adreplacer",
 						     ADREPLACER);
 	while ((idx = adreplacer.indexOf ("$proxy")) > -1) {
-	    adreplacer = adreplacer.substring(0,idx) + 
+	    adreplacer = adreplacer.substring(0,idx) +
 		proxy.getHost ().getHostName () + ":" + proxy.getPort () +
 		adreplacer.substring (idx + "$proxy".length ());
 	}
     }
 
-    public HtmlFilter newFilter (Connection con, 
-				 HttpHeader request, 
+    public HtmlFilter newFilter (Connection con,
+				 HttpHeader request,
 				 HttpHeader response) {
 	return new AdFilter (con, request, response);
     }
-    
-    /** Check if the given tag ends the current a-tag. 
+
+    /** Check if the given tag ends the current a-tag.
      *  Some sites have broken html (linuxtoday.com!).
      */
     private boolean isAEnder (TagType tt) {
@@ -67,8 +67,8 @@ public class AdFilter extends HtmlFilter {
      * @param block the part of the html page we are filtering.
      */
     @Override public void filterHtml (HtmlBlock block) {
-	int astart = -1;
-	
+	int astart;
+
 	List<Token> tokens = block.getTokens ();
 	int tsize = tokens.size ();
 	for (int i = 0; i < tsize; i++) {
@@ -95,16 +95,16 @@ public class AdFilter extends HtmlFilter {
 		    if (i == tsize && astart < i) {
 			block.setRest ((tokens.get (astart)).getStartIndex ());
 		    }
-		} else if (tagtype == TagType.LAYER 
+		} else if (tagtype == TagType.LAYER
 			   || tagtype == TagType.SCRIPT) {
 		    String src = tag.getAttribute ("src");
 		    if (isEvil (src))
 			tag.setAttribute ("src", adreplacer);
 		}
-	    }	    
+	    }
 	}
     }
-    
+
     /** Check if a string is evil (that is its probably advertising).
      * @param str the String to check.
      */
@@ -122,4 +122,3 @@ public class AdFilter extends HtmlFilter {
 	return (m.find ());
     }
 }
-

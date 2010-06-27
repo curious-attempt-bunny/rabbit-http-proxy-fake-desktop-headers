@@ -249,20 +249,19 @@ public class SCC {
 	String cr = rh.getWebHeader ().getHeader ("Content-Range");
 	if (cr == null)   // TODO check if its ok to return true here.. 
 	    // if we do not have a content range we ought to have full resource.
-	    return false; 
-	
-	for (int i = 0; i < ranges.size (); i++) {
-	    Range r = ranges.get (i);
-	    long start = r.getStart ();
-	    long end = r.getEnd ();
-	    String t = "bytes " + start + "-" + end + "/" + totalSize;
-	    if (!t.equals (cr)) {
-		ContentRangeParser crp = new ContentRangeParser (cr);
-		if (crp.isValid () && 
-		    (crp.getStart () > start || crp.getEnd () < end))
-		    return false;
-	    }
-	}
+	    return false;
+
+        for (Range r : ranges) {
+            long start = r.getStart();
+            long end = r.getEnd();
+            String t = "bytes " + start + "-" + end + "/" + totalSize;
+            if (!t.equals(cr)) {
+                ContentRangeParser crp = new ContentRangeParser(cr);
+                if (crp.isValid() &&
+		    (crp.getStart() > start || crp.getEnd() < end))
+                    return false;
+            }
+        }
 	return true;
     }
 }

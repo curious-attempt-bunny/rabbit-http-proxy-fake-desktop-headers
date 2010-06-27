@@ -290,11 +290,9 @@ public class BaseHandler
      */
     protected boolean mayCacheFromSize () {
 	Cache<HttpHeader, HttpHeader>  cache = con.getProxy ().getCache ();
-	if ((size > 0 && size > cache.getMaxSize ()) ||
-	    (cache.getMaxSize () == 0))
-	    return false;
-	return true;
-    }
+        return !((size > 0 && size > cache.getMaxSize ()) ||
+		 (cache.getMaxSize () == 0));
+	}
 
     /** Check if this handler may force the cached resource to be
      *  less than the cache max size.
@@ -328,8 +326,7 @@ public class BaseHandler
 				     expires + "' for URI: '" +
 				     request.getRequestURI () + "'");
 		entry = null;
-		return;
-	    }
+		}
 	}
     }
 
@@ -447,13 +444,6 @@ public class BaseHandler
 		}
 	    }
 	}
-    }
-
-    /** This method is used to prepare the stream for the data being sent.
-     *  This method does nothing here.
-     */
-    protected void prepareStream () {
-	// nothing here.
     }
 
     /** Check if this handler supports direct transfers.

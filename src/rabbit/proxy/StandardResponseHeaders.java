@@ -72,8 +72,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a 200 HttpHeader .
      */
     public HttpHeader get200 () {
-	HttpHeader header = getHeader (_200);
-	return header;
+	return getHeader (_200);
     }
 
     private void copyHeaderIfExists (String type,

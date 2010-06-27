@@ -116,7 +116,7 @@ public class HttpBaseFilter implements HttpFilter {
 	header.setRequestURI (requri);
 	con.setMayUseCache (false);
 	con.setMayCache (false);
-	con.setMayFilter (false);
+	con.setFilteringNotAllowed();
 	return requri;
     }
 
@@ -154,7 +154,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    if (proxy.isSelf (uhost, urlport)) {
 		con.setMayUseCache (false);
 		con.setMayCache (false);
-		con.setMayFilter (false);
+		con.setFilteringNotAllowed();
 		if (!userHandler.isValidUser (con.getUserName (),
 					      con.getPassword ())
 		    && !isPublic (url)) {
@@ -167,7 +167,7 @@ public class HttpBaseFilter implements HttpFilter {
 			err = con.getHttpGenerator ().get401 (url, realm);
 		    return err;
 		}
-		con.setMeta (true);
+		con.setMeta ();
 	    }
 	} catch (MalformedURLException e) {
 	    return con.getHttpGenerator ().get400 (e);
@@ -272,9 +272,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    if (host == null) {
 		Exception exe =
 		    new Exception ("No host header set in HTTP/1.1 request");
-		HttpHeader ret =
-		    con.getHttpGenerator ().get400 (exe);
-		return ret;
+		return con.getHttpGenerator ().get400 (exe);
 	    }
 	    maychunk = true;
 	    String closeit = header.getHeader ("Proxy-Connection");
@@ -318,7 +316,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    } else if (cached.equals ("no-transform")) {
 		useCached = false;     // cache is transformed.
 		cacheAllowed = false;  // dont store, no point.
-		con.setMayFilter (false);
+		con.setFilteringNotAllowed();
 	    }
 	}
 
@@ -451,7 +449,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    String s = (String)i.next ();
 	    if (s.indexOf ("Negotiate") != -1 ||
 		s.indexOf ("NTLM") != -1) {
-		con.setMayFilter (false);
+		con.setFilteringNotAllowed (false);
 		con.setChunking (false);
 	    }
 	}
@@ -494,8 +492,6 @@ public class HttpBaseFilter implements HttpFilter {
      */
     public boolean isPublic (URL url) {
 	String file = url.getFile ();
-	if (file.startsWith ("/FileSender/public/"))
-	    return true;
-	return false;
-    }
+        return file.startsWith ("/FileSender/public/");
+	}
 }

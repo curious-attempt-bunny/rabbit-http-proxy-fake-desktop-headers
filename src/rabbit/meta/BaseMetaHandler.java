@@ -32,10 +32,10 @@ public abstract class BaseMetaHandler
     private boolean first = true;
     protected final Logger logger = Logger.getLogger (getClass ().getName ());
     
-    private static enum Mode { SEND_HEADER, SEND_DATA, CLEANUP };
+    private static enum Mode { SEND_HEADER, SEND_DATA, CLEANUP }
     private Mode mode = Mode.SEND_HEADER;
 
-    public static enum PageCompletion { PAGE_NOT_DONE, PAGE_DONE };
+    public static enum PageCompletion { PAGE_NOT_DONE, PAGE_DONE }
     
     public void handle (HttpHeader request, 
 			SProperties htab, 

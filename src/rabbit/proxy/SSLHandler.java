@@ -59,9 +59,9 @@ class SSLHandler implements TunnelDoneListener {
 		return false;
 	    }
 	}
-	if (proxy.proxySSL == false)
+	if (!proxy.proxySSL)
 	    return false;
-	if (proxy.proxySSL == true && proxy.sslports == null)
+	if (proxy.proxySSL && proxy.sslports == null)
 	    return true;
 	for (int i = 0; i < proxy.sslports.size (); i++) {
 	    if (port.equals (proxy.sslports.get (i)))

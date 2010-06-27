@@ -129,15 +129,11 @@ class ConditionalChecker {
 	CacheEntry<HttpHeader, HttpHeader> entry = rh.getEntry ();
 	if (entry == null)
 	    return false;
-	boolean noCache = false;
 	// Only check the response header,
 	// request headers with no-cache == refetch.
 	HttpHeader resp = rh.getDataHook ();
-	noCache = checkNoCacheHeader (resp.getHeaders ("Cache-Control"));
-	if (noCache) {
-	    return setupRevalidation (con, header, rh);
-	}
-	return false;
+	boolean noCache = checkNoCacheHeader (resp.getHeaders ("Cache-Control"));
+        return noCache && setupRevalidation (con, header, rh);
     }
 
     private boolean checkQuery (Connection con, HttpHeader header,
@@ -198,7 +194,7 @@ class ConditionalChecker {
 		nc = nc.trim ();
 		if (nc.equals ("must-revalidate") ||
 		    nc.equals ("proxy-revalidate")) {
-		    con.setMustRevalidate (true);
+		    con.setMustRevalidate ();
 		    long maxAge =
 			getCacheControlValue (rh.getDataHook (), "max-age=");
 		    if (maxAge >= 0) {
@@ -209,7 +205,7 @@ class ConditionalChecker {
 			}
 		    }
 		} else if (nc.startsWith ("s-maxage=")) {
-		    con.setMustRevalidate (true);
+		    con.setMustRevalidate ();
 		    long sm =
 			Long.parseLong (nc.substring ("s-maxage=".length ()));
 		    if (sm >= 0) {
@@ -240,14 +236,14 @@ class ConditionalChecker {
 		String inm = req.getHeader ("If-None-Match");
 		if (inm == null) {
 		    req.setHeader ("If-None-Match", etag);
-		    con.setAddedINM (true);
+		    con.setAddedINM ();
 		}
 		return true;
 	    } else if (lmod != null) {
 		String ims = req.getHeader ("If-Modified-Since");
 		if (ims == null) {
 		    req.setHeader ("If-Modified-Since", lmod);
-		    con.setAddedIMS (true);
+		    con.setAddedIMS ();
 		}
 		return true;
 	    } else {

@@ -79,7 +79,6 @@ class MetaHandlerHandler {
 	if (error != null) {
 	    Logger.getLogger (getClass ().getName ()).warning (error);
 	    con.doError (400, error);
-	    return;
 	}
     }
 

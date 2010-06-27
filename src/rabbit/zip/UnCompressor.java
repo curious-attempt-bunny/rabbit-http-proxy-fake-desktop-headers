@@ -32,7 +32,7 @@ class UnCompressor implements GZipUnpackState {
     
     public void handleCurrentData (GZipUnpacker unpacker) {
 	byte[] unpacked = listener.getBuffer ();
-	int num = -1;
+	int num;
 	try {
 	    if ((num = inf.inflate (unpacked)) > 0) {
 		if (gzip)
@@ -48,7 +48,7 @@ class UnCompressor implements GZipUnpackState {
 	    // ChunkHandler 56 need to call handleChunkData a last time to 
 	    // wrap up or listener.finishedRead (); /rick
 	    if (inf.finished () || inf.needsDictionary ()) {
-		GZipUnpackState tr = null;
+		GZipUnpackState tr;
 		int remaining = inf.getRemaining ();
 		if (gzip) {
 		    long length = inf.getBytesWritten ();

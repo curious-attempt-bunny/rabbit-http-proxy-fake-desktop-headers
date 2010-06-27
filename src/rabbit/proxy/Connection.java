@@ -935,11 +935,11 @@ public class Connection {
 	return meta;
     }
 
-    /** Set the state of this request.
-     * @param meta true if this request is a metapage request, false otherwise.
+    /** Flag this request as a meta-request, that is a request that the 
+     *  proxy should to handle.
      */
-    public void setMeta (boolean meta) {
-	this.meta = meta;
+    public void setMeta () {
+	this.meta = true;
     }
 
     /** Specify if the current resource may be served from our cache.
@@ -974,10 +974,9 @@ public class Connection {
     }
 
     /** Get the state of this request. This can only be promoted down.
-     * @param filterAllowed true if we may filter the response, false otherwise.
      */
-    public void setMayFilter (boolean filterAllowed) {
-	mayFilter = filterAllowed && mayFilter;
+    public void setFilteringNotAllowed () {
+	mayFilter = false;
     }
 
     /** Get the state of the request.
@@ -987,16 +986,16 @@ public class Connection {
 	return mayFilter;
     }
 
-    void setAddedINM (boolean b) {
-	addedINM = b;
+    void setAddedINM () {
+	addedINM = true;
     }
 
-    void setAddedIMS (boolean b) {
-	addedIMS = b;
+    void setAddedIMS () {
+	addedIMS = true;
     }
 
-    public void setMustRevalidate (boolean b) {
-	mustRevalidate = b;
+    public void setMustRevalidate () {
+	mustRevalidate = true;
     }
 
     /** Set the content length of the response.

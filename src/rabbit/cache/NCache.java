@@ -498,8 +498,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      */
     @SuppressWarnings( "unchecked" )
     private void readCacheIndex () {
-	long fileNo = 0;
-	long currentSize = 0;
+	long fileNo;
+	long currenSize;
 	try {
 	    String name = dir + File.separator + CACHEINDEX;
 	    FileInputStream fis = new FileInputStream (name);

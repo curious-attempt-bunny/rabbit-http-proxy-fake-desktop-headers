@@ -167,10 +167,9 @@ public class GeneralHeader implements Storable {
      * @param to the GeneralHeader to add headers to.
      */
     public void copyHeader (GeneralHeader to) {
-	for (int i = 0; i < headers.size (); i++) {
-	    Header h = headers.get (i);
-	    to.addHeader (h.getType (), h.getValue ());
-	}
+        for (Header h : headers) {
+            to.addHeader (h.getType (), h.getValue ());
+        }
     }
     
     public void read (DataInput in) throws IOException {

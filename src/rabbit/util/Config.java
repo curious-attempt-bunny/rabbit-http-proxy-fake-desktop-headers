@@ -23,11 +23,11 @@ import java.util.StringTokenizer;
  *  key2=value2
  *  [sectionName2]
  *  key=value
- *  key2=value2 
+ *  key2=value2
  *  key_with_equals\=still_key=value3
  *  </pre>
  *  everything after the first '#' is considered a comment.
- *  blank lines are ignored. If you want keys with '=' in them 
+ *  blank lines are ignored. If you want keys with '=' in them
  *  escape it to '\=' and you should be fine.
  */
 public class Config {
@@ -38,7 +38,7 @@ public class Config {
     public Config () {
 	configs = new HashMap<String, SProperties> ();
 	SProperties current = new SProperties (); // the main thing.
-	configs.put ("", current); 
+	configs.put ("", current);
     }
 
     /** Create a Config for the specified file
@@ -56,7 +56,7 @@ public class Config {
 	BufferedReader br = new BufferedReader (new FileReader (file));
 	readConfig (br);
     }
-    
+
     /** Create a Config by reading it from a stream.
      * @param is the stream to read the config from.
      */
@@ -72,7 +72,7 @@ public class Config {
 	BufferedReader br = new BufferedReader (reader);
 	readConfig (br);
     }
-    
+
     /** read in a Config from a reader.
      * @param br the reader that has the Config.
      */
@@ -80,10 +80,10 @@ public class Config {
 	String line;
 	configs = new HashMap<String, SProperties> ();
 	SProperties current = new SProperties (); // the main thing.
-	configs.put ("", current); 
+	configs.put ("", current);
 	while ((line = br.readLine ()) != null) {
 	    int index = line.indexOf ('#');
-	    if (index >= 0) 
+	    if (index >= 0)
 		line = line.substring (0,index);
 	    if (line.equals (""))
 		continue;
@@ -94,13 +94,13 @@ public class Config {
 		    // collapse configs named equal.
 		    if (configs.get (newSection) != null)
 			current = configs.get (newSection);
-		    else 
+		    else
 			current = new SProperties ();
-		    configs.put (newSection, current);	  
+		    configs.put (newSection, current);
 		}
 	    }
 	    else {
-		boolean escaped = false;
+		boolean escaped;
 		int start = 0;
 		int eqindex;
 		do {
@@ -112,11 +112,11 @@ public class Config {
 			line = line.substring (0,eqindex-1) + line.substring (eqindex);
 		    }
 		} while (escaped);
-		String key = "" , value = "";
+		String key, value = "";
 		if (eqindex >= 0) {
 		    key = line.substring (0,eqindex);
 		    value = line.substring (eqindex+1);
-		} else 
+		} else
 		    key = line;
 		current.put (key, value);
 	    }
@@ -138,12 +138,12 @@ public class Config {
     public SProperties getProperties (String sectionName) {
     	SProperties sp = configs.get (sectionName);
       	if (sp == null)
-	    // logging might not be set up at this point so just write 
-	    System.err.println ("'" + sectionName + 
+	    // logging might not be set up at this point so just write
+	    System.err.println ("'" + sectionName +
 				"' section missing from conf");
     	return sp;
     }
-    
+
     /** set the properties for a given section
      * @param sectionName the section we want to set the properties for.
      * @param prop the SProperties for the sections
@@ -190,13 +190,13 @@ public class Config {
 	}
 	p.put (key, value);
     }
-    
-    /** save the config to a OutputStream 
+
+    /** save the config to a OutputStream
      */
     public void save (OutputStream os) {
 	save (os, null);
     }
-    /** save the config to a OutputStream 
+    /** save the config to a OutputStream
      */
     public void save (OutputStream os, String comment) {
 	PrintWriter dos = new PrintWriter (os);

@@ -14,9 +14,6 @@ public class ContentRangeParser {
     private long total;
     private boolean valid = false;
 
-    private final Logger logger = 
-	Logger.getLogger (getClass ().getName ());
-
     /** Try to parse the given content range.
      * @param cr the Content-Range header.
      */
@@ -36,6 +33,7 @@ public class ContentRangeParser {
 			total = Long.parseLong (length);
 		    valid = true;
 		} catch (NumberFormatException e) {
+		    Logger logger = Logger.getLogger (getClass ().getName ());
 		    logger.log (Level.WARNING, 
 				"bad content range: " + e + 
 				" for string: '" + cr + "'", 

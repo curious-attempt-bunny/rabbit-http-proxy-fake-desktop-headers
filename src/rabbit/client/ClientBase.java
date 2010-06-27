@@ -33,7 +33,6 @@ import rabbit.util.TrafficLogger;
 public class ClientBase {
     private final Logger logger = Logger.getLogger (getClass ().getName ());
     private final ConnectionHandler connectionHandler;
-    private final Counter counter = new Counter ();
     private final NioHandler nioHandler;
     private final TrafficLogger trafficLogger = new SimpleTrafficLogger ();
     private final BufferHandler bufHandler;
@@ -49,6 +48,7 @@ public class ClientBase {
 	DNSJavaHandler jh = new DNSJavaHandler ();
 	jh.setup (null);
 	ProxyChain proxyChain = new SimpleProxyChain (nioHandler, jh);
+	Counter counter = new Counter ();
 	connectionHandler =
 	    new ConnectionHandler (counter, proxyChain, nioHandler);
 
@@ -194,10 +194,8 @@ public class ClientBase {
     private WebConnectionResourceSource
     getWebConnectionResouceSource (WebConnection wc, BufferHandle bufferHandle,
 				   boolean isChunked, long dataSize) {
-	WebConnectionResourceSource wrs =
-	    new WebConnectionResourceSource (connectionHandler, nioHandler,
-					     wc, bufferHandle, trafficLogger,
-					     isChunked, dataSize, true);
-	return wrs;
+	return new WebConnectionResourceSource (connectionHandler, nioHandler,
+						wc, bufferHandle, trafficLogger,
+						isChunked, dataSize, true);
     }
 }
