@@ -210,8 +210,7 @@ public class Connection {
 		setupChunkedContent ();
 	    } else {
 		// no? then try regular data
-		String ct = null;
-		ct = request.getHeader ("Content-Type");
+		String ct = request.getHeader ("Content-Type");
 		if (hasRegularContent (request, ct, dataSize))
 		    setupClientResourceHandler (dataSize);
 		else
@@ -236,7 +235,6 @@ public class Connection {
     }
 
     /** Filter the request and handle it.
-     * @param header the request
      */
     // TODO: filtering here may block! be prepared to run filters in a
     // TODO: separate thread.
@@ -639,16 +637,14 @@ public class Connection {
 	    resourceEstablished (rh);
 	} catch (IOException ex) {
 	    doGateWayTimeout (ex);
-	    return;
 	}
     }
 
     // Setup a resource from the cache
     HttpHeader setupCachedEntry (RequestHandler rh) throws IOException {
 	SCC swc = new SCC (this, request, rh);
-	HttpHeader ret = swc.establish ();
-	return ret;
-    }
+	return swc.establish ();
+	}
 
     private void setupChunkedContent () throws IOException {
 	status = "Request read, reading chunked data";
@@ -726,7 +722,6 @@ public class Connection {
     }
 
     /** Send an error (400 Bad Request or 504) to the client.
-     * @param statuscode the status code of the error.
      * @param e the exception to tell the client.
      */
     private void doGateWayTimeout (Exception e) {
