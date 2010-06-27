@@ -54,6 +54,7 @@ public interface Cache<K, V> {
     /** Get the CacheEntry assosiated with given object.
      * @param k the key.
      * @return the NCacheEntry or null (if not found).
+     * @throws CacheException upon failure to get the key
      */ 
     CacheEntry<K, V> getEntry (K k) throws CacheException;
 
@@ -62,6 +63,7 @@ public interface Cache<K, V> {
      * @param real false if this is a temporary cache file, 
      *             true if it is a realized entry.
      * @param extension the cache entry extension.
+     * @return the file name of the new entry
      */
     String getEntryName (long id, boolean real, String extension);
 
@@ -92,7 +94,8 @@ public interface Cache<K, V> {
      */
     void remove (K k) throws CacheException;
 
-    /** Clear the Cache from files. 
+    /** Clear the Cache from files.
+     * @throws CacheException if the clear operation failed
      */
     void clear () throws CacheException;
 
