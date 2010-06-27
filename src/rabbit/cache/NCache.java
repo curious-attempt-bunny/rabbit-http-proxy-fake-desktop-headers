@@ -500,10 +500,6 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private void readCacheIndex () {
 	long fileNo = 0;
 	long currentSize = 0;
-	Map<FiledKey<K>, NCacheEntry<K, V>> htab =
-	    new HashMap<FiledKey<K>, NCacheEntry<K, V>> ();
-	List<NCacheEntry<K, V>> vec =
-	    new ArrayList<NCacheEntry<K, V>> ();
 	try {
 	    String name = dir + File.separator + CACHEINDEX;
 	    FileInputStream fis = new FileInputStream (name);
@@ -512,17 +508,17 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    fileNo = is.readLong ();
 	    currentSize = is.readLong ();
 	    int size = is.readInt ();
-	    Map<FiledKey<K>, NCacheEntry<K, V>> hh =
+	    Map<FiledKey<K>, NCacheEntry<K, V>> htab =
 		new HashMap<FiledKey<K>, NCacheEntry<K, V>> ((int)(size * 1.2));
 	    for (int i = 0; i < size; i++) {
 		FiledKey<K> fk = (FiledKey<K>)is.readObject ();
 		fk.setCache (this);
 		NCacheEntry<K, V> entry = (NCacheEntry<K, V>)is.readObject ();
 		entry.setKey (fk);
-		hh.put (fk, entry);
+		htab.put (fk, entry);
 	    }
-	    htab = hh;
-	    vec = (List<NCacheEntry<K, V>>)is.readObject ();
+	    List<NCacheEntry<K, V>> vec =
+		(List<NCacheEntry<K, V>>)is.readObject ();
 	    is.close ();
 
 	    // Only set internal state if we managed to get it all.
