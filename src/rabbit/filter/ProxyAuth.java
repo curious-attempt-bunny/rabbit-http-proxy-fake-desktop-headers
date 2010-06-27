@@ -97,11 +97,12 @@ public class ProxyAuth implements HttpFilter {
 
     private HttpHeader getError (HttpHeader header, Connection con) {
 	HttpGenerator hg = con.getHttpGenerator ();
+	String url = header.getRequestURI ();
 	try {
-	    return hg.get407 (new URL (header.getRequestURI ()), "internet");
+	    return hg.get407 (new URL (url), "internet");
 	} catch (MalformedURLException e) {
 	    logger.log (Level.WARNING, "Bad url: " + header.getRequestURI (), e);
-	    return hg.get407 (null, "internet");
+	    return hg.get400 (e);
 	}
     }
 
