@@ -38,7 +38,7 @@ public class ExternalProcessConverter implements ImageConverter {
 
     public void convertImage (File from, File to, String info)
 	throws IOException {
-	int idx = 0;
+	int idx;
 	String entryName = from.getAbsolutePath ();
 	String convargs = convertArgs;
 	while ((idx = convargs.indexOf ("$filename")) > -1) {

@@ -78,7 +78,6 @@ public class AdFilter extends HtmlFilter {
 		TagType tagtype = tag.getTagType ();
 		if (tagtype == TagType.A) {
 		    astart = i;
-		    Tag atag = tag;
 		    int ttsize = tokens.size ();
 		    for (; i < ttsize; i++) {
 			Token tk2 = tokens.get (i);
@@ -88,7 +87,7 @@ public class AdFilter extends HtmlFilter {
 			    if (t2tt != null && isAEnder (t2tt))
 				break;
 			    else if (t2tt != null && t2tt == TagType.IMG &&
-				     isEvil (atag.getAttribute ("href")))
+				     isEvil (tag.getAttribute ("href")))
 				tag2.setAttribute ("src", adreplacer);
 			}
 		    }

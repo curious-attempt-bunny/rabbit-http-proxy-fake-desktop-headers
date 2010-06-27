@@ -9,8 +9,8 @@ import rabbit.http.HttpHeader;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class CountingClientBaseStopper {
-    private AtomicInteger outstandingRequests = new AtomicInteger ();
-    private ClientBase clientBase;
+    private final AtomicInteger outstandingRequests = new AtomicInteger ();
+    private final ClientBase clientBase;
 
     public CountingClientBaseStopper (ClientBase clientBase) {
 	this.clientBase = clientBase;

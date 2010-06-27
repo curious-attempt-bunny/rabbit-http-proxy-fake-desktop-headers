@@ -58,7 +58,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	String attr = tag.getAttribute (attribute);
 	if (attr != null) {
 	    boolean found = false;
-	    int idx = 0;
+	    int idx;
 	    // only expect to find zero or one
 	    while ((idx = attr.indexOf (match)) > -1) {
 		found = true;

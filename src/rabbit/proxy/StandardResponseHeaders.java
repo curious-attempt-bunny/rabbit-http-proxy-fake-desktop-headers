@@ -53,7 +53,6 @@ class StandardResponseHeaders implements HttpGenerator {
     }
 
     /** Get a new HttpHeader initialized with some data.
-     * @param statusLine the statusline of the response.
      * @return a new HttpHeader.
      */
     public HttpHeader getHeader (StatusCode sc) {
@@ -288,7 +287,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	return header;
     }
 
-    private static String[][] placeTransformers = {
+    private static final String[][] placeTransformers = {
 	{"www.", ""},
 	{"", ".com"},
 	{"www.", ".com"},
@@ -299,7 +298,7 @@ class StandardResponseHeaders implements HttpGenerator {
     };
 
     /** Get a 504 Gateway Timeout for the given exception.
-     * @param exception the Exception made.
+     * @param e the Exception made.
      * @return a suitable HttpHeader.
      */
     public HttpHeader get504 (String uri, Throwable e) {

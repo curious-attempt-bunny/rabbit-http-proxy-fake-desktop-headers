@@ -6,7 +6,7 @@ import java.io.IOException;
 import rabbit.io.Storable;
 import rabbit.util.StringCache;
 
-/** This class holds a single header value, that is a 
+/** This class holds a single header value, that is a
  *  &quot;type: some text&quot;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -19,7 +19,8 @@ public class Header implements Storable {
     public static final String CRLF = "\r\n";
 
     /** The string cache we are using. */
-    private static StringCache stringCache = StringCache.getSharedInstance ();
+    private static final StringCache stringCache =
+	StringCache.getSharedInstance ();
 
     private static String getCachedString (String s) {
 	return stringCache.getCachedString (s);
@@ -27,7 +28,7 @@ public class Header implements Storable {
 
     /** Used for externalization. */
     public Header () {}
-	
+
     /** Create a new header */
     public Header (String type, String value) {
 	this.type = getCachedString (type);
@@ -43,7 +44,7 @@ public class Header implements Storable {
     public String getValue () {
 	return value;
     }
-    
+
     /** Set the value of this header to the new value given.
      */
     public void setValue (String newValue) {
@@ -72,7 +73,7 @@ public class Header implements Storable {
 	out.writeUTF (type);
 	out.writeUTF (value);
     }
-	
+
     public void read (DataInput in) throws IOException {
 	type = getCachedString (in.readUTF ());
 	value = getCachedString (in.readUTF ());

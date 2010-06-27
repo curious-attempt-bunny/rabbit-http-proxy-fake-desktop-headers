@@ -22,7 +22,7 @@ class MetaHandlerHandler {
 			    TrafficLogger tlProxy, TrafficLogger tlClient)
 	throws IOException {
 	con.getCounter ().inc ("Meta pages requested");
-	URL url = null;
+	URL url;
 	try {
 	    url = new URL (header.getRequestURI ());
 	} catch (MalformedURLException e) {
@@ -34,7 +34,7 @@ class MetaHandlerHandler {
 	if (file.length () == 0)
 	    file = "FileSender/";
 
-	int index = -1;
+	int index;
 	String args = "";
 	if ((index = file.indexOf ("?")) >= 0) {
 	    args = file.substring (index + 1);
@@ -57,7 +57,7 @@ class MetaHandlerHandler {
 
 	    Class<? extends MetaHandler> cls =
 		Class.forName (file).asSubclass (MetaHandler.class);
-	    MetaHandler mh = null;
+	    MetaHandler mh;
 	    mh = cls.newInstance ();
 	    mh.handle (header, htab, con, tlProxy, tlClient);
 	    con.getCounter ().inc ("Meta pages handled");

@@ -5,8 +5,8 @@ package rabbit.proxy;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ConnectionId {
-    private int group;
-    private long id;
+    private final int group;
+    private final long id;
     
     public ConnectionId (int group, long id) {
 	this.group = group;

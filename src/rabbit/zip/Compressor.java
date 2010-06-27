@@ -8,9 +8,9 @@ import java.util.zip.Deflater;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class Compressor implements GZipPackState {
-    private GZipPackListener listener;
-    private CRC32 crc = new CRC32 ();
-    private Deflater def;
+    private final GZipPackListener listener;
+    private final CRC32 crc = new CRC32 ();
+    private final Deflater def;
     private boolean finished = false;
 
     public Compressor (GZipPackListener listener) {

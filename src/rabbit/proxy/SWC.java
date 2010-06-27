@@ -33,7 +33,7 @@ public class SWC implements HttpHeaderSentListener,
     private final RequestHandler rh;
 
     private int attempts = 0;
-    private String method;
+    private final String method;
     private boolean safe = true;
 
     private char status = '0';
@@ -94,7 +94,7 @@ public class SWC implements HttpHeaderSentListener,
 	}
     }
 
-    public boolean useFullURI () throws IOException {
+    public boolean useFullURI () {
 	return resolver.isProxyConnected ();
     }
 

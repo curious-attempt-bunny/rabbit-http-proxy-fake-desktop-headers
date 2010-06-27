@@ -330,7 +330,7 @@ public class HtmlParser {
      * @return the value or null.
      */
     private String value () throws HtmlParseException {
-	while (nextToken == EQUALS) {
+	if (nextToken == EQUALS) {
 	    match (EQUALS);
 	    if (nextToken == STRING ||
 		nextToken == SQSTRING ||

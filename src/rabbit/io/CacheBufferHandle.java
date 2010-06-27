@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class CacheBufferHandle implements BufferHandle {
-    private BufferHandler bh;
+    private final BufferHandler bh;
     private ByteBuffer buffer;
 
     public CacheBufferHandle (BufferHandler bh) {

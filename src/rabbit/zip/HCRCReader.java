@@ -5,10 +5,10 @@ package rabbit.zip;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class HCRCReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
-    private byte flag; 
+    private final GZipUnpackListener listener;
+    private final byte flag;
     private int pos = 0;
-    private byte[] crc = new byte[2];
+    private final byte[] crc = new byte[2];
 
     public HCRCReader (GZipUnpackListener listener, byte flag) {
 	this.listener = listener;

@@ -13,7 +13,7 @@ import rabbit.io.WebConnection;
  */
 class RequestHandler {
     private BufferHandle webHandle; 
-    private ConditionalChecker cond;
+    private final ConditionalChecker cond;
 
     private ResourceSource content = null;
     private HttpHeader webHeader = null;

@@ -10,13 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Counter 
 {
     // All the messages we count.
-    private Map<String, Count> counters = 
+    private final Map<String, Count> counters =
 	new ConcurrentHashMap<String, Count> ();
     
     /** This class holds one messages counts
      */
     static class Count {
-	private AtomicInteger counter = new AtomicInteger (0);
+	private final AtomicInteger counter = new AtomicInteger (0);
 	
 	/** Create a new Count
 	 */

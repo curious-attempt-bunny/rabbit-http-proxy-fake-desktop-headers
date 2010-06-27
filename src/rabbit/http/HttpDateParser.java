@@ -44,8 +44,7 @@ public class HttpDateParser {
 	if (date == null)
 	    return null;
 
-	Date d = null;
-	d = getDate (date, sdf1, offset);
+	Date d = getDate (date, sdf1, offset);
 	if (d == null) {
 	    d = getDate (date, sdf2, offset);
 	    if (d == null) {

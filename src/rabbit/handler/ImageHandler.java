@@ -182,7 +182,7 @@ public class ImageHandler extends BaseHandler {
     /** Read in the image
      * @throws IOException if reading of the image fails.
      */
-    protected void readImage () throws IOException {
+    protected void readImage ()  {
 	String enc = response.getHeader ("Content-Encoding");
 	boolean unzip = "gzip".equalsIgnoreCase (enc); 
 	if (unzip)

@@ -7,8 +7,8 @@ import static rabbit.zip.GZipFlags.*;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class CommentReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
-    private byte flag; 
+    private final GZipUnpackListener listener;
+    private final byte flag;
 
     public CommentReader (GZipUnpackListener listener, byte flag) {
 	this.listener = listener;

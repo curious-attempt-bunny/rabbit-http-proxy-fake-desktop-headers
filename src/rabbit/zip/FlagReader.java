@@ -7,10 +7,10 @@ import static rabbit.zip.GZipFlags.*;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class FlagReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
+    private final GZipUnpackListener listener;
     private int pos = 0;
     private byte flag = -1;
-    private byte[] flags = new byte[6];
+    private final byte[] flags = new byte[6];
     
     public FlagReader (GZipUnpackListener listener) {
 	this.listener = listener;

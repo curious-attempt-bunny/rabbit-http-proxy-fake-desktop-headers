@@ -11,7 +11,7 @@ import rabbit.util.SProperties;
  */
 public class HtmlPage {
 
-    private static String BASICLOGO =
+    private static final String BASICLOGO =
 	"http://www.khelekore.org/rabbit/images/smallRabbIT4.png";
 
     private static SProperties config = setup ();
@@ -46,7 +46,7 @@ public class HtmlPage {
      * @return a HTMLHeader.
      */
     public static String getPageHeader (Connection con, String title) {
-	int idx = -1;
+	int idx;
 	HttpProxy proxy = con.getProxy ();
 	String basiclogo =
 	    proxy.getConfig ().getProperty (proxy.getClass ().getName (),

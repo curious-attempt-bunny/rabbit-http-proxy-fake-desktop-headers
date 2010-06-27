@@ -9,22 +9,23 @@ import rabbit.util.StringCache;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class HttpHeader extends GeneralHeader {    
+public class HttpHeader extends GeneralHeader {
 
     private String method = "";
     private String requestURI = "";
     private String httpVersion = null;
-    private int hashCodeValue; 
+    private int hashCodeValue;
 
     private transient String content;
 
     /** Create a new HTTPHeader from scratch
      */
-    public HttpHeader () {    
+    public HttpHeader () {
     }
 
     /** The string cache we are using. */
-    private static StringCache stringCache = StringCache.getSharedInstance ();
+    private static final StringCache stringCache =
+	StringCache.getSharedInstance ();
 
     private static String getCachedString (String s) {
 	return stringCache.getCachedString (s);
@@ -38,13 +39,13 @@ public class HttpHeader extends GeneralHeader {
 	    sb.append (content);
     }
 
-    /** Get the statusline of this header (only valid for responses). 
+    /** Get the statusline of this header (only valid for responses).
      * @return the status of the request.
      */
     public String getStatusLine () {
 	return getRequestLine ();
     }
-    
+
     /** Set the statusline of this header.
      * @param line a Status-Line )RFC 2068: 6.1)
      */
@@ -53,7 +54,7 @@ public class HttpHeader extends GeneralHeader {
     }
 
     /** Get the requestline of this header (only valid for requests).
-     * @return the request. 
+     * @return the request.
      */
     public String getRequestLine () {
 	StringBuilder sb = new StringBuilder (method.length () + requestURI.length () + 10);
@@ -91,15 +92,15 @@ public class HttpHeader extends GeneralHeader {
     public boolean isHeadOnlyRequest () {
 	return method.equals ("HEAD");     // method is casesensitive.
     }
-    
+
     /** Get the request method of this header (only valid for requests).
      * @return the request method.
      */
     public String getMethod (){
 	return method;
     }
-    
-    /** Sets the request method of this header 
+
+    /** Sets the request method of this header
      * @param method the new requestmethod
      */
     public void setMehtod (String method) {
@@ -119,8 +120,8 @@ public class HttpHeader extends GeneralHeader {
     public String getRequestURI () {
 	return requestURI;
     }
-    
-    /** Sets the request URI of this header 
+
+    /** Sets the request URI of this header
      * @param requestURI the new URI
      */
     public void setRequestURI (String requestURI) {
@@ -141,14 +142,14 @@ public class HttpHeader extends GeneralHeader {
     public void setHTTPVersion (String version) {
 	httpVersion = version;
     }
-    
+
     /** Get the HTTP version of the response (only valid for responses).
      * @return the HTTP version.
      */
     public String getResponseHTTPVersion () {
 	return method;
     }
-    
+
     /** Set the HTTP version for this response.
      * @param httpVersion the version to use.
      */
@@ -162,7 +163,7 @@ public class HttpHeader extends GeneralHeader {
     public String getStatusCode () {
 	return requestURI;
     }
-    
+
     /** Set the Status code for this response.
      * @param status the new status code.
      */
@@ -177,7 +178,7 @@ public class HttpHeader extends GeneralHeader {
     public String getReasonPhrase () {
 	return httpVersion;
     }
-    
+
     /** Set the reason phrase for this reqponse.
      * @param reason the new reasonphrase
      */
@@ -186,20 +187,20 @@ public class HttpHeader extends GeneralHeader {
     }
 
     /** Is this request a HTTP/0.9 type request?
-     *  A 0.9 request doesnt have a full HTTPheader, only a requestline 
+     *  A 0.9 request doesnt have a full HTTPheader, only a requestline
      *  so we need to treat it differently.
      */
     public boolean isDot9Request () {
 	return isRequest () && httpVersion == null;
-    }    
-    
+    }
+
     /** Get the hashCode for this header.
      * @return the hash code for this object.
      */
     @Override public int hashCode() {
-	return hashCodeValue; 
+	return hashCodeValue;
     }
-    
+
     /** Is this Header equal to the other object?
      *  Two HTTPHeaders are assumed equal if the requesURI's are equal.
      * @param o the Object to compare to.
@@ -220,8 +221,8 @@ public class HttpHeader extends GeneralHeader {
     public boolean isRequest () {
 	return !isResponse ();
     }
-    
-    /** Try to guess if this header is a response. 
+
+    /** Try to guess if this header is a response.
      * @return true if this (probably) is a response, false otherwise.
      */
     public boolean isResponse () {
@@ -247,29 +248,27 @@ public class HttpHeader extends GeneralHeader {
 	// TODO: content length is not correct, should be byte length.
 	setHeader ("Content-Length", "" + content.length ());
     }
-    
+
     /** Get the current content for this request/response.
      */
     public String getContent () {
 	return content;
     }
-    
+
     @Override public void read (DataInput in) throws IOException {
 	method = in.readUTF ();
 	requestURI = in.readUTF ();
 	httpVersion = in.readUTF ();
 	if ("".equals (httpVersion))
 	    httpVersion = null;
-	hashCodeValue = getRequestURI ().toLowerCase ().hashCode ();	
+	hashCodeValue = getRequestURI ().toLowerCase ().hashCode ();
 	super.read (in);
     }
 
-    @Override public void write (DataOutput out) throws IOException { 
+    @Override public void write (DataOutput out) throws IOException {
 	out.writeUTF (method);
 	out.writeUTF (requestURI);
 	out.writeUTF (httpVersion != null ? httpVersion : "");
 	super.write (out);
     }
 }
-    
-    

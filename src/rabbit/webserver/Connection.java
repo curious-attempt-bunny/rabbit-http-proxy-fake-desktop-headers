@@ -29,8 +29,8 @@ import rabbit.util.TrafficLogger;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class Connection {
-    private SimpleWebServer sws;
-    private SocketChannel sc;
+    private final SimpleWebServer sws;
+    private final SocketChannel sc;
     private BufferHandle clientBufferHandle;
     private boolean timeToClose = false;
     private ResourceSource resourceSource = null;

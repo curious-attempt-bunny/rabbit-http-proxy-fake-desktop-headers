@@ -8,8 +8,8 @@ import java.util.Map;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class TagType {
-    private static Map<String, TagType> types;
-    private String type;
+    private static final Map<String, TagType> types;
+    private final String type;
     
     public static final TagType A = new TagType ("a");
     public static final TagType SA = new TagType ("/a");

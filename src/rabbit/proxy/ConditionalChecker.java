@@ -133,7 +133,7 @@ class ConditionalChecker {
 	// request headers with no-cache == refetch.
 	HttpHeader resp = rh.getDataHook ();
 	boolean noCache = checkNoCacheHeader (resp.getHeaders ("Cache-Control"));
-        return noCache && setupRevalidation (con, header, rh);
+	return noCache && setupRevalidation (con, header, rh);
     }
 
     private boolean checkQuery (Connection con, HttpHeader header,
@@ -264,8 +264,8 @@ class ConditionalChecker {
 			rh.getCond ().getCacheControlValue (resp, "max-age=");
 		    if (maxAge >= 0) {
 			long now = System.currentTimeMillis ();
-			long secs = (now - rh.getEntry ().getCacheTime ()) / 1000;
-			long currentAge = secs;
+			long currentAge =
+			    (now - rh.getEntry ().getCacheTime ()) / 1000;
 			String age = resp.getHeader ("Age");
 			if (age != null)
 			    currentAge += Long.parseLong (age);

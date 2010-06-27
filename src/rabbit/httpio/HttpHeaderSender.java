@@ -32,7 +32,7 @@ public class HttpHeaderSender implements BlockSentListener {
 	bs = new BlockSender (channel, nioHandler, tl, bh, false, this);
     }
 
-    public void sendHeader () throws IOException {
+    public void sendHeader () {
 	bs.write ();
     }
 

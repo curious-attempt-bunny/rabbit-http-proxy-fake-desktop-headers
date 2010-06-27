@@ -9,7 +9,7 @@ import java.io.Writer;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class LogWriter extends PrintWriter {
-    private OutputStream os;
+    private final OutputStream os;
     
     public LogWriter (OutputStream os, boolean autoFlush) {
 	super (os, autoFlush);

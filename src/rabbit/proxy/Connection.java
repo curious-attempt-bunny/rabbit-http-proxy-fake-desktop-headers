@@ -55,7 +55,7 @@ public class Connection {
     private BufferHandle requestHandle;
 
     /** The buffer handler. */
-    private BufferHandler bufHandler;
+    private final BufferHandler bufHandler;
 
     /** The proxy we are serving */
     private final HttpProxy proxy;
@@ -89,9 +89,9 @@ public class Connection {
 
     private ClientResourceHandler clientResourceHandler;
 
-    private HttpGenerator responseHandler;
+    private final HttpGenerator responseHandler;
 
-    private TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
+    private final TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
 
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
@@ -413,17 +413,13 @@ public class Connection {
 
     private void tunnel (RequestHandler rh) {
 	status = "Handling request - tunneling";
-	try {
-	    TunnelDoneListener tdl = new TDL (rh);
-	    SocketChannel webChannel = rh.getWebConnection ().getChannel ();
-	    Tunnel tunnel =
-		new Tunnel (getNioHandler (), channel, requestHandle,
-			    tlh.getClient (), webChannel,
-			    rh.getWebHandle (), tlh.getNetwork (), tdl);
-	    tunnel.start ();
-	} catch (IOException ex) {
-	    logAndClose (rh);
-	}
+	TunnelDoneListener tdl = new TDL (rh);
+	SocketChannel webChannel = rh.getWebConnection ().getChannel ();
+	Tunnel tunnel =
+	    new Tunnel (getNioHandler (), channel, requestHandle,
+			tlh.getClient (), webChannel,
+			rh.getWebHandle (), tlh.getNetwork (), tdl);
+	tunnel.start ();
     }
 
     private void resourceEstablished (RequestHandler rh) {
@@ -564,7 +560,7 @@ public class Connection {
 	}
     }
 
-    private boolean handleConditional (RequestHandler rh) throws IOException {
+    private boolean handleConditional (RequestHandler rh) {
 	HttpHeader cachedHeader = rh.getDataHook ();
 	rh.getContent ().release ();
 
@@ -609,7 +605,7 @@ public class Connection {
     }
 
     private class TDL implements TunnelDoneListener {
-	private RequestHandler rh;
+	private final RequestHandler rh;
 
 	public TDL (RequestHandler rh) {
 	    this.rh = rh;
@@ -646,7 +642,7 @@ public class Connection {
 	return swc.establish ();
 	}
 
-    private void setupChunkedContent () throws IOException {
+    private void setupChunkedContent () {
 	status = "Request read, reading chunked data";
 	setMayUseCache (false);
 	setMayCache (false);

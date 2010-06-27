@@ -38,7 +38,7 @@ public class HttpSnoop implements HttpFilter {
     }
 
     private static class ContentLogger implements ClientResourceListener {
-	private HttpHeader header;
+	private final HttpHeader header;
 	public ContentLogger (HttpHeader header) {
 	    this.header = header;
 	}

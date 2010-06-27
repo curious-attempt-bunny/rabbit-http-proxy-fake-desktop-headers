@@ -78,7 +78,7 @@ public abstract class BaseMetaHandler
 	}
     }
 
-    protected void cleanup () throws IOException {
+    protected void cleanup () {
 	con.logAndRestart ();
     }
 

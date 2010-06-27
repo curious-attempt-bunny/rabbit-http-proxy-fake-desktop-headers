@@ -31,7 +31,7 @@ public class PartialCacher {
     }
     
     private static class FileWriter implements WritableByteChannel {
-	private FileChannel fc;
+	private final FileChannel fc;
 
 	public FileWriter (FileChannel fc) {
 	    this.fc = fc;

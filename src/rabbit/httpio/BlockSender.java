@@ -16,8 +16,8 @@ import rabbit.util.TrafficLogger;
  */
 public class BlockSender extends BaseSocketHandler implements WriteHandler {
     private ByteBuffer chunkBuffer;
-    private ByteBuffer end;
-    private ByteBuffer[] buffers;
+    private final ByteBuffer end;
+    private final ByteBuffer[] buffers;
     private final TrafficLogger tl;
     private final BlockSentListener sender;
     
@@ -25,7 +25,7 @@ public class BlockSender extends BaseSocketHandler implements WriteHandler {
 			TrafficLogger tl, 
 			BufferHandle bufHandle, boolean chunking, 
 			BlockSentListener sender) 
-	throws IOException {
+	{
 	super (channel, bufHandle, nioHandler);
 	this.tl = tl;
 	ByteBuffer buffer = bufHandle.getBuffer ();

@@ -193,20 +193,8 @@ public class Config {
 
     /** save the config to a OutputStream
      */
-    public void save (OutputStream os) {
-	save (os, null);
-    }
-    /** save the config to a OutputStream
-     */
-    public void save (OutputStream os, String comment) {
+    public void save(OutputStream os) {
 	PrintWriter dos = new PrintWriter (os);
-	if (comment != null) {
-	    StringTokenizer st = new StringTokenizer (comment, "\n");
-	    while (st.hasMoreElements ()) {
-		String str = st.nextToken ();
-		dos.println ("#" + str);
-	    }
-	}
 	for (String section : configs.keySet ()) {
 	    dos.println ("[" + section + "]");
 	    SProperties pr = configs.get (section);

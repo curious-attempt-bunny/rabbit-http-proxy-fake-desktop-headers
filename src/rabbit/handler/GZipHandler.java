@@ -12,7 +12,7 @@ import rabbit.util.SProperties;
 import rabbit.zip.GZipPackListener;
 import rabbit.zip.GZipPacker;
 
-/** This handler compresses the data passing through it. 
+/** This handler compresses the data passing through it.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -27,24 +27,24 @@ public class GZipHandler extends BaseHandler {
      */
     public GZipHandler () {
     }
-    
+
     /** Create a new GZipHandler for the given request.
      * @param con the Connection handling the request.
      * @param request the actual request made.
      * @param clientHandle the client side buffer.
      * @param response the actual response.
      * @param content the resource.
-     * @param mayCache May we cache this request? 
+     * @param mayCache May we cache this request?
      * @param mayFilter May we filter this request?
      * @param size the size of the data beeing handled.
      * @param compress if we want this handler to compress or not.
      */
-    public GZipHandler (Connection con, TrafficLoggerHandler tlh, 
+    public GZipHandler (Connection con, TrafficLoggerHandler tlh,
 			HttpHeader request, BufferHandle clientHandle,
-			HttpHeader response, ResourceSource content, 
-			boolean mayCache, boolean mayFilter, long size, 
+			HttpHeader response, ResourceSource content,
+			boolean mayCache, boolean mayFilter, long size,
 			boolean compress) {
-	super (con, tlh, request, clientHandle, response, content, 
+	super (con, tlh, request, clientHandle, response, content,
 	       mayCache, mayFilter, size);
 	this.compress = compress;
     }
@@ -62,7 +62,7 @@ public class GZipHandler extends BaseHandler {
 	    }
 	}
     }
-    
+
     protected boolean willCompress (HttpHeader request) {
 	String ce = response.getHeader ("Content-Encoding");
 	if (ce == null)
@@ -73,19 +73,19 @@ public class GZipHandler extends BaseHandler {
 
     @Override
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
-				   HttpHeader header, BufferHandle bufHandle, 
-				   HttpHeader webHeader, 
-				   ResourceSource content, boolean mayCache, 
+				   HttpHeader header, BufferHandle bufHandle,
+				   HttpHeader webHeader,
+				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
-	GZipHandler h = 
-	    new GZipHandler (con, tlh, header, bufHandle, webHeader, 
-			     content, mayCache, mayFilter, size, 
+	GZipHandler h =
+	    new GZipHandler (con, tlh, header, bufHandle, webHeader,
+			     content, mayCache, mayFilter, size,
 			     compress && mayFilter);
 	h.setupHandler ();
 	return h;
     }
 
-    /** 
+    /**
      * ®return true this handler modifies the content.
      */
     @Override public boolean changesContentSize () {
@@ -99,7 +99,7 @@ public class GZipHandler extends BaseHandler {
 	    packer = new GZipPacker (pl);
 	    if (!packer.needsInput ())
 		packer.handleCurrentData ();
-	    else 
+	    else
 		super.prepare ();
 	} else {
 	    super.prepare ();
@@ -124,7 +124,7 @@ public class GZipHandler extends BaseHandler {
 		blockSent ();
 	    }
 	}
-	
+
 	public void dataPacked () {
 	    // do not really care...
 	}
@@ -137,7 +137,7 @@ public class GZipHandler extends BaseHandler {
 	    GZipHandler.this.failed (e);
 	}
     }
-    
+
     @Override
     protected void finishData () {
 	if (isCompressing) {
@@ -149,7 +149,7 @@ public class GZipHandler extends BaseHandler {
 	}
     }
 
-    private void sendEndBuffers () { 
+    private void sendEndBuffers () {
 	if (packer.finished ()) {
 	    super.finishData ();
 	} else {
@@ -165,7 +165,7 @@ public class GZipHandler extends BaseHandler {
 	return false;
     }
 
-    @Override 
+    @Override
     public void blockSent () {
 	if (packer == null)
 	    super.blockSent ();
@@ -175,33 +175,33 @@ public class GZipHandler extends BaseHandler {
 	    sendEndBuffers ();
 	else if (packer.needsInput ())
 	    waitForData ();
-	else 
+	else
 	    packer.handleCurrentData ();
     }
-    
+
     protected void waitForData () {
 	content.addBlockListener (this);
     }
-    
+
     /** Write the current block of data to the gzipper.
-     *  If you override this method you probably want to override 
+     *  If you override this method you probably want to override
      *  the modifyBuffer(ByteBuffer) as well.
      * @param arr the data to write to the gzip stream.
      */
-    protected void writeDataToGZipper (byte[] arr) throws IOException {
+    protected void writeDataToGZipper (byte[] arr) {
 	packer.setInput (arr, 0, arr.length);
 	if (packer.needsInput ())
 	    waitForData ();
-	else 
-	    packer.handleCurrentData ();		    
+	else
+	    packer.handleCurrentData ();
     }
 
-    /** This method is used when we are not compressing data. 
+    /** This method is used when we are not compressing data.
      *  This method will just call "super.bufferRead (buf);"
      * @param bufHandle the handle to the buffer that just was read.
      */
     protected void modifyBuffer (BufferHandle bufHandle) {
-	super.bufferRead (bufHandle);	
+	super.bufferRead (bufHandle);
     }
 
     protected void send (BufferHandle bufHandle) {
@@ -209,11 +209,11 @@ public class GZipHandler extends BaseHandler {
 	    ByteBuffer buf = bufHandle.getBuffer ();
 	    byte[] arr = buf.array ();
 	    int pos = buf.position ();
-	    int len = buf.remaining ();	    
+	    int len = buf.remaining ();
 	    packer.setInput (arr, pos, len);
 	    if (!packer.needsInput ())
 		packer.handleCurrentData ();
-	    else 
+	    else
 		blockSent ();
 	} else {
 	    super.bufferRead (bufHandle);
@@ -224,33 +224,29 @@ public class GZipHandler extends BaseHandler {
     public void bufferRead (BufferHandle bufHandle) {
 	if (con == null) {
 	    // not sure why this can happen, client has closed connection?
-	    return; 
+	    return;
 	}
 	if (isCompressing) {
-	    try {
-		// we normally have direct buffers and we can not use
-		// array() on them. Create a new byte[] and copy data into it.
-		byte[] arr; 		
-		ByteBuffer buf = bufHandle.getBuffer ();
-		totalRead += buf.remaining ();
-		if (buf.isDirect ()) {
-		    arr = new byte[buf.remaining ()];
-		    buf.get (arr);
-		} else {
-		    arr = buf.array ();
-		    buf.position (buf.limit ());
-		}
-		bufHandle.possiblyFlush ();
-		writeDataToGZipper (arr);
-	    } catch (IOException e) {
-		failed (e);
+	    // we normally have direct buffers and we can not use
+	    // array() on them. Create a new byte[] and copy data into it.
+	    byte[] arr;
+	    ByteBuffer buf = bufHandle.getBuffer ();
+	    totalRead += buf.remaining ();
+	    if (buf.isDirect ()) {
+		arr = new byte[buf.remaining ()];
+		buf.get (arr);
+	    } else {
+		arr = buf.array ();
+		buf.position (buf.limit ());
 	    }
+	    bufHandle.possiblyFlush ();
+	    writeDataToGZipper (arr);
 	} else {
 	    modifyBuffer (bufHandle);
 	}
     }
 
-    @Override 
+    @Override
     public void setup (SProperties prop) {
 	super.setup (prop);
 	if (prop != null) {

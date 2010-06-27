@@ -97,7 +97,7 @@ public class HttpProxy {
     private NioHandler nioHandler;
 
     /** The buffer handlers. */
-    private BufferHandler bufferHandler = new CachingBufferHandler ();
+    private final BufferHandler bufferHandler = new CachingBufferHandler ();
 
     /** If this proxy is using strict http parsing. */
     private boolean strictHttp = true;
@@ -106,7 +106,7 @@ public class HttpProxy {
     private int maxConnections = 50;
 
     /** The counter of events. */
-    private Counter counter = new Counter ();
+    private final Counter counter = new Counter ();
 
     /** The cache-handler */
     private NCache<HttpHeader, HttpHeader> cache;
@@ -120,7 +120,7 @@ public class HttpProxy {
     private HandlerFactoryHandler handlerFactoryHandler;
 
     /** All the currently active connections. */
-    private List<Connection> connections = new ArrayList<Connection> ();
+    private final List<Connection> connections = new ArrayList<Connection> ();
 
     /** The total traffic in and out of this proxy. */
     private final TrafficLoggerHandler tlh = new TrafficLoggerHandler ();

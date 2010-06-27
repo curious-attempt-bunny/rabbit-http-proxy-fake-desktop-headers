@@ -43,7 +43,7 @@ public class HttpBaseFilter implements HttpFilter {
 	if (uap.startsWith ("Basic ")) {
 	    uap = uap.substring ("Basic ".length ());
 	    String userapass = Base64.decode (uap);
-	    int i = -1;
+	    int i;
 	    if ((i = userapass.indexOf (":")) > -1) {
 		String userid = userapass.substring (0, i);
 		String pass = userapass.substring (i + 1);
@@ -158,7 +158,7 @@ public class HttpBaseFilter implements HttpFilter {
 		if (!userHandler.isValidUser (con.getUserName (),
 					      con.getPassword ())
 		    && !isPublic (url)) {
-		    HttpHeader err = null;
+		    HttpHeader err;
 		    String realm = uhost + ":" + urlport;
 		    if (proxyRequest)
 			err = con.getHttpGenerator ().get407 (url, realm);
@@ -184,7 +184,7 @@ public class HttpBaseFilter implements HttpFilter {
 	for (int i = 0; i < l; i++) {
 	    String val = cons.get (i);
 	    /* ok, split it... */
-	    int s = -1;
+	    int s;
 	    int start = 0;
 	    while (start < val.length ()) {
 		while (val.length () > start + 1
@@ -263,8 +263,8 @@ public class HttpBaseFilter implements HttpFilter {
 
 	handleAuthentications (header, con);
 
-	boolean maychunk = true;
-	boolean mayKeepAlive = true;
+	boolean maychunk;
+	boolean mayKeepAlive;
 
 	String requestVersion = header.getHTTPVersion ().toUpperCase ();
 	if (requestVersion.equals ("HTTP/1.1")) {
@@ -353,7 +353,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    cacheAllowed = false;  // and dont cache it.
 	} else if (cookieId) {
 	    String cookie = header.getHeader ("cookie");
-	    String lccookie = null;
+	    String lccookie;
 	    if (cookie != null &&     // cookie-passwords suck.
 		(((lccookie = cookie.toLowerCase ()).indexOf ("password") >= 0)
 		 || (lccookie.indexOf ("id") >= 0))) {

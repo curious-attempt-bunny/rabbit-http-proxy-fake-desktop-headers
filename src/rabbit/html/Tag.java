@@ -20,7 +20,7 @@ public class Tag {
      */
     public static class Pair {
 	/** The key of this pair. */
-	public String key;
+	public final String key;
 	/** The lowercase key.. */
 	public String lcKey;
 	/** The value of this pair. */

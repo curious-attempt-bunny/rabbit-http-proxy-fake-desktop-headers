@@ -9,13 +9,13 @@ import java.util.zip.Inflater;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class UnCompressor implements GZipUnpackState {
-    private GZipUnpackListener listener;
-    private Inflater inf;
+    private final GZipUnpackListener listener;
+    private final Inflater inf;
     private CRC32 crc;
     private byte[] buf;
     private int off;
     private int len;
-    private boolean gzip;
+    private final boolean gzip;
 
     /** 
      * @param listener the data listener

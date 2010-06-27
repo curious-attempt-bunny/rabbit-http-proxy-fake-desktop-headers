@@ -26,14 +26,14 @@ public class ProxyLogger implements ConnectionLogger {
     private Logger accessLog;
 
     /** The format we write dates on. */
-    private SimpleDateFormat sdf =
+    private final SimpleDateFormat sdf =
     new SimpleDateFormat ("dd/MMM/yyyy:HH:mm:ss 'GMT'");
 
     /** The monitor for sdf. */
     private final Object sdfMonitor = new Object ();
 
     /** The distance to GMT in milis. */
-    private long offset;
+    private final long offset;
 
     /** Create a new ProxyLogger. */
     public ProxyLogger () {

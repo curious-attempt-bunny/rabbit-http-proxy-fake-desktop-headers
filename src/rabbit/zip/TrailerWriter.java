@@ -8,9 +8,9 @@ import java.nio.ByteOrder;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class TrailerWriter implements GZipPackState {
-    private GZipPackListener listener;
-    private int crc;
-    private int totalIn;
+    private final GZipPackListener listener;
+    private final int crc;
+    private final int totalIn;
     private boolean finished = false;
 
     public TrailerWriter (GZipPackListener listener, int crc, int totalIn) {

@@ -14,9 +14,9 @@ import rabbit.io.Range;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class SCC {
-    private Connection con;
-    private HttpHeader header; 
-    private RequestHandler rh;
+    private final Connection con;
+    private final HttpHeader header;
+    private final RequestHandler rh;
 
     public SCC (Connection con, HttpHeader header, 
 		RequestHandler rh) {
@@ -189,8 +189,8 @@ public class SCC {
 	    throw new NumberFormatException ("bad range: no '-'");
 	String s = r.substring (0, d).trim ();
 	String e = r.substring (d + 1).trim ();
-	long start = -1;
-	long end = -1;
+	long start;
+	long end;
 	long size = rh.getEntry ().getSize ();
 	if (s.length () > 0) {
 	    start = Integer.parseInt (s);

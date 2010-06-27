@@ -29,7 +29,7 @@ class Tunnel {
 		   SocketChannel to, BufferHandle toHandle, 
 		   TrafficLogger toLogger,
 		   TunnelDoneListener listener) 
-	throws IOException {
+	{
 	if (logger.isLoggable (Level.FINEST))
 	    logger.finest ("Tunnel created from: " + from + " to: " + to);
 	this.nioHandler = nioHandler;
@@ -97,7 +97,7 @@ class Tunnel {
 		}
 		ByteBuffer buf = bh.getBuffer ();
 		if (buf.hasRemaining ()) {
-		    int written = 0;
+		    int written;
 		    do {
 			written = to.write (buf);
 			if (logger.isLoggable (Level.FINEST))

@@ -13,16 +13,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class CachingBufferHandler implements BufferHandler {
-    private Queue<BufferHolder> cache = 
+    private final Queue<BufferHolder> cache =
 	new ConcurrentLinkedQueue<BufferHolder> ();
-    private Queue<BufferHolder> largeCache = 
+    private final Queue<BufferHolder> largeCache =
 	new ConcurrentLinkedQueue<BufferHolder> ();
     private int count = 0;
     
     private ByteBuffer getBuffer (Queue<BufferHolder> bufs, int size) {
 	count++;
 	BufferHolder r = bufs.poll ();
-	ByteBuffer b = null;
+	ByteBuffer b;
 	if (r != null)
 	    b = r.getBuffer ();
 	else
@@ -60,7 +60,7 @@ public class CachingBufferHandler implements BufferHandler {
     }
 
     private static final class BufferHolder {
-	private ByteBuffer buffer;
+	private final ByteBuffer buffer;
 	
 	public BufferHolder (ByteBuffer buffer) {
 	    this.buffer = buffer;

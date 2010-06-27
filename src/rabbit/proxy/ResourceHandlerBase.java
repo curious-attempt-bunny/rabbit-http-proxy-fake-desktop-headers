@@ -13,9 +13,9 @@ import rabbit.io.WebConnection;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 abstract class ResourceHandlerBase implements ClientResourceHandler {
-    protected Connection con;
-    protected BufferHandle bufHandle;
-    protected TrafficLoggerHandler tlh;
+    protected final Connection con;
+    protected final BufferHandle bufHandle;
+    protected final TrafficLoggerHandler tlh;
     protected WebConnection wc;
     protected ClientResourceTransferredListener listener;
     private List<ClientResourceListener> resourceListeners;
@@ -67,7 +67,7 @@ abstract class ResourceHandlerBase implements ClientResourceHandler {
     }
     
     private class Reader implements ReadHandler {
-	private Long timeout = con.getNioHandler ().getDefaultTimeout ();
+	private final Long timeout = con.getNioHandler ().getDefaultTimeout ();
 
 	public void read () {
 	    try {

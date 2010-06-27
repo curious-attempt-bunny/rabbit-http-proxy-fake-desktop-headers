@@ -16,7 +16,7 @@ public class GeneralHeader implements Storable {
 
     /** The headers of this Header in order.
      */
-    protected ArrayList<Header> headers = new ArrayList<Header> ();
+    protected final ArrayList<Header> headers = new ArrayList<Header> ();
 
     /** Create a new HTTPHeader from scratch
      */

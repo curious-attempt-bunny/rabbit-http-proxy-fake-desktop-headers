@@ -8,11 +8,11 @@ import java.nio.ByteOrder;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class TrailReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
-    private long bytesUnpacked;
-    private long crc;
+    private final GZipUnpackListener listener;
+    private final long bytesUnpacked;
+    private final long crc;
     private int pos = 0;
-    private byte[] data = new byte[8];
+    private final byte[] data = new byte[8];
     
     public TrailReader (GZipUnpackListener listener, long bytesUnpacked, long crc) {
 	this.listener = listener;

@@ -14,8 +14,8 @@ import rabbit.util.Config;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class HttpHeaderFilterer {
-    private List<HttpFilter> httpInFilters;
-    private List<HttpFilter> httpOutFilters;
+    private final List<HttpFilter> httpInFilters;
+    private final List<HttpFilter> httpOutFilters;
     
     public HttpHeaderFilterer (String in, String out, 
 			       Config config, HttpProxy proxy) {

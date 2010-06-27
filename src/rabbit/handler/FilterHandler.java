@@ -79,7 +79,7 @@ public class FilterHandler extends GZipHandler {
 	if (mayFilter) {
 	    response.removeHeader ("Content-Length");
 
-	    String cs = defaultCharSet;
+	    String cs;
 	    if (overrideCharSet != null) {
 		cs = overrideCharSet;
 	    } else {
@@ -96,7 +96,7 @@ public class FilterHandler extends GZipHandler {
 	    // <META content="text/html; charset=gb2312" http-equiv=Content-Type>
 	    // <meta http-equiv="content-type" content="text/html;charset=Shift_JIS" />
 
-	    Charset charSet = null;
+	    Charset charSet;
 	    try {
 		charSet = Charset.forName (cs);
 	    } catch (UnsupportedCharsetException e) {
@@ -146,7 +146,7 @@ public class FilterHandler extends GZipHandler {
     }
 
     private class GZListener implements GZipUnpackListener {
-	private byte[] buffer = new byte[4096];
+	private final byte[] buffer = new byte[4096];
 	public void unpacked (byte[] buf, int off, int len) {
 	    handleArray (buf, off, len);
 	}
@@ -231,7 +231,7 @@ public class FilterHandler extends GZipHandler {
 	    restBlock = null;
 	}
 	parser.setText (arr, off, len);
-	HtmlBlock currentBlock = null;
+	HtmlBlock currentBlock;
 	try {
 	    currentBlock = parser.parse ();
 	    for (HtmlFilter hf : filters) {
@@ -252,7 +252,6 @@ public class FilterHandler extends GZipHandler {
 	} catch (HtmlParseException e) {
 	    getLogger ().info ("Bad HTML: " + e.toString ());
 	    // out.write (arr);
-	    currentBlock = null;
 	    ByteBuffer buf = ByteBuffer.wrap (arr, off, len);
 	    sendBlocks = Arrays.asList (buf).iterator ();
 	}

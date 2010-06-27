@@ -7,7 +7,7 @@ import java.util.zip.Deflater;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class HeaderWriter implements GZipPackState {
-    private GZipPackListener listener;
+    private final GZipPackListener listener;
 
     public HeaderWriter (GZipPackListener listener) {
 	this.listener = listener;

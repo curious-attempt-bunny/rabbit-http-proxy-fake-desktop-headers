@@ -12,20 +12,20 @@ import rabbit.io.SimpleBufferHandle;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-class ContentTransferHandler extends ResourceHandlerBase 
+class ContentTransferHandler extends ResourceHandlerBase
     implements BlockSentListener {
-    private long dataSize;
+    private final long dataSize;
     private long transferred = 0;
     private long toTransfer = 0;
-    
-    public ContentTransferHandler (Connection con, 
-				   BufferHandle bufHandle, 
-				   long dataSize, 
+
+    public ContentTransferHandler (Connection con,
+				   BufferHandle bufHandle,
+				   long dataSize,
 				   TrafficLoggerHandler tlh) {
 	super (con, bufHandle, tlh);
 	this.dataSize = dataSize;
     }
-    
+
     @Override protected void doTransfer () {
 	if (transferred >= dataSize) {
 	    listener.clientResourceTransferred ();
@@ -37,10 +37,10 @@ class ContentTransferHandler extends ResourceHandlerBase
     public void modifyRequest (HttpHeader header) {
 	// nothing.
     }
-    
+
     @Override void sendBuffer () {
 	ByteBuffer buffer = bufHandle.getBuffer ();
-	toTransfer = Math.min (buffer.remaining (), 
+	toTransfer = Math.min (buffer.remaining (),
 			       dataSize - transferred);
 	BufferHandle sbufHandle = bufHandle;
 	if (toTransfer < buffer.remaining ()) {
@@ -51,22 +51,18 @@ class ContentTransferHandler extends ResourceHandlerBase
 	    buffer.limit (limit);
 	    sbufHandle = new SimpleBufferHandle (sendBuffer);
 	}
-	try {
-	    fireResouceDataRead (sbufHandle);
-	    BlockSender bs = 
-		new BlockSender (wc.getChannel (), con.getNioHandler (), 
-				 tlh.getNetwork (), sbufHandle, false, this);
-	    bs.write ();
-	} catch (IOException e) {
-	    failed (e);
-	}
+	fireResouceDataRead (sbufHandle);
+	BlockSender bs =
+	    new BlockSender (wc.getChannel (), con.getNioHandler (),
+			     tlh.getNetwork (), sbufHandle, false, this);
+	bs.write ();
     }
 
     public void blockSent () {
 	transferred += toTransfer;
 	if (transferred < dataSize)
 	    doTransfer ();
-	else 
+	else
 	    listener.clientResourceTransferred ();
     }
 }

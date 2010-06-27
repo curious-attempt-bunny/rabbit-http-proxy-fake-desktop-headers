@@ -21,7 +21,7 @@ public class RandomCacheResourceSource extends CacheResourceSource {
     private String contentType;
     private List<Range> ranges;
     private int currentRange = 0;
-    private String separator = "THIS_STRING_SEPARATES";
+    private final String separator = "THIS_STRING_SEPARATES";
     private boolean startBlock = true;
     private long currentIndex = 0;
     private long totalSize;

@@ -49,7 +49,7 @@ public class MultiPartPipe {
     }
 
     private class LineHandler implements LineListener {
-	private ByteBuffer buf;
+	private final ByteBuffer buf;
 	
 	public LineHandler (ByteBuffer buf) {
 	    this.buf = buf;

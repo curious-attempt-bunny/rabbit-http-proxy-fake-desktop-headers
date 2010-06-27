@@ -24,7 +24,7 @@ import rabbit.util.TrafficLogger;
  */
 public class SimpleWebServer {
     private File dir;
-    private int port;
+    private final int port;
     private final NioHandler nioHandler;
     private final TrafficLogger trafficLogger = new SimpleTrafficLogger ();
     private final BufferHandler bufferHandler = new CachingBufferHandler ();

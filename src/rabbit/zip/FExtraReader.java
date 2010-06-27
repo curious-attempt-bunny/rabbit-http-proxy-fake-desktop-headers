@@ -7,9 +7,9 @@ import static rabbit.zip.GZipFlags.*;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class FExtraReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
-    private byte flag; 
-    private byte[] xlen = new byte[2];
+    private final GZipUnpackListener listener;
+    private final byte flag;
+    private final byte[] xlen = new byte[2];
     private int pos = 0;
     private int toSkip = -1;
 

@@ -5,7 +5,7 @@ package rabbit.zip;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class CompressionMethodReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
+    private final GZipUnpackListener listener;
     private static final int GZIP_DEFLATE = 8;
 
     public CompressionMethodReader (GZipUnpackListener listener) {

@@ -5,10 +5,10 @@ package rabbit.zip;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class MagicReader implements GZipUnpackState {
-    private GZipUnpackListener listener;
+    private final GZipUnpackListener listener;
     
     private int pos = 0;
-    private byte[] GZIP_ID = {0x1f, (byte)0x8b};
+    private final byte[] GZIP_ID = {0x1f, (byte)0x8b};
     
     public MagicReader (GZipUnpackListener listener) {
 	this.listener = listener;

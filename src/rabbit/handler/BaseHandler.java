@@ -569,7 +569,7 @@ public class BaseHandler
 
     public void failed (Exception cause) {
 	if (con != null) {
-	    String st = null;
+	    String st;
 	    if (cause instanceof IOException) {
 		IOException ioe = (IOException)cause;
 		String msg = ioe.getMessage ();

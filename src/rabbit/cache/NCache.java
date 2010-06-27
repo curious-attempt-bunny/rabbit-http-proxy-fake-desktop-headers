@@ -29,14 +29,14 @@ import rabbit.util.SProperties;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class NCache<K, V> implements Cache<K, V>, Runnable {
-    private static String DIR = "/tmp/rabbit/cache";  // standard dir.
-    private static String DEFAULT_SIZE  = "10";       // 10 MB.
-    private static String DEFAULT_CACHE_TIME = "24";  // 1 day.
-    private static String DEFAULT_CLEAN_LOOP = "60";  // 1 minute
+    private static final String DIR = "/tmp/rabbit/cache";  // standard dir.
+    private static final String DEFAULT_SIZE  = "10";       // 10 MB.
+    private static final String DEFAULT_CACHE_TIME = "24";  // 1 day.
+    private static final String DEFAULT_CLEAN_LOOP = "60";  // 1 minute
 
-    private static String CACHEINDEX = "cache.index"; // the indexfile.
-    private static String TEMPDIR = "temp";
-    private static int filesperdir = 256;             // reasonable?
+    private static final String CACHEINDEX = "cache.index"; // the indexfile.
+    private static final String TEMPDIR = "temp";
+    private static final int FILES_PER_DIR = 256;             // reasonable?
 
     private boolean changed = false;                  // have we changed?
     private Thread cleaner = null;                    // remover of old stuff.
@@ -259,7 +259,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	if (!real) {
 	    sb.append (TEMPDIR);
 	} else {
-	    long fdir = id / filesperdir;
+	    long fdir = id / FILES_PER_DIR;
 	    sb.append (fdir);
 	}
 	sb.append (File.separator);
@@ -314,7 +314,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    return;
 	}
 
-	long fdir = ent.getId () / filesperdir;
+	long fdir = ent.getId () / FILES_PER_DIR;
 	File f = new File (dir, "" + fdir);
 	String newName = getEntryName (ent.getId (), true, null);
 	File nFile = new File (newName);
@@ -499,7 +499,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     @SuppressWarnings( "unchecked" )
     private void readCacheIndex () {
 	long fileNo;
-	long currenSize;
+	long currentSize;
 	try {
 	    String name = dir + File.separator + CACHEINDEX;
 	    FileInputStream fis = new FileInputStream (name);

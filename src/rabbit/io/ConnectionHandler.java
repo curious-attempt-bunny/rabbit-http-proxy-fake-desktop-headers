@@ -87,7 +87,7 @@ public class ConnectionHandler {
 			       final WebConnectionListener wcl) {
 	// TODO: should we use the Host: header if its available? probably...
 	String requri = header.getRequestURI ();
-	URL url = null;
+	URL url;
 	try {
 	    url = new URL (requri);
 	} catch (MalformedURLException e) {
@@ -117,7 +117,7 @@ public class ConnectionHandler {
     private void getConnection (HttpHeader header,
 				WebConnectionListener wcl,
 				Address a) {
-	WebConnection wc = null;
+	WebConnection wc;
 	counter.inc ("WebConnections used");
 	String method = header.getMethod ();
 
@@ -160,7 +160,7 @@ public class ConnectionHandler {
     }
 
     private WebConnection unregister (WebConnection wc) {
-	CloseListener closer = null;
+	CloseListener closer;
 	closer = wc2closer.remove (wc);
 	if (closer != null)
 	    nioHandler.cancel (wc.getChannel (), closer);
@@ -209,17 +209,10 @@ public class ConnectionHandler {
 		    throw new IllegalStateException (err);
 		}
 	    }
-	    try {
-		pool.add (wc);
-		CloseListener cl = new CloseListener (wc);
-		wc2closer.put (wc, cl);
-		cl.register ();
-	    } catch (IOException e) {
-		logger.log (Level.WARNING,
-			    "Get IOException when setting up a CloseListener: ",
-			    e);
-		closeWebConnection (wc);
-	    }
+	    pool.add (wc);
+	    CloseListener cl = new CloseListener (wc);
+	    wc2closer.put (wc, cl);
+	    cl.register ();
 	}
     }
 
@@ -236,10 +229,10 @@ public class ConnectionHandler {
     }
 
     private class CloseListener implements ReadHandler {
-	private WebConnection wc;
+	private final WebConnection wc;
 	private Long timeout;
 
-	public CloseListener (WebConnection wc) throws IOException {
+	public CloseListener (WebConnection wc) {
 	    this.wc = wc;
 	}
 

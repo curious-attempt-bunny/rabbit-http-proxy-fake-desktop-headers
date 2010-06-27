@@ -35,7 +35,7 @@ class SSLHandler implements TunnelDoneListener {
 
     public SSLHandler (HttpProxy proxy, Connection con,
 		       HttpHeader request, TrafficLoggerHandler tlh)
-	throws IOException {
+	{
 	this.proxy = proxy;
 	this.con = con;
 	this.request = request;
@@ -72,7 +72,6 @@ class SSLHandler implements TunnelDoneListener {
 
     /** handle the tunnel.
      * @param channel the client channel
-     * @param selector the proxy selector
      * @param bh the buffer handle used, may contain data from client.
      */
     public void handle (SocketChannel channel, BufferHandle bh) {
@@ -91,7 +90,7 @@ class SSLHandler implements TunnelDoneListener {
     }
 
     private class WebConnector implements WebConnectionListener {
-	private String uri;
+	private final String uri;
 
 	public WebConnector () {
 	    uri = request.getRequestURI ();
@@ -200,7 +199,7 @@ class SSLHandler implements TunnelDoneListener {
     }
 
     private class TunnelConnected implements HttpHeaderSentListener {
-	private BufferHandle server2client;
+	private final BufferHandle server2client;
 
 	public TunnelConnected (BufferHandle server2client) {
 	    this.server2client = server2client;
@@ -224,16 +223,11 @@ class SSLHandler implements TunnelDoneListener {
     private void tunnelData (BufferHandle server2client) {
 	sbh = server2client;
 	SocketChannel sc = wc.getChannel ();
-	try {
-	    Tunnel tunnel =
-		new Tunnel (proxy.getNioHandler (), channel, bh,
-			    tlh.getClient (), sc, server2client,
-			    tlh.getNetwork (), this);
-	    tunnel.start ();
-	} catch (IOException e) {
-	    warn ("SSLHandler error setting up tunnels", e);
-	    closeDown ();
-	}
+	Tunnel tunnel =
+	    new Tunnel (proxy.getNioHandler (), channel, bh,
+			tlh.getClient (), sc, server2client,
+			tlh.getNetwork (), this);
+	tunnel.start ();
     }
 
     public void tunnelClosed () {

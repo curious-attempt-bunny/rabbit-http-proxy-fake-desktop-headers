@@ -43,7 +43,7 @@ public class ClientBase {
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
 	nioHandler =
-	    new MultiSelectorNioHandler (es, sh, 4, Long.valueOf (15000));
+	    new MultiSelectorNioHandler (es, sh, 4, 15000L);
 	nioHandler.start ();
 	DNSJavaHandler jh = new DNSJavaHandler ();
 	jh.setup (null);
@@ -89,8 +89,7 @@ public class ClientBase {
 
     /** Send a request and let the client be notified on response.
      */
-    public void sendRequest (HttpHeader request, ClientListener client)
-	throws IOException {
+    public void sendRequest (HttpHeader request, ClientListener client) {
 	WebConnectionListener wcl = new WCL (request, client);
 	connectionHandler.getConnection (request, wcl);
     }
@@ -105,8 +104,8 @@ public class ClientBase {
     }
 
     private abstract class BaseAsyncListener {
-	protected HttpHeader request;
-	protected ClientListener client;
+	protected final HttpHeader request;
+	protected final ClientListener client;
 
 	public BaseAsyncListener (HttpHeader request, ClientListener client) {
 	    this.request = request;
