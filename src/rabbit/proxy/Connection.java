@@ -1,7 +1,6 @@
 package rabbit.proxy;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;

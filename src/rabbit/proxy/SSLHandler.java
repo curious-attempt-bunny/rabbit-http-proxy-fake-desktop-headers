@@ -1,7 +1,6 @@
 package rabbit.proxy;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
