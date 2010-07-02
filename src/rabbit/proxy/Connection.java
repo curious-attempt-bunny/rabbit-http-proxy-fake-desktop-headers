@@ -113,7 +113,9 @@ public class Connection {
 	responseHandler = hgf.create (proxy.getServerIdentity (), this);
     }
 
-    // For logging and status
+    /**
+     * @return the ConnectionId of this connection
+     */
     public ConnectionId getId () {
 	return id;
     }
@@ -367,6 +369,10 @@ public class Connection {
 	}
     }
 
+    /** Fired when setting up a web connection failed.
+     * @param rh the RequestHandler
+     * @param cause the Exception that signaled the problem
+     */
     public void webConnectionSetupFailed (RequestHandler rh, Exception cause) {
 	if (cause instanceof UnknownHostException)
 	    // do we really want this in the log?
@@ -396,14 +402,18 @@ public class Connection {
 
     /** Check if we must tunnel a request.
      *  Currently will only check if the Authorization starts with NTLM or Negotiate.
-     * @param rh the request handler.
+     * @return true if the current request needs to be handled by a tunnel
      */
-    protected boolean mustTunnel (RequestHandler rh) {
+    protected boolean mustTunnel () {
 	String auth = request.getHeader ("Authorization");
 	return auth != null &&
 	    (auth.startsWith ("NTLM") || auth.startsWith ("Negotiate"));
     }
 
+    /** Fired when a web connection has been established.
+     *  The web connection may be to the origin server or to an upstream proxy.
+     * @param rh the RequestHandler for the current request 
+     */
     public void webConnectionEstablished (RequestHandler rh) {
 	getProxy ().markForPipelining (rh.getWebConnection ());
 	if (!request.isDot9Request ())
@@ -427,7 +437,7 @@ public class Connection {
 	try {
 	    // and now we filter the response header if any.
 	    if (!request.isDot9Request ()) {
-		if (mustTunnel (rh)) {
+		if (mustTunnel ()) {
 		    tunnel (rh);
 		    return;
 		}
@@ -730,7 +740,7 @@ public class Connection {
 	sendAndClose (header);
     }
 
-    private void checkAndHandleSSL (BufferHandle bh) throws IOException {
+    private void checkAndHandleSSL (BufferHandle bh) {
 	status = "Handling ssl request";
 	SSLHandler sslh = new SSLHandler (proxy, this, request, tlh);
 	if (sslh.isAllowed ()) {
@@ -742,19 +752,29 @@ public class Connection {
     }
 
     /** Get the SocketChannel to the client
+     * @return the SocketChannel connected to the client
      */
     public SocketChannel getChannel () {
 	return channel;
     }
 
+    /**
+     * @return the NioHandler that this connection is using
+     */
     public NioHandler getNioHandler () {
 	return proxy.getNioHandler ();
     }
 
+    /**
+     * @return the HttProxy that this connection is serving
+     */
     public HttpProxy getProxy () {
 	return proxy;
     }
 
+    /**
+     * @return the BufferHandler that this connection is using
+     */
     public BufferHandler getBufferHandler () {
 	return bufHandler;
     }
@@ -774,6 +794,9 @@ public class Connection {
 	return proxy.getConnectionLogger ();
     }
 
+    /**
+     * @return the Counter that keeps count of operations for this connection.
+     */
     public Counter getCounter () {
 	return proxy.getCounter ();
     }
@@ -824,6 +847,9 @@ public class Connection {
 	return userName;
     }
 
+    /** Set the name of the currently authenticated user (for basic proxy auth)
+     * @param userName the name of the current user
+     */
     public void setUserName (String userName) {
 	this.userName = userName;
     }
@@ -835,11 +861,15 @@ public class Connection {
 	return password;
     }
 
+    /** Set the password of the currently authenticated user (for basic proxy auth)
+     * @param password the password that was used for authentication
+     */
     public void setPassword (String password) {
 	this.password = password;
     }
 
     /** Get the request line of the request currently being handled
+     * @return the request line for the current request
      */
     public String getRequestLine () {
 	return requestLine;
@@ -847,12 +877,15 @@ public class Connection {
 
     /** Get the current request uri.
      *  This will get the uri from the request header.
+     * @return the uri of the current request
      */
     public String getRequestURI () {
 	return request.getRequestURI();
     }
 
-    // Get debug info for use in 500 error response
+    /** Get debug info for use in 500 error response
+     * @return a string with internal state of this connection
+     */
     public String getDebugInfo () {
 	return
 	    "status: " + getStatus ()  + "\n" +
@@ -871,12 +904,15 @@ public class Connection {
     /** Get the http version that the client used.
      *  We modify the request header to hold HTTP/1.1 since that is
      *  what rabbit uses, but the real client may have sent a 1.0 header.
+     * @return the request http version
      */
     public String getRequestVersion () {
 	return requestVersion;
     }
 
-    // For logging and status
+    /** Get the current status of this request 
+     * @return the current status
+     */
     public String getStatus () {
 	return status;
     }
@@ -886,6 +922,9 @@ public class Connection {
 	return statusCode;
     }
 
+    /**
+     * @return the content length of the current request
+     */
     public String getContentLength () {
 	return contentLength;
     }

@@ -40,7 +40,7 @@ public class HttpResponseReader
 				       header, fullURI, this);
     }
 
-    public void sendRequestAndWaitForResponse () throws IOException {
+    public void sendRequestAndWaitForResponse () {
 	sender.sendHeader ();
     }
     

@@ -1,6 +1,5 @@
 package rabbit.proxy;
 
-import java.io.IOException;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockListener;
 import rabbit.httpio.BlockSender;
@@ -51,14 +50,10 @@ class ChunkedContentTransferHandler extends ResourceHandlerBase
     }
 
     public void finishedRead () {
-	try {
-	    ChunkEnder ce = new ChunkEnder ();
-	    sentEndChunk = true;
-	    ce.sendChunkEnding (wc.getChannel (), con.getNioHandler (),
-				tlh.getNetwork (), this);
-	} catch (IOException e) {
-	    failed (e);
-	}
+	ChunkEnder ce = new ChunkEnder ();
+	sentEndChunk = true;
+	ce.sendChunkEnding (wc.getChannel (), con.getNioHandler (),
+			    tlh.getNetwork (), this);
     }
 
     public void register () {

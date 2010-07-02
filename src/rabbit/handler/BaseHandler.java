@@ -178,12 +178,8 @@ public class BaseHandler
 	    emptyChunkSent = true;
 	    BlockSentListener bsl = new Finisher ();
 	    ChunkEnder ce = new ChunkEnder ();
-	    try {
-		ce.sendChunkEnding (con.getChannel (), con.getNioHandler (),
-				    tlh.getClient (), bsl);
-	    } catch (IOException e) {
-		failed (e);
-	    }
+	    ce.sendChunkEnding (con.getChannel (), con.getNioHandler (),
+				tlh.getClient (), bsl);
 	} else {
 	    finish (true);
 	}
