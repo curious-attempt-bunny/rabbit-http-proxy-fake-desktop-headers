@@ -929,10 +929,17 @@ public class Connection {
 	return contentLength;
     }
 
+    /** Get the client resource handler, that is the handler of any content
+     *  the client is submitting (POSTED data, file uploads etc.)
+     * @return the ClientResourceHandler for the current request
+     */
     public ClientResourceHandler getClientResourceHandler () {
 	return clientResourceHandler;
     }
 
+    /** Get the extra information associated with the current request.
+     * @return the currently set extra info or null if no such info is set.
+     */
     public String getExtraInfo () {
 	return extraInfo;
     }
@@ -944,7 +951,9 @@ public class Connection {
 	this.extraInfo = info;
     }
 
-    /** Get the time this connection was started. */
+    /** Get the time the current request was started. 
+     * @return the start time for the current request
+     */
     public long getStarted () {
 	return started;
     }
@@ -1029,6 +1038,8 @@ public class Connection {
 	addedIMS = true;
     }
 
+    /** Tell this connection that the current request must be revalidated.
+     */
     public void setMustRevalidate () {
 	mustRevalidate = true;
     }
@@ -1040,6 +1051,9 @@ public class Connection {
 	this.contentLength = contentLength;
     }
 
+    /** Set the status code for the current request
+     * @param statusCode the new status code
+     */
     public void setStatusCode (String statusCode) {
 	this.statusCode = statusCode;
     }
@@ -1116,6 +1130,7 @@ public class Connection {
     }
 
     /** Log the current request and close/end this connection
+     * @param rh the current RequestHandler
      */
     public void logAndClose (RequestHandler rh) {
 	if (rh != null && rh.getWebConnection () != null) {
@@ -1142,6 +1157,10 @@ public class Connection {
 	}
     }
 
+    /** Get the HttpGenerator that this connection uses when it needs to
+     *  generate a custom respons header and resource.
+     * @return the current HttpGenerator
+     */
     public HttpGenerator getHttpGenerator () {
 	return responseHandler;
     }

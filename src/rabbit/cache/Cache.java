@@ -8,6 +8,9 @@ import java.util.logging.Logger;
  *  A cache may be persistent over sessions. 
  *  A cache may clean itself over time.
  *
+ * @param <K> the key type of the cache
+ * @param <V> the data resource
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public interface Cache<K, V> {
@@ -67,10 +70,14 @@ public interface Cache<K, V> {
      */
     String getEntryName (long id, boolean real, String extension);
 
-    /** Get the file handler for the keys.*/
+    /** Get the file handler for the keys.
+     * @return the FileHandler for the key objects
+     */
     FileHandler<K> getKeyFileHandler ();
 
-    /** Get the file handler for the values.*/
+    /** Get the file handler for the values.
+     * @return the FileHandler for the values
+     */
     FileHandler<V> getHookFileHandler ();
     
     /** Reserve space for a CacheEntry with key o.
@@ -81,16 +88,22 @@ public interface Cache<K, V> {
 
     /** Insert a CacheEntry into the cache.
      * @param ent the CacheEntry to store.
+     * @throws CacheException if adding the entry fails
      */
     void addEntry (CacheEntry<K, V> ent) throws CacheException;
 
     /** Signal that a cache entry have changed.
+     * @param ent the CacheEntry that changed
+     * @param newKey the new key of the entry
+     * @param newValue the new value
+     * @throws CacheException if updating the cache fails
      */
     void entryChanged (CacheEntry<K, V> ent, K newKey, V newValue)
 	throws CacheException;
 
     /** Remove the Entry with key o from the cache.
      * @param k the key for the CacheEntry.
+     * @throws CacheException if removal fails
      */
     void remove (K k) throws CacheException;
 
@@ -114,6 +127,8 @@ public interface Cache<K, V> {
      */
     void stop ();
 
-    /** Get the logger of this cache */
+    /** Get the logger of this cache 
+     * @return the Logger used by the cache
+     */
     Logger getLogger ();
 }

@@ -77,10 +77,12 @@ public class BaseHandler
     /** For creating the factory.
      */
     public BaseHandler () {
+	// empty
     }
 
     /** Create a new BaseHandler for the given request.
      * @param con the Connection handling the request.
+     * @param tlh the TrafficLoggerHandler to update with traffic information
      * @param request the actual request made.
      * @param clientHandle the client side buffer.
      * @param response the actual response.
@@ -205,8 +207,9 @@ public class BaseHandler
     }
 
     /** Mark the current response as a partial response.
+     * @param shouldbe the number of byte that the resource ought to be
      */
-    protected void setPartialContent (long got, long shouldbe) {
+    protected void setPartialContent (long shouldbe) {
 	response.setHeader ("RabbIT-Partial", "" + shouldbe);
     }
 
@@ -283,6 +286,7 @@ public class BaseHandler
     /** Try to use the resource size to decide if we may cache or not.
      *  If the size is known and the size is bigger than the maximum cache
      *  size, then we dont want to cache the resource.
+     * @return true if the current resource may be cached, false otherwise
      */
     protected boolean mayCacheFromSize () {
 	Cache<HttpHeader, HttpHeader>  cache = con.getProxy ().getCache ();
@@ -510,7 +514,7 @@ public class BaseHandler
 
     public void finishedRead () {
 	if (size > 0 && totalRead != size)
-	    setPartialContent (totalRead, size);
+	    setPartialContent (size);
 	finishData ();
     }
 

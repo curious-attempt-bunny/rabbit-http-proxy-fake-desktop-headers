@@ -23,6 +23,7 @@ public interface HandlerFactory {
      * @param mayCache if the handler may cache the response.
      * @param mayFilter if the handler may filter the response.
      * @param size the Size of the data beeing handled (-1 = unknown length).
+     * @return the new Handler
      */
     Handler getNewInstance (Connection connection,
 			    TrafficLoggerHandler tlh,
@@ -35,6 +36,7 @@ public interface HandlerFactory {
 			    long size);
     
     /** setup the handler factory. 
+     * @param properties the properties for this factory
      */
     void setup (SProperties properties);
 }

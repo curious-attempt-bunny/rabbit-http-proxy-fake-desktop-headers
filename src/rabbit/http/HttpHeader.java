@@ -21,6 +21,7 @@ public class HttpHeader extends GeneralHeader {
     /** Create a new HTTPHeader from scratch
      */
     public HttpHeader () {
+	// empty
     }
 
     /** The string cache we are using. */
@@ -189,6 +190,7 @@ public class HttpHeader extends GeneralHeader {
     /** Is this request a HTTP/0.9 type request?
      *  A 0.9 request doesnt have a full HTTPheader, only a requestline
      *  so we need to treat it differently.
+     * @return true if the request did not have any http version
      */
     public boolean isDot9Request () {
 	return isRequest () && httpVersion == null;
@@ -250,6 +252,7 @@ public class HttpHeader extends GeneralHeader {
     }
 
     /** Get the current content for this request/response.
+     * @return the resource associated with this header, may be null
      */
     public String getContent () {
 	return content;

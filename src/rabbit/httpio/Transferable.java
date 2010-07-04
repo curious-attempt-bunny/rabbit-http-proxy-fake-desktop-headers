@@ -28,6 +28,7 @@ public interface Transferable {
      * @param target The target channel
      * @return The number of bytes, possibly zero, that were actually 
      *         transferred
+     * @throws IOException if data transfer fails
      */
     long transferTo (long position, long count, WritableByteChannel target)
 	throws IOException;

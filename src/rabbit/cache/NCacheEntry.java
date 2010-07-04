@@ -7,6 +7,9 @@ import java.io.ObjectOutput;
 
 /** A cached object.
  *
+ * @param <K> the key type of this entry
+ * @param <V> the value type of this entry
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
@@ -27,6 +30,7 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
 
     /** Not to be used, for externalizable only. */
     public NCacheEntry () {
+	// empty
     }
 
     /** Create a new CacheEntry for given key and filename
@@ -117,7 +121,8 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
 	return id;
     }
 
-    /** Get the real data hook
+    /** Get the real data hook.
+     * @return the FiledHook for the value
      */
     protected FiledHook<V> getRealDataHook () {
 	return datahook;

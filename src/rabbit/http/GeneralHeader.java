@@ -20,10 +20,12 @@ public class GeneralHeader implements Storable {
 
     /** Create a new HTTPHeader from scratch
      */
-    public GeneralHeader () {    
+    public GeneralHeader () {
+	// empty
     }
 
     /** Get the number of headers set in this header.
+     * @return the number of header lines
      */
     public int size () {
 	return headers.size ();
@@ -39,6 +41,7 @@ public class GeneralHeader implements Storable {
     }
 
     /** Fill the given StringBuilder with text from this header.
+     * @param sb the StringBuilder this header is written to
      */ 
     protected void fillBuffer (StringBuilder sb) {
 	int hsize = headers.size ();
@@ -146,6 +149,7 @@ public class GeneralHeader implements Storable {
 
     /** Get all headers of a specified type...
      * @param type the type of the headers to get, eg. "Cache-Control".
+     * @return all the headers lines of this header
      */
     public List<String> getHeaders (String type) {
 	List<String> ret = null; 

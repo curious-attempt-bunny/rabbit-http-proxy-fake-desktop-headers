@@ -7,6 +7,8 @@ import java.util.logging.Logger;
  *  This class only exists to trick equals/hashCode that we
  *  have the same key. 
  *
+ * @param <V> the type of the data stored
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class MemoryHook<V> extends FiledHook<V> {

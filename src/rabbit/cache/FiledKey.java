@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 
 /** A class that stores cache keys in compressed form.
  *
+ * @param <K> they key object type
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class FiledKey<K> extends FileData<K> {
@@ -60,13 +62,18 @@ class FiledKey<K> extends FileData<K> {
 	}
     }
 
-    /** Get the actual key object. */
+    /** Get the actual key object. 
+     * @return the key object
+     * @throws IOException if reading the data fails
+     */
     public K getData () throws IOException {
 	return readData (getFileName (), cache.getKeyFileHandler (), 
 			 cache.getLogger ());
     }
 
-    /** Get the unique id for this object. */
+    /** Get the unique id for this object.
+     * @return the id of this object
+     */
     public long getId () {
 	return id;
     }

@@ -27,25 +27,35 @@ public class Header implements Storable {
     }
 
     /** Used for externalization. */
-    public Header () {}
+    public Header () {
+	// empty
+    }
 
-    /** Create a new header */
+    /** Create a new header
+     * @param type the type of this header
+     * @param value the actual value
+     */
     public Header (String type, String value) {
 	this.type = getCachedString (type);
 	this.value = getCachedString (value);
     }
 
-    /** Get the type of this header. */
+    /** Get the type of this header.
+     * @return the type of this header
+     */
     public String getType () {
 	return type;
     }
 
-    /** Get the value of this header. */
+    /** Get the value of this header.
+     * @return the value of this header
+     */
     public String getValue () {
 	return value;
     }
 
     /** Set the value of this header to the new value given.
+     * @param newValue the new value
      */
     public void setValue (String newValue) {
 	value = newValue;
@@ -63,6 +73,7 @@ public class Header implements Storable {
     }
 
     /** Update the value by appending the given string to it.
+     * @param s the String to append to the current value
      */
     public void append (String s) {
 	value += CRLF + s;

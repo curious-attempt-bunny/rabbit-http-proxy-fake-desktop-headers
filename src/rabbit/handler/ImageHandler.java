@@ -42,6 +42,7 @@ public class ImageHandler extends BaseHandler {
     /** For creating the factory.
      */
     public ImageHandler () {
+	// empty
     }
 
     /** Create a new ImageHandler for the given request.
@@ -274,7 +275,7 @@ public class ImageHandler extends BaseHandler {
 	public void finishedRead () {
 	    try {
 		if (size > 0 && totalRead != size)
-		    setPartialContent (totalRead, size);
+		    setPartialContent (size);
 		cacheChannel.close ();
 		cacheChannel = null;
 		convertImage ();

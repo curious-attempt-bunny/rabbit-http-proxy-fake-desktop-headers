@@ -13,8 +13,12 @@ public class MultipartHeader extends GeneralHeader {
 
     /** Used for Externalizable, not to be used for other purposes. */
     MultipartHeader () {
+	// empty
     }
     
+    /** Create a a new multi-part header using the given separator
+     * @param header the separator String.
+     */
     public MultipartHeader (String header) {
 	this.header = header;
     }

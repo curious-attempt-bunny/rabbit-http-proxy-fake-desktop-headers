@@ -23,6 +23,7 @@ public interface ClientResourceHandler {
 		   ClientResourceTransferredListener crtl);
 
     /** Add a listener for the client resource data.
+     * @param crl the listener
      */
     void addContentListener (ClientResourceListener crl);
 }

@@ -13,6 +13,9 @@ import java.util.zip.GZIPOutputStream;
 import org.khelekore.rnio.impl.Closer;
 
 /** A class to store cache data to a file.
+ *
+ * @param <T> the data type stored on disk
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class FileData<T> implements Serializable {
@@ -24,6 +27,11 @@ class FileData<T> implements Serializable {
     }
     
     /** Read the data from disk. 
+     * @param name the name of the file to read the data from
+     * @param fh the FileHandler that will do the data convesion
+     * @param logger the logger to use
+     * @throws IOException if file reading fails
+     * @return the object read
      */
     protected T readData (String name, FileHandler<T> fh, Logger logger)
 	throws IOException {
