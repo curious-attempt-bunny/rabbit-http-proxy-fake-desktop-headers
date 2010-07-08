@@ -47,6 +47,7 @@ public class ImageHandler extends BaseHandler {
 
     /** Create a new ImageHandler for the given request.
      * @param con the Connection handling the request.
+     * @param tlh the logger for the data traffic
      * @param request the actual request made.
      * @param clientHandle the client side buffer.
      * @param response the actual response.
@@ -54,6 +55,10 @@ public class ImageHandler extends BaseHandler {
      * @param mayCache May we cache this request?
      * @param mayFilter May we filter this request?
      * @param size the size of the data beeing handled.
+     * @param config the configuration of this handler
+     * @param doConvert image comprssion will only be attempted if true
+     * @param minSizeToConvert images less than this many bytes are not compressed
+     * @param imageConverter the actual converter to use
      */
     public ImageHandler (Connection con, TrafficLoggerHandler tlh,
 			 HttpHeader request, BufferHandle clientHandle,
@@ -109,11 +114,7 @@ public class ImageHandler extends BaseHandler {
     /** Try to convert the image before letting the superclass handle it.
      */
     @Override public void handle () {
-	try {
-	    tryconvert ();
-	} catch (IOException e) {
-	    failed (e);
-	}
+	tryconvert ();
     }
 
     @Override protected void addCache () {
@@ -159,7 +160,7 @@ public class ImageHandler extends BaseHandler {
      *  convert it we dont want to write the file to the cache later
      *  on.
      */
-    protected void tryconvert () throws IOException {
+    protected void tryconvert () {
 	if (getLogger ().isLoggable (Level.FINER))
 	    getLogger ().finer (request.getRequestURI () + 
 				": doConvert: " + doConvert + ", mayFilter: " + 
@@ -347,7 +348,7 @@ public class ImageHandler extends BaseHandler {
 					  con.getBufferHandler ());
     }
 
-    public static class ImageConversionResult {
+    private static class ImageConversionResult {
 	public final long origSize;
 	public final long convertedSize;
 	public final File convertedFile;
@@ -374,9 +375,12 @@ public class ImageHandler extends BaseHandler {
     }
 
     /** Perform the actual image conversion. 
+     * @param input the File holding the source image
      * @param entryName the filename of the cache entry to use.
+     * @return the conversion result
+     * @throws IOException if image compression fails
      */
-    protected ImageConversionResult 
+    private ImageConversionResult 
     internalConvertImage (File input, String entryName) throws IOException {
 	long origSize = size;
 	File convertedFile = new File (entryName + ".c");
@@ -386,7 +390,11 @@ public class ImageHandler extends BaseHandler {
 	return new ImageConversionResult (origSize, convertedFile, typeFile);
     }
 
-    /** Make sure that the cache entry is the smallest image. 
+    /** Make sure that the cache entry is the smallest image.
+     * @param entry the file holding the source image
+     * @param icr the image compression result
+     * @return the File to use
+     * @throws IOException if image selection fails
      */
     private File selectImage (File entry, ImageConversionResult icr) 
 	throws IOException {

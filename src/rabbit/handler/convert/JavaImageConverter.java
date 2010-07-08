@@ -24,6 +24,9 @@ public class JavaImageConverter implements ImageConverter {
     private final float quality;
     private final long maxImageSize;
 
+    /** Create a new JavaImageConverter using the given properties.
+     * @param props the properties hodling the configuration
+     */
     public JavaImageConverter (SProperties props) {
         Runtime rt = Runtime.getRuntime ();
         long max = rt.maxMemory ();
