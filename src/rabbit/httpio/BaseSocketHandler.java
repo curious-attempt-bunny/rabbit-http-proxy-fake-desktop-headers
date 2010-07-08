@@ -29,6 +29,12 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
     /** The timeout value set by the previous channel registration */
     private Long timeout;
 
+    /** Create a new BaseSocketHandler that will handle the traffic on 
+     *  the given channel
+     * @param channel the SocketChannel to read to and write from
+     * @param bh the BufferHandle to use for the io operation
+     * @param nioHandler the NioHandler to use to wait for operations on
+     */
     public BaseSocketHandler (SocketChannel channel, BufferHandle bh, 
 			      NioHandler nioHandler) {
 	this.channel = channel;
@@ -40,16 +46,26 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
 	return bh.getBuffer ();
     }
 
+    protected ByteBuffer getLargeBuffer () {
+	return bh.getLargeBuffer ();
+    }
+
+    protected boolean isUsingSmallBuffer (ByteBuffer buffer) {
+	return !bh.isLarge (buffer);
+    }
+
     protected void releaseBuffer () {
 	bh.possiblyFlush ();
     }
 
     /** Does nothing by default */
     public void closed () {
+	// empty
     }
 
     /** Does nothing by default */
     public void timeout () {
+	// empty
     }
 
     /** Runs on the selector thread by default */
@@ -74,19 +90,33 @@ public abstract class BaseSocketHandler implements SocketChannelHandler {
 	nioHandler.close (channel);
     }
 
+    /** Get the channel this BaseSocketHandler is using
+     * @return the SocketChannel being used 
+     */
     public SocketChannel getChannel () {
 	return channel;
     }
 
+    /** Get the BufferHandle this BaseSocketHandler is using
+     * @return the BufferHandle used for io operations
+     */
     public BufferHandle getBufferHandle () {
 	return bh;
     }
 
+    /** Wait for more data to be readable on the channel
+     * @param rh the handler that will be notified when more data is
+     *        ready to be read
+     */
     public void waitForRead (ReadHandler rh) {
 	this.timeout = nioHandler.getDefaultTimeout ();
 	nioHandler.waitForRead (channel, rh);
     }
 
+    /** Wait for more data to be writable on the channel
+     * @param rh the handler that will be notified when more data is
+     *        ready to be written
+     */
     public void waitForWrite (WriteHandler rh) {
 	this.timeout = nioHandler.getDefaultTimeout ();
 	nioHandler.waitForWrite (channel, rh);

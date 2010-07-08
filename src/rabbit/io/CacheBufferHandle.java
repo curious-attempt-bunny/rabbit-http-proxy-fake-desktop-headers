@@ -29,6 +29,10 @@ public class CacheBufferHandle implements BufferHandle {
 	return buffer;
     }
 
+    public boolean isLarge (ByteBuffer buffer) {
+	return bh.isLarge (buffer);
+    }
+
     public void possiblyFlush () {
 	if (buffer == null)
 	    return;

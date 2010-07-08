@@ -136,11 +136,17 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    int pos = buffer.position ();
 	    if (pos == startPos) {
 		if (buffer.remaining () + pos >= buffer.capacity ()) {
-		    releaseBuffer ();
-		    // ok, we did no progress, abort, client is sending 
-		    // too long lines. 
-		    // TODO: perhaps grow buffer....
-		    throw new RequestLineTooLongException ();
+		    // Try to get a large buffer, there are cookies that
+		    // are very long.
+		    if (isUsingSmallBuffer (buffer)) {
+			buffer = getLargeBuffer ();
+		    } else {
+			releaseBuffer ();
+			// ok, we did no progress, abort, client is sending 
+			// too long lines. 
+			// TODO: perhaps grow buffer....
+			throw new RequestLineTooLongException ();
+		    }
 		}
 		// set back position so the next read aligns...
 		buffer.position (fullPosition);

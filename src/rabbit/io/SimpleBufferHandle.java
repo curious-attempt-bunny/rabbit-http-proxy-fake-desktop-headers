@@ -9,6 +9,9 @@ import java.nio.ByteBuffer;
 public class SimpleBufferHandle implements BufferHandle {
     private ByteBuffer buffer;
 
+    /** Create a BufferHandle that wraps the given ByteBuffer.
+     * @param buffer the ByteBuffer to wrap
+     */
     public SimpleBufferHandle (ByteBuffer buffer) {
 	this.buffer = buffer;
     }
@@ -23,6 +26,10 @@ public class SimpleBufferHandle implements BufferHandle {
 
     public ByteBuffer getLargeBuffer () {
 	throw new RuntimeException ("Not implemented");
+    }
+
+    public boolean isLarge (ByteBuffer buffer) {
+	return false; // we only give out small buffers
     }
 
     public void possiblyFlush () {

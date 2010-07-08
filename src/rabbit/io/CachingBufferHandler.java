@@ -59,6 +59,10 @@ public class CachingBufferHandler implements BufferHandler {
 	return lb;
     }
 
+    public boolean isLarge (ByteBuffer buffer) {
+	return buffer.capacity () > 4096;
+    }
+
     private static final class BufferHolder {
 	private final ByteBuffer buffer;
 	
