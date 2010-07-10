@@ -49,7 +49,6 @@ public class ImageHandler extends BaseHandler {
      * @param con the Connection handling the request.
      * @param tlh the logger for the data traffic
      * @param request the actual request made.
-     * @param clientHandle the client side buffer.
      * @param response the actual response.
      * @param content the resource.
      * @param mayCache May we cache this request?
@@ -61,12 +60,12 @@ public class ImageHandler extends BaseHandler {
      * @param imageConverter the actual converter to use
      */
     public ImageHandler (Connection con, TrafficLoggerHandler tlh,
-			 HttpHeader request, BufferHandle clientHandle,
-			 HttpHeader response, ResourceSource content,
-			 boolean mayCache, boolean mayFilter, long size,
+			 HttpHeader request, HttpHeader response,
+			 ResourceSource content, boolean mayCache,
+			 boolean mayFilter, long size,
 			 SProperties config, boolean doConvert,
 			 int minSizeToConvert, ImageConverter imageConverter) {
-	super (con, tlh, request, clientHandle, response, content,
+	super (con, tlh, request, response, content,
 	       mayCache, mayFilter, size);
 	if (size == -1)
 	    con.setKeepalive (false);
@@ -79,11 +78,10 @@ public class ImageHandler extends BaseHandler {
 
     @Override
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
-				   HttpHeader header, BufferHandle bufHandle,
-				   HttpHeader webHeader,
+				   HttpHeader header, HttpHeader webHeader,
 				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
-	return new ImageHandler (con, tlh, header, bufHandle, webHeader,
+	return new ImageHandler (con, tlh, header, webHeader,
 				 content, mayCache, mayFilter, size,
 				 getConfig (), getDoConvert (), 
 				 getMinSizeToConvert (), imageConverter);

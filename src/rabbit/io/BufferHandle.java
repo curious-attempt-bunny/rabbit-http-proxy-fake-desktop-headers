@@ -31,4 +31,10 @@ public interface BufferHandle {
 
     /** release a buffer if possible. */
     void possiblyFlush ();
+
+    /** Flag that the internal ByteBuffer may not be flushed.
+     * @param mayBeFlushed if true the buffer may be returned,
+     *                     if false the putBuffer call will throw an exception
+     */
+    void setMayBeFlushed (boolean mayBeFlushed);
 }

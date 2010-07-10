@@ -36,4 +36,8 @@ public class SimpleBufferHandle implements BufferHandle {
 	if (!buffer.hasRemaining ())
 	    buffer = null;
     }
+
+    public void setMayBeFlushed (boolean mayBeFlushed) {
+	// ignore
+    }
 }

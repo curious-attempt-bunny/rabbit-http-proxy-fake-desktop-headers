@@ -137,7 +137,7 @@ public class SWC implements HttpHeaderSentListener,
 				      rh.getWebHandle (), con.getNioHandler (),
 				      tlh.getNetwork (), false,
 				      con.getProxy ().getStrictHttp (), this);
-	    hhr.readRequest ();
+	    hhr.readHeader ();
 	} catch (IOException e) {
 	    failed (e);
 	}

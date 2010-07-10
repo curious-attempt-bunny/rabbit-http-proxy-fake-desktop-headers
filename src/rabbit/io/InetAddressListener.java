@@ -13,6 +13,7 @@ public interface InetAddressListener {
     void lookupDone (InetAddress ia);
 
     /** Lookup failed.
+     * @param e the cause of the problem
      */
     void unknownHost (Exception e);
 }

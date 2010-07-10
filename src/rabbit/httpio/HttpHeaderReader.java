@@ -1,14 +1,12 @@
 package rabbit.httpio;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.ReadHandler;
-import rabbit.http.Header;
 import rabbit.http.HttpHeader;
 import rabbit.io.BufferHandle;
 import rabbit.util.TrafficLogger;
@@ -17,16 +15,11 @@ import rabbit.util.TrafficLogger;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class HttpHeaderReader extends BaseSocketHandler 
-    implements LineListener, ReadHandler {
+public class HttpHeaderReader extends BaseSocketHandler
+    implements ReadHandler {
     
-    private HttpHeader header;
-    private Header head = null;    
-    private boolean append = false;
-    private final boolean request;
-    private final boolean strictHttp;
     private final HttpHeaderListener reader;
-    private boolean headerRead = false;
+    private final HttpHeaderParser headerParser;
 
     // State variables.
     private boolean keepalive = true;
@@ -35,21 +28,18 @@ public class HttpHeaderReader extends BaseSocketHandler
     private int startParseAt = 0;
 
     private final TrafficLogger tl;
-    private LineReader lr;
-
-    private static final ByteBuffer HTTP_IDENTIFIER = 
-    ByteBuffer.wrap (new byte[]{(byte)'H', (byte)'T', (byte)'T', 
-				(byte)'P', (byte)'/'});
-    
-    private static final ByteBuffer EXTRA_LAST_CHUNK = 
-    ByteBuffer.wrap (new byte[]{(byte)'0', (byte)'\r', (byte)'\n', 
-				(byte)'\r', (byte)'\n'});
-    
 
     /** 
+     * @param channel the SocketChannel to read from
+     * @param bh the BufferHandle to use to get ByteBuffers
+     * @param nioHandler the NioHandler to use to wait for more data
+     * @param tl the TrafficLogger to update with network read Statistics
      * @param request true if a request is read, false if a response is read.
      *                Servers may respond without header (HTTP/0.9) so try to 
      *                handle that.
+     * @param strictHttp if true http headers will be strictly parsed, if false
+     *                   http newlines may be single \n
+     * @param reader the listener for http headers
      */ 
     public HttpHeaderReader (SocketChannel channel, BufferHandle bh, 
 			     NioHandler nioHandler, TrafficLogger tl, 
@@ -57,12 +47,14 @@ public class HttpHeaderReader extends BaseSocketHandler
 			     HttpHeaderListener reader) {
 	super (channel, bh, nioHandler);
 	this.tl = tl;
-	this.request = request;
-	this.strictHttp = strictHttp;
+	headerParser = new HttpHeaderParser (request, strictHttp);
 	this.reader = reader;
     }
 
-    public void readRequest () throws IOException {
+    /** Try to read a http header
+     * @throws IOException if a header can not be parsed
+     */
+    public void readHeader () throws IOException {
 	if (!getBufferHandle ().isEmpty ()) {
 	    ByteBuffer buffer = getBuffer ();
 	    startParseAt = buffer.position ();
@@ -74,6 +66,7 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
 
     @Override public String getDescription () {
+	HttpHeader header = headerParser.getHeader ();
 	return "HttpHeaderReader: channel: " + getChannel () + 
 	    ", current header lines: " + 
 	    (header == null ? 0 : header.size ());
@@ -117,54 +110,50 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    buffer.position (startParseAt);
 	    buffer.limit (read + pos);
 	    parseBuffer (buffer);
+	} catch (BadHttpHeaderException e) {
+	    closeDown ();
+	    reader.failed (e);
 	} catch (IOException e) {
 	    closeDown ();
 	    reader.failed (e);
 	}
     }
-    
+
     private void parseBuffer (ByteBuffer buffer) throws IOException {
-	int startPos = buffer.position ();
 	buffer.mark ();
-	boolean done = handleBuffer (buffer);
+	boolean done = headerParser.handleBuffer (buffer);
 	Logger logger = getLogger ();
 	if (logger.isLoggable (Level.FINEST))
 	    logger.finest ("HttpHeaderReader.parseBuffer: done " + done);
 	if (!done) {
-	    int fullPosition = buffer.position ();
-	    buffer.reset ();
 	    int pos = buffer.position ();
-	    if (pos == startPos) {
-		if (buffer.remaining () + pos >= buffer.capacity ()) {
-		    // Try to get a large buffer, there are cookies that
-		    // are very long.
-		    if (isUsingSmallBuffer (buffer)) {
-			buffer = getLargeBuffer ();
-		    } else {
-			releaseBuffer ();
-			// ok, we did no progress, abort, client is sending 
-			// too long lines. 
-			// TODO: perhaps grow buffer....
-			throw new RequestLineTooLongException ();
-		    }
-		}
-		// set back position so the next read aligns...
-		buffer.position (fullPosition);
-	    } else {
+	    buffer.reset ();
+	    if (buffer.position () > 0) {
 		// ok, some data handled, make space for more.
 		buffer.compact ();
 		startParseAt = 0;
+	    } else if (isUsingSmallBuffer (buffer)) {
+		buffer = getLargeBuffer ();
+		buffer.position (pos);
+		startParseAt = 0;
+	    } else {
+		releaseBuffer ();
+		// ok, we did no progress, abort, client is sending
+		// too long lines.
+		// TODO: perhaps grow buffer...
+		throw new RequestLineTooLongException ();
 	    }
 	    waitForRead (this);
 	} else {
-	    setState ();
+	    HttpHeader header = headerParser.getHeader ();
+	    setState (header);
 	    releaseBuffer ();
 	    reader.httpHeaderRead (header, getBufferHandle (), 
 				   keepalive, ischunked, dataSize);
 	}
     }
 
-    private void setState () {
+    private void setState (HttpHeader header) {
 	dataSize = -1;
 	String cl = header.getHeader ("Content-Length");
 	if (cl != null) {
@@ -224,167 +213,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    }
 	}
     }
-
-    /** read the data from the buffer and try to build a http header.
-     * 
-     * @return true if a full header was read, false if more data is needed.
-     */
-    private boolean handleBuffer (ByteBuffer buffer) throws IOException {
-	if (!request && header == null && !verifyResponse (buffer))
-	    return true;
-	if (lr == null)
-	    lr = new LineReader (strictHttp);
-	while (!headerRead && buffer.hasRemaining ())
-	    lr.readLine (buffer, this);
-	return headerRead;
-    }
-
-    /** Verify that the response starts with "HTTP/" 
-     *  Failure to verify response => treat all of data as content = HTTP/0.9.
-     */
-    private boolean verifyResponse (ByteBuffer buffer) throws IOException {
-	// some broken web servers (apache/2.0.4x) send multiple last-chunks
-	if (buffer.remaining () > 4 && matchBuffer (EXTRA_LAST_CHUNK)) {
-	    getLogger ().warning ("Found a last-chunk, trying to ignore it.");
-	    buffer.position (buffer.position () + EXTRA_LAST_CHUNK.capacity ());
-	    return verifyResponse (buffer);
-	}
-
-	if (buffer.remaining () > 4 && !matchBuffer (HTTP_IDENTIFIER)) {
-	    getLogger ().warning ("http response header with odd start:" + 
-				  getBufferStartString (buffer, 5));
-	    // Create a http/0.9 response...
-	    header = new HttpHeader ();
-	    return true;
-	}
-
-	return true;
-    }
-
-    private boolean matchBuffer (ByteBuffer test) {
-	int len = test.remaining ();
-	ByteBuffer buffer = getBuffer ();
-	if (buffer.remaining () < len)
-	    return false;
-	int pos = buffer.position ();
-	for (int i = 0; i < len; i++)
-	    if (buffer.get (pos + i) != test.get (i))
-		return false;
-	return true;
-    }
-
-    private String getBufferStartString (ByteBuffer buffer, int size) {
-	try {
-	    int pos = buffer.position ();
-	    byte[] arr = new byte[size];
-	    buffer.get (arr);
-	    buffer.position (pos);
-	    return new String (arr, "ASCII");
-	} catch (UnsupportedEncodingException e) {
-	    return "unable to get ASCII: " + e.toString ();
-	}
-    }    
     
-    /** Handle a newly read line. */
-    public void lineRead (String line) throws IOException {
-	if (line.length () == 0) {
-	    headerRead = header != null;
-	    return;
-	}
-
-	if (header == null) {
-	    header = new HttpHeader ();
-	    header.setRequestLine (line);
-	    headerRead = false;
-	    return;
-	}
-
-	if (header.isDot9Request ()) {
-	    headerRead = true;
-	    return;
-	}
-
-	char c;
-	if (header.size () == 0 &&
-	    line.length () > 0 && 
-	    ((c = line.charAt (0)) == ' ' || c == '\t')) {
-	    header.setReasonPhrase (header.getReasonPhrase () + line);
-	    headerRead = false;
-	    return;
-	} 
-
-	readHeader (line);
-	headerRead = false;
-    }
-
-    public void readHeader (String msg) throws IOException {
-	if (msg == null) 
-	    throw (new IOException ("Couldnt read headers, connection must be closed"));
-	char c = msg.charAt (0);
-	if (c == ' ' || c == '\t' || append) {
-	    if (head != null) {
-		head.append (msg);
-		append = checkQuotes (head.getValue ());
-	    } else {
-		SocketChannel channel = getChannel ();
-		throw (new IOException ("Malformed header from: " + 
-					channel.socket ().getInetAddress () +
-					", msg: " + msg));
-	    }
-	    return;
-	}
-	int i = msg.indexOf (':');	    
-	if (i < 0) {
-	    switch (msg.charAt (0)) {
-	    case 'h':
-	    case 'H':
-		if (msg.toLowerCase ().startsWith ("http/")) {
-		    /* ignoring header since it looks
-		     * like a duplicate responseline
-		     */
-		    return;
-		}
-		// fallthrough
-	    default:
-		throw (new IOException ("Malformed header:" + msg));
-	    }
-	}
-	int j = i;
-	while (j > 0 && ((c = msg.charAt (j - 1)) == ' ' || c == '\t'))
-	    j--;
-	// ok, the header may be empty, so trim away whites.
-	String value = msg.substring (i + 1);
-	
-	/* there are some sites with broken headers
-	 * like http://docs1.excite.com/functions.js
-	 * which returns lines such as this (20040416) /robo
-	 * msg is: 'Cache-control: must-revalidate"'
-	 * so we only check for append when in strict mode...
-	 */
-	if (strictHttp) 
-	    append = checkQuotes (value);
-	if (!append)
-	    value = value.trim ();
-	head = new Header (msg.substring (0, j), value);
-	header.addHeader (head);
-    }
-
-    private boolean checkQuotes (String v) {
-	int q = v.indexOf ('"');
-	if (q == -1)
-	    return false;
-	boolean halfquote = false;
-	int l = v.length ();
-	for (; q < l; q++) {
-	    char c = v.charAt (q);
-	    if (c == '\\')
-		q++;    // skip one...
-	    else if (c == '"')
-		halfquote = !halfquote;
-	}
-	return halfquote;
-    }
-
     /** Set the keep alive value to currentkeepalive & keepalive
      * @param keepalive the new keepalive value.
      */

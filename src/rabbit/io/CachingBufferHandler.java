@@ -23,10 +23,11 @@ public class CachingBufferHandler implements BufferHandler {
 	count++;
 	BufferHolder r = bufs.poll ();
 	ByteBuffer b;
-	if (r != null)
+	if (r != null) {
 	    b = r.getBuffer ();
-	else
+	} else {
 	    b = ByteBuffer.allocateDirect (size);
+	}
 	b.clear ();
 	return b;
     }
@@ -53,7 +54,9 @@ public class CachingBufferHandler implements BufferHandler {
     public ByteBuffer growBuffer (ByteBuffer buffer) {
 	ByteBuffer lb = getBuffer (largeCache, 128 * 1024);
 	if (buffer != null) {
+	    int position = buffer.position ();
 	    lb.put (buffer);
+	    lb.position (position);
 	    putBuffer (buffer);
 	}
 	return lb;

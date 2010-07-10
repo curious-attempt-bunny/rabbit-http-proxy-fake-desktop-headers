@@ -1,6 +1,5 @@
 package rabbit.handler;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.ResourceSource;
@@ -30,8 +29,8 @@ public class GZipHandler extends BaseHandler {
 
     /** Create a new GZipHandler for the given request.
      * @param con the Connection handling the request.
+     * @param tlh the TrafficLoggerHandler to update with traffic information
      * @param request the actual request made.
-     * @param clientHandle the client side buffer.
      * @param response the actual response.
      * @param content the resource.
      * @param mayCache May we cache this request?
@@ -40,11 +39,10 @@ public class GZipHandler extends BaseHandler {
      * @param compress if we want this handler to compress or not.
      */
     public GZipHandler (Connection con, TrafficLoggerHandler tlh,
-			HttpHeader request, BufferHandle clientHandle,
-			HttpHeader response, ResourceSource content,
-			boolean mayCache, boolean mayFilter, long size,
-			boolean compress) {
-	super (con, tlh, request, clientHandle, response, content,
+			HttpHeader request, HttpHeader response,
+			ResourceSource content, boolean mayCache,
+			boolean mayFilter, long size, boolean compress) {
+	super (con, tlh, request, response, content,
 	       mayCache, mayFilter, size);
 	this.compress = compress;
     }
@@ -73,12 +71,11 @@ public class GZipHandler extends BaseHandler {
 
     @Override
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
-				   HttpHeader header, BufferHandle bufHandle,
-				   HttpHeader webHeader,
+				   HttpHeader header, HttpHeader webHeader,
 				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
 	GZipHandler h =
-	    new GZipHandler (con, tlh, header, bufHandle, webHeader,
+	    new GZipHandler (con, tlh, header, webHeader,
 			     content, mayCache, mayFilter, size,
 			     compress && mayFilter);
 	h.setupHandler ();

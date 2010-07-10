@@ -131,7 +131,7 @@ public class Connection {
 		new HttpHeaderReader (channel, requestHandle, getNioHandler (),
 				      tlh.getClient (), true,
 				      proxy.getStrictHttp (), clientListener);
-	    hr.readRequest ();
+	    hr.readHeader ();
 	} catch (Throwable ex) {
 	    handleFailedRequestRead (ex);
 	}
@@ -501,7 +501,7 @@ public class Connection {
 		rh.getHandlerFactory ().getClass ().getName ();
 	    Handler handler =
 		rh.getHandlerFactory ().getNewInstance (this, tlh,
-							request, requestHandle,
+							request,
 							rh.getWebHeader (),
 							rh.getContent (),
 							getMayCache (),

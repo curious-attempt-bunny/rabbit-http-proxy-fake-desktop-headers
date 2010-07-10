@@ -53,7 +53,7 @@ public class Connection {
 	    new HttpHeaderReader (sc, clientBufferHandle, sws.getNioHandler (),
 				  sws.getTrafficLogger (), true, true, 
 				  requestListener);
-	requestReader.readRequest ();
+	requestReader.readHeader ();
     }
 
     private void shutdown () {

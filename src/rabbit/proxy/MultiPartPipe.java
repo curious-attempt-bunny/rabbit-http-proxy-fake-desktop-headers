@@ -57,7 +57,7 @@ public class MultiPartPipe {
 	
 	// check for end line and if it is found we limit the buffer to 
 	// this position.
-	public void lineRead (String line) throws IOException {
+	public void lineRead (String line) {
 	    if (line.startsWith ("--") && line.endsWith ("--") &&
 		line.substring (2, line.length () - 2).equals (boundary)) {
 		buf.limit (buf.position ());

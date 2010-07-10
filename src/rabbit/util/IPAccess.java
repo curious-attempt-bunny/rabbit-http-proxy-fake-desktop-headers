@@ -21,6 +21,8 @@ public class IPAccess {
     }
 
     /** transform to suitable variabletypes
+     * @param lowipa the lowest ip in the range
+     * @param highipa the highest ip in the range
      */
     private void setup (InetAddress lowipa, InetAddress highipa) {
 	lowip = getLongFromIP (lowipa);
@@ -34,6 +36,8 @@ public class IPAccess {
     }
   
     /** make an long from the ip so we can do simple test later on
+     * @param ia the InetAddress to convert to a long
+     * @return the long value
      */
     private long getLongFromIP (InetAddress ia) {
 	byte[] address = ia.getAddress ();

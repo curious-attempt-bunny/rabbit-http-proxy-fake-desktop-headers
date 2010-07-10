@@ -60,14 +60,24 @@ public enum StatusCode {
 	this.description = description;
     }
 
+    /** Get the numeric value of the status code
+     * @return the status code
+     */
     public int getCode () {
 	return code;
     }
 
+    /** Get the human readable description of this status code.
+     * @return the description
+     */
     public String getDescription () {
 	return description;
     }
 
+    /** Get a http response line using this status code
+     * @param httpVersion the HTTP version to use
+     * @return the formatted status line
+     */
     public String getStatusLine (String httpVersion) {
 	return httpVersion + " " + getCode () + " " + getDescription ();
     }

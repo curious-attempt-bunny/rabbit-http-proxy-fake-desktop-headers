@@ -50,10 +50,10 @@ class SSLHandler implements TunnelDoneListener {
     public boolean isAllowed () {
 	String hp = request.getRequestURI ();
 	int c = hp.indexOf (':');
-	Integer port = 443;
+	Integer port = Integer.valueOf (443);
 	if (c >= 0) {
 	    try {
-		port = new Integer (hp.substring (c+1));
+		port = new Integer (hp.substring (c + 1));
 	    } catch (NumberFormatException e) {
 		logger.warning ("Connect to odd port: " + e);
 		return false;

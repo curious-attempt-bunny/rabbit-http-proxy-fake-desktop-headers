@@ -18,14 +18,18 @@ public interface Resolver {
     /** Get the port to use for connecting to a given port.
      *  Normally port is returned, but if there is a chained proxy, 
      *  then the proxy port is returned instead.
+     * @param port the port number we are trying to use
+     * @return the tcp port number to use
      */
     int getConnectPort (int port); 
 
     /** Check if the resolver is using a proxy or not. 
+     * @return true if there is an upstream proxy
      */
     boolean isProxyConnected ();
 
     /** Get the currently set proxy authentication. 
+     * @return the upstream proxy basic identification header
      */
     String getProxyAuthString ();
 }

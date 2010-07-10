@@ -50,7 +50,7 @@ public class HttpResponseReader
 	    HttpHeaderReader reader = 
 		new HttpHeaderReader (channel, bh, nioHandler,
 				      tl, false, strictHttp, this);
-	    reader.readRequest ();
+	    reader.readHeader ();
 	} catch (IOException e) {
 	    failed (e);
 	}

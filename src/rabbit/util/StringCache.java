@@ -15,6 +15,7 @@ public class StringCache extends WeakHashMap<String, WeakReference<String>> {
     private static StringCache instance;
     
     /** Get the shared instance of the string caches.
+     * @return the StringCache
      */
     public static synchronized StringCache getSharedInstance () {
 	if (instance == null)
@@ -26,6 +27,7 @@ public class StringCache extends WeakHashMap<String, WeakReference<String>> {
      *  If the string given is not null then the cache will hold one
      *  entry with the same value as the given string after this method has completed.
      * @param s the string to get a shared string for.
+     * @return the shared string
      */
     public String getCachedString (String s) {
 	if (s == null)

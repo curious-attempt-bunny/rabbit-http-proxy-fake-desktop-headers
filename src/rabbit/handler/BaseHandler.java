@@ -48,8 +48,6 @@ public class BaseHandler
     protected TrafficLoggerHandler tlh;
     /** The actual request made. */
     protected HttpHeader request;
-    /** The client buffer. */
-    protected BufferHandle clientHandle;
     /** The actual response. */
     protected HttpHeader response;
     /** The resource */
@@ -84,7 +82,6 @@ public class BaseHandler
      * @param con the Connection handling the request.
      * @param tlh the TrafficLoggerHandler to update with traffic information
      * @param request the actual request made.
-     * @param clientHandle the client side buffer.
      * @param response the actual response.
      * @param content the resource.
      * @param mayCache May we cache this request?
@@ -92,13 +89,12 @@ public class BaseHandler
      * @param size the size of the data beeing handled.
      */
     public BaseHandler (Connection con, TrafficLoggerHandler tlh,
-			HttpHeader request, BufferHandle clientHandle,
-			HttpHeader response, ResourceSource content,
+			HttpHeader request, HttpHeader response,
+			ResourceSource content,
 			boolean mayCache, boolean mayFilter, long size) {
 	this.con = con;
 	this.tlh = tlh;
 	this.request = request;
-	this.clientHandle = clientHandle;
 	this.response = response;
 	if (!request.isDot9Request () && response == null)
 	    throw new IllegalArgumentException ("response may not be null");
@@ -109,11 +105,10 @@ public class BaseHandler
     }
 
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
-				   HttpHeader header, BufferHandle bufHandle,
-				   HttpHeader webHeader,
+				   HttpHeader header, HttpHeader webHeader,
 				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
-	return new BaseHandler (con, tlh, header, bufHandle, webHeader, content,
+	return new BaseHandler (con, tlh, header, webHeader, content,
 				mayCache, mayFilter, size);
     }
 
@@ -254,9 +249,6 @@ public class BaseHandler
 	}
 	tlh = null;
 	con = null;
-	if (clientHandle != null)
-	    clientHandle.possiblyFlush ();
-	clientHandle = null;
     }
 
     private void finishCache () {

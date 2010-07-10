@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 public class CacheBufferHandle implements BufferHandle {
     private final BufferHandler bh;
     private ByteBuffer buffer;
+    private boolean mayBeFlushed = true;
 
     public CacheBufferHandle (BufferHandler bh) {
 	this.bh = bh;
@@ -34,12 +35,19 @@ public class CacheBufferHandle implements BufferHandle {
     }
 
     public void possiblyFlush () {
+	if (!mayBeFlushed)
+	    throw new IllegalStateException ("buffer may not be flushed!: " +
+					     System.identityHashCode (buffer));
 	if (buffer == null)
 	    return;
 	if (!buffer.hasRemaining ()) {
 	    bh.putBuffer (buffer);
 	    buffer = null;
 	}
+    }
+
+    public void setMayBeFlushed (boolean mayBeFlushed) {
+	this.mayBeFlushed = mayBeFlushed;
     }
 
     @Override public String toString () {

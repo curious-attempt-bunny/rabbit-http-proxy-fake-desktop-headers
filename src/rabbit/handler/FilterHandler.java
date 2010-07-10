@@ -48,8 +48,8 @@ public class FilterHandler extends GZipHandler {
 
     /** Create a new FilterHandler for the given request.
      * @param con the Connection handling the request.
+     * @param tlh the TrafficLoggerHandler to update with traffic information
      * @param request the actual request made.
-     * @param clientHandle the client side buffer handle.
      * @param response the actual response.
      * @param content the resource.
      * @param mayCache May we cache this request?
@@ -58,12 +58,12 @@ public class FilterHandler extends GZipHandler {
      * @param compress if we want this handler to compress or not.
      */
     public FilterHandler (Connection con, TrafficLoggerHandler tlh,
-			  HttpHeader request, BufferHandle clientHandle,
-			  HttpHeader response, ResourceSource content,
-			  boolean mayCache, boolean mayFilter, long size,
+			  HttpHeader request, HttpHeader response,
+			  ResourceSource content, boolean mayCache,
+			  boolean mayFilter, long size,
 			  boolean compress, boolean repack,
 			  List<HtmlFilterFactory> filterClasses) {
-	super (con, tlh, request, clientHandle, response, content,
+	super (con, tlh, request, response, content,
 	       mayCache, mayFilter, size, compress);
 	this.repack = repack;
 	this.filterClasses = filterClasses;
@@ -167,12 +167,11 @@ public class FilterHandler extends GZipHandler {
 
     @Override
     public Handler getNewInstance (Connection con, TrafficLoggerHandler tlh,
-				   HttpHeader header, BufferHandle bufHandle,
-				   HttpHeader webHeader,
+				   HttpHeader header, HttpHeader webHeader,
 				   ResourceSource content, boolean mayCache,
 				   boolean mayFilter, long size) {
 	FilterHandler h =
-	    new FilterHandler (con, tlh, header, bufHandle, webHeader,
+	    new FilterHandler (con, tlh, header, webHeader,
 			       content, mayCache, mayFilter, size,
 			       compress, repack, filterClasses);
 	h.defaultCharSet = defaultCharSet;
