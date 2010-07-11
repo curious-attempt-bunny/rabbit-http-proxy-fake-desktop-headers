@@ -25,20 +25,18 @@ public interface IPAccessFilter {
     void setup (SProperties properties);
 
     /** Get the list of allowed ips
+     * @return the list of allowed accesses
      */
     public List<IPAccess> getAllowList ();
 
     /** Get the list of denied ips
+     * @return the list of denied accesses
      */
     public List<IPAccess> getDenyList ();
     
     /** Loads in the accessess allowed from the given Reader
      * @param r the Reader were data is available
+     * @throws IOException if loading fails
      */
     public void loadAccess (Reader r) throws IOException;
-
-    /** Saves the accesslist from the given Reader.
-     * @param r the Reader with the users.
-     */
-    public void saveAccess (Reader r) throws IOException;
 }

@@ -10,7 +10,9 @@ public interface TrafficLogger {
      */
     void read (long read);
 
-    /** Get the number of read bytes */
+    /** Get the number of read bytes.
+     * @return the number of bytes that have been read
+     */
     long read ();
     
     /** Log a write
@@ -19,6 +21,7 @@ public interface TrafficLogger {
     void write (long written);
 
     /** Get the number of written bytes.
+     * @return the number of bytes that have been written
      */
     long write ();
 
@@ -28,6 +31,7 @@ public interface TrafficLogger {
     void transferFrom (long transferred);
 
     /** Get the number of bytes transferred from this resource.
+     * @return the number of bytes that have been transferred
      */
     long transferFrom ();
 
@@ -37,6 +41,7 @@ public interface TrafficLogger {
     void transferTo (long transferred);
 
     /** Get the number of bytes transferred to this resourse. 
+     * @return the number of bytes that have been transferred
      */
     long transferTo ();
 

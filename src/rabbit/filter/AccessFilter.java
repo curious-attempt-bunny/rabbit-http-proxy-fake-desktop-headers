@@ -1,12 +1,9 @@
 package rabbit.filter;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -132,26 +129,6 @@ public class AccessFilter implements IPAccessFilter {
 			    br.getLineNumber());
 	}
 	return ip;
-    }
-
-    /** Saves the accesslist from the given Reader.
-     * @param r the Reader with the users.
-     */
-    public void saveAccess (Reader r) throws IOException {
-	if (accessfile == null) 
-	    return;
-	BufferedReader br = new BufferedReader (r);
-	PrintWriter fw = null; 
-	try {
-	    fw = new PrintWriter (new FileWriter (accessfile));
-	    String line;
-	    while ((line = br.readLine ()) != null)
-		fw.println (line);
-	    fw.flush ();
-	} finally {
-	    Closer.close (fw, logger);
-	    Closer.close (br, logger);
-	}
     }
 
     /** Get the list of allowed ips

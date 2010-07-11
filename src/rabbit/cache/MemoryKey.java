@@ -5,6 +5,8 @@ package rabbit.cache;
  *  This class only exists to trick equals/hashCode that we
  *  have the same key. 
  *
+ * @param <K> the type of keys stored.
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 class MemoryKey<K> extends FiledKey<K> {

@@ -26,6 +26,9 @@ import rabbit.util.SProperties;
  *  The NCache is persistent over sessions (saves itself to disk).
  *  The NCache is selfcleaning, that is it removes old stuff.
  *
+ * @param <K> the key type of the cache
+ * @param <V> the data resource
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class NCache<K, V> implements Cache<K, V>, Runnable {
@@ -62,10 +65,14 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private final FileHandler<K> fhk;
     private final FileHandler<V> fhv;
 
-    public boolean running = true;
+    private boolean running = true;
 
     /** Create a cache that uses default values.
      *  Note that you must call startCleaner to have the cache fully up.
+     * @param props the configuration of the cache
+     * @param fhk the FileHandler for the cache keys
+     * @param fhv the FileHandler for the cache values
+     * @throws IOException if the cache file directory can not be configured
      */
     public NCache (SProperties props, FileHandler<K> fhk, FileHandler<V> fhv)
 	throws IOException {
@@ -76,6 +83,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	setup (props);
     }
 
+    /** Start the thread that cleans the cache.
+     */
     public void startCleaner () {
 	cleaner = new Thread (this, getClass ().getName () + ".cleaner");
 	cleaner.setDaemon (true);
@@ -98,8 +107,9 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     /** Sets the cachedir. This will flush the cache and make
      *  it try to read in the cache from the new dir.
      * @param newDir the name of the new directory to use.
+     * @throws IOException if the new cache file directory can not be configured
      */
-    public void setCacheDir (String newDir) throws IOException {
+    private void setCacheDir (String newDir) throws IOException {
 	w.lock ();
 	try {
 	    // save old cachedir.
@@ -174,6 +184,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     }
 
     /** Get how long time the cleaner sleeps between cleanups.
+     * @return the number of millis between cleanups
      */
     public int getCleanLoopTime () {
 	return cleanLoopTime;
@@ -211,6 +222,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     }
 
     /** Check that the data hook exists.
+     * @param e the NCacheEntry to check
+     * @return true if the cache data is valid, false otherwise
      */
     private boolean checkHook (NCacheEntry<K, V> e) {
 	FiledHook<V> hook = e.getRealDataHook ();
@@ -649,6 +662,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     /** Configure the cache system from the given config.
      * @param config the properties describing the cache settings.
+     * @throws IOException if the new cache can not be configured correctly
      */
     public void setup (SProperties config) throws IOException {
 	if (config == null)

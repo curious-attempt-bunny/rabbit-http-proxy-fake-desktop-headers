@@ -27,9 +27,11 @@ public class HttpDateParser {
     /** The default constructor.
      */
     public HttpDateParser (){
+	// empty
     }
 
-    /** Set the time offset relative GMT. 
+    /** Set the time offset relative GMT.
+     * @param offset the time difference in millis
      */
     public static void setOffset (long offset) {
 	HttpDateParser.offset = offset;
@@ -94,7 +96,9 @@ public class HttpDateParser {
 	}
     }
 
-    /** Simple self test method. */
+    /** Simple self test method.
+     * @param args the command line arguments
+     */
     public static void main (String[] args) {
 	String d1 = "Sat, 07 Feb 2004 22:14:05 GMT";
 	String d2 = "Sun, 06 Nov 2043 08:49:37 GMT - 49 years (1994)";

@@ -16,11 +16,12 @@ public class HtmlPage {
 
     private static SProperties config = setup ();
 
-    // no dont instanciate this.
+    // No dont instanciate this.
     private HtmlPage () {
+	// empty
     }
 
-    /** return a simple HTMLheader.
+    /** Return a simple HTMLheader.
      * @return a HTMLHeader.
      */
     public static String getPageHeader () {
@@ -32,7 +33,7 @@ public class HtmlPage {
 		"\" vlink=\"" + config.getProperty ("bodyvlink") + "\">\n");
     }
 
-    /** return a HTMLheader.
+    /** Return a HTMLheader.
      * @param con the Connection handling the request
      * @param type the StatusCode of the request
      * @return a HTMLHeader.
@@ -41,7 +42,8 @@ public class HtmlPage {
 	return getPageHeader (con, type.getDescription ());
     }
 
-    /** return a HTMLheader.
+    /** Return a HTMLheader.
+     * @param con the Connection creating the page
      * @param title the title of this page.
      * @return a HTMLHeader.
      */
@@ -71,9 +73,10 @@ public class HtmlPage {
     }
 
 
-    /** return a table header with given width (int %) and given borderwidth.
+    /** Return a table header with given width (int %) and given borderwidth.
      * @param width the width of the table
      * @param border the width of the border in pixels
+     * @return a html table header
      */
     public static String getTableHeader (int width, int border) {
 	return ("<table border=\"" + border + "\" " +
@@ -81,13 +84,15 @@ public class HtmlPage {
 		"bgcolor=\"" + config.getProperty ("tablebgcolor") + "\">\n");
     }
 
-    /** return a tabletopic row
+    /** Return a table topic row
+     * @return a html table topic row
      */
     public static String getTableTopicRow () {
 	return "<tr bgcolor=\"" + config.getProperty ("tabletopicrow") + "\">";
     }
 
-    /** setup this class for usage
+    /** Setup this class for usage
+     * @return some default properties with color codes
      */
     public static SProperties setup () {
 	config = new SProperties ();
@@ -98,47 +103,6 @@ public class HtmlPage {
 	config.put ("bodyvlink", "#AA00AA");
 	config.put ("tablebgcolor", "#DDDDFF");
 	config.put ("tabletopicrow", "#DD6666");
-	return config;
-    }
-
-
-    /** setup this class for usage
-     * @param props the properties to read from
-     */
-    public static SProperties setup (SProperties props) {
-	String param = props.getProperty ("bodybgcolor");
-	if (param != null)
-	    config.put ("bodybgcolor", param);
-
-	param = props.getProperty ("bodytext");
-	if (param != null)
-	    config.put ("bodytext", param);
-
-	param = props.getProperty ("bodylink");
-	if (param != null)
-	    config.put ("bodylink", param);
-
-	param = props.getProperty ("bodyalink");
-	if (param != null)
-	    config.put ("bodyalink", param);
-
-	param = props.getProperty ("bodyvlink");
-	if (param != null)
-	    config.put ("bodyvlink", param);
-
-	param = props.getProperty ("tablebgcolor");
-	if (param != null)
-	    config.put ("tablebgcolor", param);
-
-	param = props.getProperty ("tabletopicrow");
-	if (param != null)
-	    config.put ("tabletopicrow", param);
-	return config;
-    }
-
-    /** return the properties this class uses
-     */
-    public static SProperties getProperties () {
 	return config;
     }
 }

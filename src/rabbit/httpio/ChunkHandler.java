@@ -21,11 +21,19 @@ public class ChunkHandler {
     private BlockListener listener;
     private long totalRead = 0;
 
+    /** Create a new ChunkHandler that will get data from the given feeder.
+     * @param feeder the raw data provider
+     * @param strictHttp if true then parse http strict, that is use \r\n
+     *        for line breaks.
+     */
     public ChunkHandler (ChunkDataFeeder feeder, boolean strictHttp) {
 	this.feeder = feeder;
 	this.strictHttp = strictHttp;
     }
 
+    /** Set the chunk block listener.
+     * @param listener the listener for the chunk data
+     */
     public void setBlockListener (BlockListener listener) {
 	this.listener = listener;
     }
@@ -41,6 +49,9 @@ public class ChunkHandler {
 	return currentChunkSize == -1;
     }
 
+    /** Try to parse and handle the new data
+     * @param bufHandle the data to parse
+     */
     public void handleData (BufferHandle bufHandle) {
 	try {
 	    ByteBuffer buffer = bufHandle.getBuffer ();

@@ -51,12 +51,16 @@ public class Address {
 	return ia + ":" + port;
     }
 
-    /** Get the internet address */
+    /** Get the internet address.
+     * @return the InetAddress for this Address
+     */
     public InetAddress getInetAddress () {
 	return ia;
     }
 
-    /** Get the port number */
+    /** Get the port number.
+     * @return the port number for this Address
+     */
     public int getPort () {
 	return port;
     }

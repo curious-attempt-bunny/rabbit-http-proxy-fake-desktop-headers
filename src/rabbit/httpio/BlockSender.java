@@ -21,11 +21,19 @@ public class BlockSender extends BaseSocketHandler implements WriteHandler {
     private final TrafficLogger tl;
     private final BlockSentListener sender;
     
+    /** Create a new BlockSender that will write data to the given channel
+     * @param channel the SocketChannel to write the data to
+     * @param nioHandler the NioHandler to use to wait for write ready
+     * @param tl the traffic statistics gatherer
+     * @param bufHandle the data to write
+     * @param chunking if true chunk the data out
+     * @param sender the listener that will be notified when the data has
+     *        been handled.
+     */
     public BlockSender (SocketChannel channel, NioHandler nioHandler, 
 			TrafficLogger tl, 
 			BufferHandle bufHandle, boolean chunking, 
-			BlockSentListener sender) 
-	{
+			BlockSentListener sender) {
 	super (channel, bufHandle, nioHandler);
 	this.tl = tl;
 	ByteBuffer buffer = bufHandle.getBuffer ();

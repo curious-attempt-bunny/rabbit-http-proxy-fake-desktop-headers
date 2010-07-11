@@ -22,6 +22,11 @@ public class FileHelper {
 				   toDelete.getAbsolutePath ());
     }
 
+    /** Try to create the given directory and all parent directories that
+     *  are needed.
+     * @param newDir the directory to create
+     * @throws IOException if directory could not be created
+     */
     public static void mkdirs (File newDir) throws IOException {
 	if (newDir == null)
 	    throw new NullPointerException ("can not create null directory");
