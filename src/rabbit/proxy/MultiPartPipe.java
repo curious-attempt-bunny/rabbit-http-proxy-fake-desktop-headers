@@ -31,8 +31,9 @@ public class MultiPartPipe {
     }
 
     /** Parse the buffer, will set the position and the limit.
+     * @param buf the ByteBuffer to parse
      */
-    public void parseBuffer (ByteBuffer buf) throws IOException {
+    public void parseBuffer (ByteBuffer buf) {
 	int pos = buf.position ();
 	LineReader lr = new LineReader (true);
 	LineHandler lh = new LineHandler (buf);

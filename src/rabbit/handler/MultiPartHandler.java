@@ -18,8 +18,10 @@ import rabbit.proxy.TrafficLoggerHandler;
 public class MultiPartHandler extends BaseHandler {
     private MultiPartPipe mpp = null;
     
-    // For creating the factory.
-    public MultiPartHandler () {	
+    /** Create a new MultiPartHandler factory.
+     */
+    public MultiPartHandler () {
+	// empty
     }
 
     /** Create a new BaseHansler for the given request.
@@ -91,16 +93,12 @@ public class MultiPartHandler extends BaseHandler {
      * This is not a fully correct handling, but it seems to work well enough.
      */
     @Override public void bufferRead (BufferHandle bufHandle) {
-	try {
-	    ByteBuffer buf = bufHandle.getBuffer ();
-	    mpp.parseBuffer (buf);
-	    BlockSender bs = 
-		new BlockSender (con.getChannel (), con.getNioHandler (),
-				 tlh.getClient (), bufHandle, 
-				 con.getChunking (), this);
-	    bs.write ();
-	} catch (IOException e) {
-	    failed (e);	    
-	}
+	ByteBuffer buf = bufHandle.getBuffer ();
+	mpp.parseBuffer (buf);
+	BlockSender bs = 
+	    new BlockSender (con.getChannel (), con.getNioHandler (),
+			     tlh.getClient (), bufHandle, 
+			     con.getChunking (), this);
+	bs.write ();
     }
 }

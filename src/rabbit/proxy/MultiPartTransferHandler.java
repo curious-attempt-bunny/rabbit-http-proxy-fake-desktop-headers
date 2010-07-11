@@ -35,19 +35,15 @@ class MultiPartTransferHandler extends ResourceHandlerBase
     }
     
     @Override void sendBuffer () {
-	try {
-	    ByteBuffer buffer = bufHandle.getBuffer ();
-	    ByteBuffer sendBuffer = buffer.slice ();
-	    BufferHandle sbh = new SimpleBufferHandle (sendBuffer);
-	    mpp.parseBuffer (sendBuffer);
-	    fireResouceDataRead (sbh);
-	    BlockSender bs = 
-		new BlockSender (wc.getChannel (), con.getNioHandler (), 
-				 tlh.getNetwork (), sbh, false, this);
-	    bs.write ();
-	} catch (IOException e) {
-	    failed (e);
-	}
+	ByteBuffer buffer = bufHandle.getBuffer ();
+	ByteBuffer sendBuffer = buffer.slice ();
+	BufferHandle sbh = new SimpleBufferHandle (sendBuffer);
+	mpp.parseBuffer (sendBuffer);
+	fireResouceDataRead (sbh);
+	BlockSender bs = 
+	    new BlockSender (wc.getChannel (), con.getNioHandler (), 
+			     tlh.getNetwork (), sbh, false, this);
+	bs.write ();
     }
     public void blockSent () {
 	if (!mpp.isFinished ())
