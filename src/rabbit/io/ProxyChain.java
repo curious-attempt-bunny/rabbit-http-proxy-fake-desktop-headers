@@ -13,6 +13,7 @@ import rabbit.io.Resolver;
 public interface ProxyChain {
     /** Get the Resolver to use for the given url
      * @param url the address to connect to.
+     * @return the Resolver to use
      */
     Resolver getResolver (String url);
 }

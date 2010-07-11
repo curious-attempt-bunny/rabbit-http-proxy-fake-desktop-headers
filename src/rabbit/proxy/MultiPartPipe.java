@@ -1,13 +1,11 @@
 package rabbit.proxy;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.StringTokenizer;
 import rabbit.httpio.LineListener;
 import rabbit.httpio.LineReader;
 
-/** A class that reads multipart data from one channel and writes 
- *  it to the other channel.
+/** A helper class for dealing with multipart data.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
@@ -15,6 +13,9 @@ public class MultiPartPipe {
     private String boundary;
     private boolean endFound = false;
     
+    /** Create a new MultiPartPipe
+     * @param ctHeader the content type header hodling the boundary
+     */
     public MultiPartPipe (String ctHeader) {
 	StringTokenizer st = new StringTokenizer (ctHeader, " =\n\r\t;");
 	while (st.hasMoreTokens ()) {
@@ -45,6 +46,9 @@ public class MultiPartPipe {
 	buf.position (pos);
     }
 
+    /** Check if the multipart data has been fully handled.
+     * @return true if all multipart data has been handled
+     */
     public boolean isFinished () {
 	return endFound;
     }

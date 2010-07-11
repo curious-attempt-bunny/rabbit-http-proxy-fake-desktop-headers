@@ -1,6 +1,5 @@
 package rabbit.handler;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.BlockSender;
