@@ -21,7 +21,7 @@ import rabbit.util.Base64;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-class SSLHandler implements TunnelDoneListener {
+public class SSLHandler implements TunnelDoneListener {
     private final HttpProxy proxy;
     private final Connection con;
     private final HttpHeader request;
@@ -33,9 +33,14 @@ class SSLHandler implements TunnelDoneListener {
     private WebConnection wc;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
+    /** Create a new SSLHandler
+     * @param proxy the HttpProxy this SSL connection is serving
+     * @param con the Connection to handle
+     * @param request the CONNECT header
+     * @param tlh the traffic statistics gatherer
+     */
     public SSLHandler (HttpProxy proxy, Connection con,
-		       HttpHeader request, TrafficLoggerHandler tlh)
-	{
+		       HttpHeader request, TrafficLoggerHandler tlh) {
 	this.proxy = proxy;
 	this.con = con;
 	this.request = request;

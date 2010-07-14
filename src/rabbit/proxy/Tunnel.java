@@ -174,6 +174,7 @@ public class Tunnel {
 		}
 	    } catch (IOException e) {
 		logger.warning ("Got exception reading from tunnel: " + e);
+		closeDown ();
 	    }
 	}
 
