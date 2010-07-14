@@ -17,6 +17,11 @@ public class ProxyResolver implements Resolver {
     /** The proxy auth token we will use. */
     private final String auth;
 
+    /** Create a new ProxyResolver that will always return the given address.
+     * @param proxy the upstream proxy to use for all requests
+     * @param port the upstream proxy port to use for all requests
+     * @param auth the upstream proxy basic auth string to use for all request
+     */
     public ProxyResolver (InetAddress proxy, int port, String auth) {
 	this.proxy = proxy;
 	this.port = port;

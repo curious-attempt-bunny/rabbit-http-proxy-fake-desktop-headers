@@ -19,12 +19,19 @@ public class HttpHeaderSender implements BlockSentListener {
     private final HttpHeaderSentListener sender;
     private final BlockSender bs;
 
-    /** 
-     * @param fullURI if false then try to change header.uri into just the file.
+    /**
+     * @param channel the SocketChannel to write the header to
+     * @param nioHandler the NioHandler to use to wait for write ready
+     * @param tl the statics gatherer to use
+     * @param header the HttpHeader to send
+     * @param fullURI if false then try to change header.uri into just the file
+     * @param sender the listener that will be notified when the header has
+     *        been sent (or sending has failed
+     * @throws IOException if the header can not be converted to network data
      */
-    public HttpHeaderSender (SocketChannel channel, NioHandler nioHandler, 
+    public HttpHeaderSender (SocketChannel channel, NioHandler nioHandler,
 			     TrafficLogger tl, HttpHeader header,
-			     boolean fullURI, HttpHeaderSentListener sender) 
+			     boolean fullURI, HttpHeaderSentListener sender)
 	throws IOException {
 	this.fullURI = fullURI;
 	this.sender = sender;
@@ -32,13 +39,15 @@ public class HttpHeaderSender implements BlockSentListener {
 	bs = new BlockSender (channel, nioHandler, tl, bh, false, this);
     }
 
+    /** Send the header
+     */
     public void sendHeader () {
 	bs.write ();
     }
 
     private ByteBuffer getBuffer (HttpHeader header) throws IOException {
 	String uri = header.getRequestURI ();
-	if (header.isRequest () && !header.isSecure () && 
+	if (header.isRequest () && !header.isSecure () &&
 	    !fullURI && uri.charAt (0) != '/') {
 	    URL url = new URL (uri);
 	    String file = url.getFile ();
@@ -49,7 +58,7 @@ public class HttpHeaderSender implements BlockSentListener {
 	String s = header.toString ();
 	byte[] bytes = s.getBytes ("ASCII");
 	ByteBuffer buf = ByteBuffer.wrap (bytes);
-	header.setRequestURI (uri);		
+	header.setRequestURI (uri);
 	return buf;
     }
 
@@ -63,5 +72,5 @@ public class HttpHeaderSender implements BlockSentListener {
 
     public void blockSent () {
 	sender.httpHeaderSent ();
-    }    
+    }
 }

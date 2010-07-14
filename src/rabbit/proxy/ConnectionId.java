@@ -8,14 +8,16 @@ public class ConnectionId {
     private final int group;
     private final long id;
     
+    /** Create a new identifier for a Connection
+     * @param group the grup id
+     * @param id the id in the group
+     */
     public ConnectionId (int group, long id) {
 	this.group = group;
 	this.id = id;
     }
 
     @Override public String toString () {
-	StringBuilder sb = new StringBuilder ();
-	sb.append ("[").append (group).append (",").append (id).append ("]");
-	return sb.toString ();
+	return "[" + group + ", " + id + "]";
     }
 }

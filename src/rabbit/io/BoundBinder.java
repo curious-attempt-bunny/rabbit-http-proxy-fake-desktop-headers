@@ -9,6 +9,10 @@ import java.net.InetAddress;
 public class BoundBinder implements SocketBinder {
     private final InetAddress ia;
 
+    /** Create a new SocketBinder that will always bind to the given
+     *  InetAddress.
+     * @param ia the InetAddress to use
+     */
     public BoundBinder (InetAddress ia) {
 	this.ia = ia;
     }

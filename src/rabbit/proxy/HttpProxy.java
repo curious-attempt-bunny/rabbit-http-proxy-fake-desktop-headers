@@ -186,7 +186,7 @@ public class HttpProxy {
 	int threads = getInt (section, "num_selector_threads", cpus);
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
-	Long timeout = 15000L;
+	Long timeout = Long.valueOf (15000);
 	try {
 	    nioHandler =
 		new MultiSelectorNioHandler (es, sh, threads, timeout);

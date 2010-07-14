@@ -9,6 +9,8 @@ import java.io.IOException;
 public class RequestLineTooLongException extends IOException {
     private static final long serialVersionUID = 1;
 
+    /** Create a new RequestLineTooLongException
+     */
     public RequestLineTooLongException () {
 	super ("Request line too long");
     }

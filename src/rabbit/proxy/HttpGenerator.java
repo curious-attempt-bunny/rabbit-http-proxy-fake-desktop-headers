@@ -22,11 +22,13 @@ public interface HttpGenerator {
     /** Get a 206 Partial Content header. 
      * @param ifRange if the request is a range request.
      * @param header the current HttpHeader.
+     * @return a HttpHeader with status code 206
      */
     HttpHeader get206 (String ifRange, HttpHeader header);
+
     /** Get a 304 Not Modified header for the given old header
      * @param oldresp the cached header.
-     * @return a 304 HttpHeader .
+     * @return a HttpHeader with status code 304
      */
     HttpHeader get304 (HttpHeader oldresp);
 
@@ -49,6 +51,7 @@ public interface HttpGenerator {
     HttpHeader get403 ();
 
     /** Get a 404 File not found header.
+     * @param file the file that was not found
      * @return a HttpHeader.
      */
     HttpHeader get404 (String file);
@@ -83,12 +86,14 @@ public interface HttpGenerator {
     HttpHeader get417 (String expectation);
     
     /** Get a 500 Internal Server Error header for the given exception.
+     * @param requestURL the url that failed
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */
     HttpHeader get500 (String requestURL, Throwable exception);
 
     /** Get a 504 Gateway Timeout for the given exception.
+     * @param requestURL the url of the request
      * @param exception the Exception made.
      * @return a suitable HttpHeader.
      */

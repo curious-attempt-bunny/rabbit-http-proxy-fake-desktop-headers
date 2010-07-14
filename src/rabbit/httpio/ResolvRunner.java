@@ -15,6 +15,12 @@ public class ResolvRunner implements Runnable {
     private final URL url;
     private final InetAddressListener ial;
 
+    /** Create a new resolver that does the DNS request on a background thread.
+     * @param dnsHandler the actual DNSHandler to use for dns lookups
+     * @param url the url to look up
+     * @param ial the listener that will get the callback when the dns lookup
+     *        is done
+     */
     public ResolvRunner (DNSHandler dnsHandler, 
 			 URL url, InetAddressListener ial) {
 	this.dnsHandler = dnsHandler;

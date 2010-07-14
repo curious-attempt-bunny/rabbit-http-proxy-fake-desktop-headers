@@ -11,6 +11,10 @@ public class CacheBufferHandle implements BufferHandle {
     private ByteBuffer buffer;
     private boolean mayBeFlushed = true;
 
+    /** Create a new CacheBufferHandle that uses the given BufferHandler
+     *  for the caching of the ByteBuffer:s
+     * @param bh the BufferHandler that is the actual cache
+     */
     public CacheBufferHandle (BufferHandler bh) {
 	this.bh = bh;
     }
