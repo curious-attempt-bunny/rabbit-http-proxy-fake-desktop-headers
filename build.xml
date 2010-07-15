@@ -84,16 +84,10 @@
             <fileset dir="libs"/>
         </copy>
 
-        <copy todir="${dist}/logs">
-            <fileset dir="logs"/>
-        </copy>
+        <mkdir dir="${dist}/logs" />
 
         <copy todir="${dist}/htdocs">
             <fileset dir="htdocs"/>
-        </copy>
-
-        <copy todir="${dist}/logs">
-            <fileset dir="logs"/>
         </copy>
 
         <copy todir="${dist}">
