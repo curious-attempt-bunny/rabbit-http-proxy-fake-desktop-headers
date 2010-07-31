@@ -30,10 +30,19 @@ public class MultipartHeader extends GeneralHeader {
 	return ret.toString ();
     }
 
+    /** Write this MultipartHeader to the given output.
+     * @param out the output to write this header to.
+     * @throws IOException if writing fails
+     */
     public void writeExternal (ObjectOutput out) throws IOException {
 	out.writeObject (header);
     }
 	
+    /** Read in the state of this header from the given input.
+     * @param in the input to read from
+     * @throws IOException if reading fails
+     * @throws ClassNotFoundException if the input has bad data.
+     */
     public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 	header = (String)in.readObject ();
     }

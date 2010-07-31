@@ -14,10 +14,12 @@ public interface ResourceSource extends Transferable {
     /** Return true if FileChannel.transferTo can be used. 
      *  Will generally only be true if the resource is served
      *  from a FileChannel.
+     * @return true if transferTo can be used, false otherwise
      */
     boolean supportsTransfer ();
 
     /** Add a ByteBuffer listener. 
+     * @param bl the listener that will get notified when data is available
      */
     void addBlockListener (BlockListener bl);
 

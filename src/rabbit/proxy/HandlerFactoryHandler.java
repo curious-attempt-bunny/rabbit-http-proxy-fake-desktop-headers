@@ -48,9 +48,9 @@ class HandlerFactoryHandler {
 	}
     }
 
-    /** load a set of handlers.
-     * @param section the section in the config file.
-     * @param log the Logger to write errors/warnings to.
+    /** Load a set of handlers.
+     * @param handlersProps the properties for the handlers
+     * @param config the Config to get handler properties from
      * @return a Map with mimetypes as keys and Handlers as values.
      */
     protected List<HandlerInfo> loadHandlers (SProperties handlersProps,

@@ -10,6 +10,7 @@ public interface HttpGeneratorFactory {
     /** Create a HttpGenerator for the given connection
      * @param serverIdentity the identity of the server
      * @param connection the Connection handling the request
+     * @return a HttpGenerator
      */
     HttpGenerator create (String serverIdentity, 
 			  Connection connection);

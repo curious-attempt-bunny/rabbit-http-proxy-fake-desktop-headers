@@ -19,6 +19,7 @@ public interface MetaHandler {
      * @param con the Connection that is serving the request.
      * @param tlProxy the TrafficLogger to log proxy traffic on.
      * @param tlClient the TrafficLogger to log client traffic on.
+     * @throws IOException if writing the resource fails
      */
     void handle (HttpHeader request, 
 		 SProperties htab, 

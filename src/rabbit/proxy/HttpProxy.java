@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
+import org.khelekore.rnio.impl.Acceptor;
+import org.khelekore.rnio.impl.AcceptorListener;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
 import rabbit.cache.Cache;
@@ -28,8 +30,6 @@ import rabbit.dns.DNSSunHandler;
 import rabbit.handler.HandlerFactory;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
-import rabbit.httpio.Acceptor;
-import rabbit.httpio.AcceptorListener;
 import rabbit.httpio.ProxiedProxyChain;
 import rabbit.httpio.SimpleProxyChain;
 import rabbit.io.BufferHandler;
@@ -127,12 +127,17 @@ public class HttpProxy {
 
     private HttpGeneratorFactory hgf;
 
+    /** Create a new HttpProxy.
+     * @throws UnknownHostException if the local host address can not
+     *         be determined
+     */
     public HttpProxy () throws UnknownHostException {
 	localhost = InetAddress.getLocalHost ();
     }
 
     /** Set the config file to use for this proxy.
      * @param conf the name of the file to use for proxy configuration.
+     * @throws IOException if the config file can not be read
      */
     public void setConfig (String conf) throws IOException {
 	setConfig (new Config (conf));
@@ -295,10 +300,16 @@ public class HttpProxy {
 	}
     }
 
+    /** Toogle the strict http flag.
+     * @param b the new mode for the strict http flag
+     */
     public void setStrictHttp (boolean b) {
 	this.strictHttp = b;
     }
 
+    /** Check if strict http is turned on or off.
+     * @return the strict http flag
+     */
     public boolean getStrictHttp () {
 	return strictHttp;
     }
@@ -443,8 +454,7 @@ public class HttpProxy {
 
 	String in = config.getProperty ("Filters", "httpinfilters","");
 	String out = config.getProperty ("Filters", "httpoutfilters","");
-	httpHeaderFilterer =
-	    new HttpHeaderFilterer (in, out, config, this);
+	httpHeaderFilterer = new HttpHeaderFilterer (in, out, config);
     }
 
 
@@ -467,18 +477,30 @@ public class HttpProxy {
 	}
     }
 
+    /** Get the NioHandler that this proxy is using.
+     * @return the NioHandler in use 
+     */
     public NioHandler getNioHandler () {
 	return nioHandler;
     }
 
+    /** Get the cache that this proxy is currently using.
+     * @return the Cache in use
+     */
     public Cache<HttpHeader, HttpHeader> getCache () {
 	return cache;
     }
 
+    /** Get the time offset, that is the time between GMT and local time.
+     * @return the current time offset in millis
+     */
     public long getOffset () {
 	return accessLogger.getOffset ();
     }
 
+    /** Get the time this proxy was started.
+     * @return the start time as returned from System.currentTimeMillis()
+     */
     public long getStartTime () {
 	return started;
     }
@@ -491,6 +513,9 @@ public class HttpProxy {
 	return ssc;
     }
 
+    /** Get the current Counter
+     * @return the Ćounter in use
+     */
     public Counter getCounter () {
 	return counter;
     }
@@ -503,7 +528,9 @@ public class HttpProxy {
 	return httpHeaderFilterer;
     }
 
-    /** Get the configuration of the proxy. */
+    /** Get the configuration of the proxy.
+     * @return the current configuration	
+     */
     public Config getConfig () {
 	return config;
     }
@@ -516,10 +543,16 @@ public class HttpProxy {
 	return handlerFactoryHandler.getCacheHandlerFactory (mime);
     }
 
+    /** Get the version of this proxy.
+     * @return the version of the proxy
+     */
     public String getVersion () {
 	return VERSION;
     }
 
+    /** Get the current server identity.
+     * @return the current identity
+     */
     public String getServerIdentity () {
 	return serverIdentity;
     }
@@ -538,12 +571,18 @@ public class HttpProxy {
 	return port;
     }
 
+    /** Get the ProxyChain this proxy is currently using
+     * @return the current ProxyChain
+     */
     public ProxyChain getProxyChain () {
 	return proxyChain;
     }
 
     /** Try hard to check if the given address matches the proxy.
      *  Will use the localhost name and all ip addresses.
+     * @param uhost the host name to check
+     * @param urlport the port number to check
+     * @return true if the given hostname and port matches this proxy
      */
     public boolean isSelf (String uhost, int urlport) {
 	if (urlport == getPort ()) {
@@ -600,29 +639,38 @@ public class HttpProxy {
      * @param con the connection
      */
     public void addCurrentConnection (Connection con) {
-	connections.add (con);
+	synchronized (connections) {
+	    connections.add (con);
+	}
     }
 
     /** Remove a current connection.
      * @param con the connection
      */
     public void removeCurrentConnection (Connection con) {
-	connections.remove (con);
+	synchronized (connections) {
+	    connections.remove (con);
+	}
     }
 
     /** Get the connection handler.
+     * @return the current ConnectionHandler
      */
     public ConnectionHandler getConnectionHandler () {
 	return conhandler;
     }
 
     /** Get all the current connections
+     * @return all current connections
      */
     public List<Connection> getCurrentConnections () {
-	return Collections.unmodifiableList (connections);
+	synchronized (connections) {
+	    return Collections.unmodifiableList (connections);
+	}
     }
 
     /** Update the currently transferred traffic statistics.
+     * @param tlh the traffic statistics for some operation
      */
     protected void updateTrafficLog (TrafficLoggerHandler tlh) {
 	synchronized (this.tlh) {
@@ -631,6 +679,7 @@ public class HttpProxy {
     }
 
     /** Get the currently transferred traffic statistics.
+     * @return the current TrafficLoggerHandler
      */
     public TrafficLoggerHandler getTrafficLoggerHandler () {
 	return tlh;
@@ -640,6 +689,9 @@ public class HttpProxy {
 	return bufferHandler;
     }
 
+    /** Get the current HttpGeneratorFactory.
+     * @return the HttpGeneratorFactory in use
+     */
     public HttpGeneratorFactory getHttpGeneratorFactory () {
 	return hgf;
     }

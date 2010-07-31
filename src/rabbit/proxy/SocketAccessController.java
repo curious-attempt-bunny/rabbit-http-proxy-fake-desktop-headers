@@ -20,6 +20,11 @@ public class SocketAccessController {
 	new ArrayList<IPAccessFilter> ();
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
+    /** Create a new SocketAccessController that will use a list of internal
+     *  filters.
+     * @param filters a comma separated list of filters to use
+     * @param config the Config to get the internal filters properties from
+     */
     public SocketAccessController (String filters, Config config) {
 	accessfilters = new ArrayList<IPAccessFilter> ();
 	loadAccessFilters (filters, accessfilters, config);
@@ -50,11 +55,15 @@ public class SocketAccessController {
 	    }
 	}
     }
-    
-    public List<IPAccessFilter> getAccessFilters () {
+
+    private List<IPAccessFilter> getAccessFilters () {
 	return Collections.unmodifiableList (accessfilters);
     }
 
+    /** Check if the given channel is allowed access.
+     * @param sc the channel to check
+     * @return true if the channel is allowed access, false otherwise
+     */
     public boolean checkAccess (SocketChannel sc) {
 	for (IPAccessFilter filter : getAccessFilters ()) {
 	    if (filter.doIPFiltering (sc))

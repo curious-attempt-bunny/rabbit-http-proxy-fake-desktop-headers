@@ -16,7 +16,12 @@ import rabbit.util.TrafficLogger;
 class MetaHandlerHandler {
 
     /** Handle a meta page.
+     * @param con the Connection serving the request
      * @param header the request being made.
+     * @param tlProxy the TrafficLogger for proxy traffic
+     * @param tlClient the TrafficLogger for the client traffic
+     * @throws IOException if the actual meta handler fails to handle 
+     *         the request
      */
     public void handleMeta (Connection con, HttpHeader header,
 			    TrafficLogger tlProxy, TrafficLogger tlClient)

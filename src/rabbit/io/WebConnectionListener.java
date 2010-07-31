@@ -16,6 +16,7 @@ public interface WebConnectionListener {
     void timeout ();
 
     /** Creating the connection failed. 
+     * @param e the cause of the failure
      */
     void failed (Exception e);
 }

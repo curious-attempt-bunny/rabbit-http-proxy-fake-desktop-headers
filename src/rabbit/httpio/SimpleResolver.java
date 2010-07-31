@@ -13,17 +13,21 @@ import rabbit.io.Resolver;
  */
 public class SimpleResolver implements Resolver {
     private final DNSHandler dnsHandler;
-    private final NioHandler tr;
+    private final NioHandler nio;
 
-    public SimpleResolver (NioHandler tr, DNSHandler dnsHandler) {
+    /** Create a new Resolver that does normal DNS lookups.
+     * @param nio the NioHandler to use for running background tasks
+     * @param dnsHandler the DNSHandler to use for the DNS lookup
+     */
+    public SimpleResolver (NioHandler nio, DNSHandler dnsHandler) {
 	this.dnsHandler = dnsHandler;
-	this.tr = tr;
+	this.nio = nio;
     }
 
     public void getInetAddress (URL url, InetAddressListener listener) {
 	String groupId = getClass ().getSimpleName ();
-	tr.runThreadTask (new ResolvRunner (dnsHandler, url, listener), 
-			  new DefaultTaskIdentifier (groupId, url.toString ()));
+	nio.runThreadTask (new ResolvRunner (dnsHandler, url, listener), 
+			   new DefaultTaskIdentifier (groupId, url.toString ()));
     }
 
     public int getConnectPort (int port) {

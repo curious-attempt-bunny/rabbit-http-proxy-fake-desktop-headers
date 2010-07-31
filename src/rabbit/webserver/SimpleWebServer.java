@@ -9,10 +9,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
+import org.khelekore.rnio.impl.Acceptor;
+import org.khelekore.rnio.impl.AcceptorListener;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
-import rabbit.httpio.Acceptor;
-import rabbit.httpio.AcceptorListener;
 import rabbit.io.BufferHandler;
 import rabbit.io.CachingBufferHandler;
 import rabbit.util.SimpleTrafficLogger;
@@ -30,6 +30,7 @@ public class SimpleWebServer {
     private final BufferHandler bufferHandler = new CachingBufferHandler ();
 
     /** Start a web server using the port and base dir given as arguments. 
+     * @param args the command line arguments
      */
     public static void main (String[] args) {
 	if (args.length != 2) {
@@ -52,7 +53,10 @@ public class SimpleWebServer {
 
     /** Start a web server listening on the given port and serving files 
      *  from the given path. The web server will not serve requests until
-     *  <code>start ()</code> is called
+     *  <code>start ()</code> is called.
+     * @param port the port to listen on
+     * @param path the directory to serve resources from
+     * @throws IOException if server setup fails
      */
     public SimpleWebServer (int port, String path) throws IOException {
 	this.port = port;
@@ -63,7 +67,7 @@ public class SimpleWebServer {
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
 	nioHandler = 
-	    new MultiSelectorNioHandler (es, sh, 4, 15000L);
+	    new MultiSelectorNioHandler (es, sh, 4, Long.valueOf (15000L));
     }
 
     /** Start serving requests. 
@@ -94,22 +98,30 @@ public class SimpleWebServer {
 	}
     }
 
-    /** Get the directory files are served from. */
+    /** Get the directory files are served from.
+     * @return the root directory for resources
+     */
     public File getBaseDir () {
 	return dir;
     }
 
-    /** Get the BufferHandler used by this web server. */
+    /** Get the BufferHandler used by this web server.
+     * @return the BufferHandler
+     */
     public BufferHandler getBufferHandler () {
 	return bufferHandler;
     }
 
-    /** Get the SelectorRunner used by this web server. */
+    /** Get the SelectorRunner used by this web server.
+     * @return the NioHandler in use
+     */
     public NioHandler getNioHandler () {
 	return nioHandler;
     }
 
-    /** Get the TrafficLogger used by this web server. */
+    /** Get the TrafficLogger used by this web server.
+     * @return the TrafficLogger in use
+     */
     public TrafficLogger getTrafficLogger () {
 	return trafficLogger;
     }

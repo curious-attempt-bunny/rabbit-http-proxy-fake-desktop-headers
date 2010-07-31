@@ -31,9 +31,10 @@ public class WebConnection implements Closeable {
 
     /** Create a new WebConnection to the given InetAddress and port.
      * @param address the computer to connect to.
+     * @param binder the SocketBinder to use when creating the network socket
      * @param counter the Counter to used to collect statistics
      */
-    public WebConnection (Address address, SocketBinder binder, 
+    public WebConnection (Address address, SocketBinder binder,
 			  Counter counter) {
 	this.id = idCounter.getAndIncrement ();
 	this.address = address;
@@ -47,14 +48,20 @@ public class WebConnection implements Closeable {
 	return "WebConnection(id: " + id +
 	    ", address: "  + address +
 	    ", keepalive: " + keepalive +
-	    ", releasedAt: " + releasedAt + 
+	    ", releasedAt: " + releasedAt +
 	    ", local port: " + port + ")";
     }
 
+    /** Get the address that this connection is connected to
+     * @return the network address that the underlying socket is connected to
+     */
     public Address getAddress () {
 	return address;
     }
 
+    /** Get the actual SocketChannel that is used
+     * @return the network channel
+     */
     public SocketChannel getChannel () {
 	return channel;
     }
@@ -64,6 +71,12 @@ public class WebConnection implements Closeable {
 	channel.close ();
     }
 
+    /** Try to establish the network connection.
+     * @param nioHandler the NioHandler to use for network tasks
+     * @param wcl the listener that will be notified when the connection
+     *        has been extablished.
+     * @throws IOException if the network operations fail
+     */
     public void connect (NioHandler nioHandler, WebConnectionListener wcl)
 	throws IOException {
 	// if we are a keepalive connection then just say so..
@@ -72,7 +85,7 @@ public class WebConnection implements Closeable {
 	} else {
 	    // ok, open the connection....
 	    channel = SocketChannel.open ();
-	    channel.socket ().bind (new InetSocketAddress (binder.getInetAddress (), 
+	    channel.socket ().bind (new InetSocketAddress (binder.getInetAddress (),
 							   binder.getPort ()));
 	    channel.configureBlocking (false);
 	    SocketAddress addr =
@@ -140,8 +153,8 @@ public class WebConnection implements Closeable {
 		close ();
 		nioHandler.close (channel);
 	    } catch (IOException e) {
-		logger.log (Level.WARNING, 
-			    "Failed to close down WebConnection", 
+		logger.log (Level.WARNING,
+			    "Failed to close down WebConnection",
 			    e);
 	    }
 	}
@@ -174,18 +187,21 @@ public class WebConnection implements Closeable {
     }
 
     /** Get the time that this WebConnection was released.
+     * @return the time this WebConnection was last released.
      */
     public long getReleasedAt () {
 	return releasedAt;
     }
 
     /** Mark this WebConnection for pipelining.
+     * @param b if true this connection may be used for pipelining.
      */
     public void setMayPipeline (boolean b) {
 	mayPipeline = b;
     }
 
     /** Check if this WebConnection may be used for pipelining.
+     * @return true if this connection may be used for pipelining
      */
     public boolean mayPipeline () {
 	return mayPipeline;

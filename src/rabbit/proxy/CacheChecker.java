@@ -71,6 +71,7 @@ class CacheChecker {
     }
 
     /** Check if we can use the cached entry.
+     * @param con the Connection handling the request
      * @param header the reques.
      * @param rh the RequestHandler
      * @return true if the request was handled, false otherwise.

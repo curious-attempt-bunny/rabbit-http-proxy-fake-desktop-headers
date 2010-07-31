@@ -12,6 +12,11 @@ import rabbit.io.Resolver;
 public class ProxiedProxyChain implements ProxyChain {
     private final Resolver resolver;
 
+    /** Create a new ProxyChain that always will proxy to the given address
+     * @param proxy the hostname to connect to
+     * @param port the port to connect to
+     * @param proxyAuth the http basic proxy authentication token
+     */
     public ProxiedProxyChain (InetAddress proxy, int port, String proxyAuth) {
 	resolver = new ProxyResolver (proxy, port, proxyAuth);
     }

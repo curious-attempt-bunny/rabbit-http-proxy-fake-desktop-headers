@@ -13,6 +13,10 @@ import rabbit.io.Resolver;
 public class SimpleProxyChain implements ProxyChain {
     private final Resolver resolver;
 
+    /** Create a new Proxy chain that always uses direct connections.
+     * @param nio the NioHandler to use for running background tasks
+     * @param dnsHandler the DNSHandler to use for DNS lookups
+     */
     public SimpleProxyChain (NioHandler nio, DNSHandler dnsHandler) {
 	resolver = new SimpleResolver (nio, dnsHandler);
     }

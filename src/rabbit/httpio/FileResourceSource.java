@@ -31,12 +31,24 @@ public class FileResourceSource implements ResourceSource {
     private final Logger logger = 
 	Logger.getLogger (getClass ().getName ());
     
+    /** Create a new FileResourceSource using the given filename
+     * @param filename the file for this resource
+     * @param nioHandler the NioHandler to use for background tasks
+     * @param bufHandler the BufferHandler to use when reading and writing
+     * @throws IOException if the file is a valid file
+     */
     public FileResourceSource (String filename, NioHandler nioHandler, 
 			       BufferHandler bufHandler) 
 	throws IOException {
 	this (new File (filename), nioHandler, bufHandler);
     }
 
+    /** Create a new FileResourceSource using the given filename
+     * @param f the resource
+     * @param nioHandler the NioHandler to use for background tasks
+     * @param bufHandler the BufferHandler to use when reading and writing
+     * @throws IOException if the file is a valid file
+     */
     public FileResourceSource (File f, NioHandler nioHandler, 
 			       BufferHandler bufHandler) 
 	throws IOException {

@@ -18,12 +18,12 @@ class HttpHeaderFilterer {
     private final List<HttpFilter> httpOutFilters;
     
     public HttpHeaderFilterer (String in, String out, 
-			       Config config, HttpProxy proxy) {
+			       Config config) {
 	httpInFilters = new ArrayList<HttpFilter> ();
-	loadHttpFilters (in, httpInFilters, config, proxy);
+	loadHttpFilters (in, httpInFilters, config);
 	
 	httpOutFilters = new ArrayList<HttpFilter> ();
-	loadHttpFilters (out, httpOutFilters, config, proxy);
+	loadHttpFilters (out, httpOutFilters, config);
     }
 
     /** Runs all input filters on the given header. 
@@ -65,7 +65,7 @@ class HttpHeaderFilterer {
     }
 
     private void loadHttpFilters (String filters, List<HttpFilter> ls,
-				  Config config, HttpProxy proxy) {
+				  Config config) {
 	String[] filterArray = filters.split (",");
         for (String className : filterArray) {
             Logger log = Logger.getLogger(getClass().getName());

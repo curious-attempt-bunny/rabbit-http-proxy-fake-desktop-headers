@@ -5,7 +5,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rabbit.httpio.AcceptorListener;
+import org.khelekore.rnio.impl.AcceptorListener;
 import rabbit.io.BufferHandler;
 
 /** An acceptor handler that creates proxy client connection
@@ -18,6 +18,10 @@ public class ProxyConnectionAcceptor implements AcceptorListener {
     private final Logger logger = Logger.getLogger (getClass ().getName ());
     private final AtomicLong counter = new AtomicLong ();
 
+    /** Create a new ProxyConnectionAcceptor.
+     * @param id the connection group id
+     * @param proxy the HttpProxy to accept connections for
+     */
     public ProxyConnectionAcceptor (int id, HttpProxy proxy) {
 	logger.fine ("ProxyConnectionAcceptor created: " + id);
 	this.id = id;

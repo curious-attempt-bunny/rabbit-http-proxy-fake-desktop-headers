@@ -48,7 +48,8 @@ public class ProxyLogger implements ConnectionLogger {
 			       gc.get (Calendar.MILLISECOND));
     }
 
-    /** Get the distance to GMT in millis
+    /** Get the distance to GMT in millis.
+     * @return the time offset
      */
     public long getOffset () {
 	return offset;
@@ -84,6 +85,10 @@ public class ProxyLogger implements ConnectionLogger {
 	return ret;
     }
 
+    /** Configure this logger from the given properties
+     * @param config the properties to use for configuration.
+     * @throws IOException if logging setup fails
+     */
     public void setup (SProperties config) throws IOException {
 	String sysLogging =
 	    System.getProperty ("java.util.logging.config.file");

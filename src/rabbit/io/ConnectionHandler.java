@@ -51,6 +51,11 @@ public class ConnectionHandler {
     // the socket binder
     private SocketBinder socketBinder = new DefaultBinder ();
 
+    /** Create a new ConnectionHandler.
+     * @param counter the Counter to update with statistics
+     * @param proxyChain the ProxyChain to use when doing dns lookups
+     * @param nioHandler the NioHandler to use for network and background tasks
+     */
     public ConnectionHandler (Counter counter, ProxyChain proxyChain,
 			      NioHandler nioHandler) {
 	this.counter = counter;
@@ -75,8 +80,20 @@ public class ConnectionHandler {
 	return keepaliveTime;
     }
 
+    /** Get a copy of the current connections.
+     * @return the current connections
+     */
     public Map<Address, List<WebConnection>> getActiveConnections () {
-	return Collections.unmodifiableMap (activeConnections);
+	Map<Address, List<WebConnection>> ret =
+	    new HashMap<Address, List<WebConnection>> ();
+	synchronized (activeConnections) {
+	    for (Map.Entry<Address, List<WebConnection>> me : 
+		     activeConnections.entrySet ()) {
+		ret.put (me.getKey (), 
+			 Collections.unmodifiableList (me.getValue ()));
+	    }
+	}
+	return ret;
     }
 
     /** Get a WebConnection for the given header.
@@ -295,7 +312,10 @@ public class ConnectionHandler {
 		wc.setMayPipeline (true);
 	}
     }
-
+    
+    /** Configure this ConnectionHandler using the given properties.
+     * @param config the properties to read the configuration from
+     */
     public void setup (SProperties config) {
 	if (config == null)
 	    return;
