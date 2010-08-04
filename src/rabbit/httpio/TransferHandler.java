@@ -24,6 +24,15 @@ public class TransferHandler implements Runnable {
     private long pos = 0; 
     private long count;
 
+    /** Create a new TransferHandler
+     * @param nioHandler the NioHandler to use for network and background tasks
+     * @param t the resource to transfer
+     * @param channel the Channel to transfer the resource to
+     * @param tlFrom the network statistics for the source
+     * @param tlTo the network statistics for the sink
+     * @param listener the listener that will be notified when the transfer has
+     *        completed
+     */
     public TransferHandler (NioHandler nioHandler, Transferable t, 
 			    SocketChannel channel, 
 			    TrafficLogger tlFrom, TrafficLogger tlTo, 
@@ -37,6 +46,8 @@ public class TransferHandler implements Runnable {
 	count = t.length ();
     }
 
+    /** Start the data transfer. 
+     */
     public void transfer () {
 	String groupId = getClass ().getSimpleName ();
 	String desc = "Transferable: " + t + ", chanel: " + channel + 

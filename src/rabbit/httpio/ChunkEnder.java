@@ -15,6 +15,13 @@ public class ChunkEnder {
     private static final byte[] CHUNK_ENDING = 
     new byte[] {'0', '\r', '\n', '\r', '\n'};
 
+    /** Send the chunk ending block.
+     * @param channel the Channel to send the chunk ender to
+     * @param nioHandler the NioHandler to use for network operations
+     * @param tl the TrafficLogger to update with network statistics
+     * @param bsl the listener that will be notified when the sending is
+     *        complete
+     */
     public void sendChunkEnding (SocketChannel channel, NioHandler nioHandler,
 				 TrafficLogger tl, BlockSentListener bsl) {
 	ByteBuffer bb = ByteBuffer.wrap (CHUNK_ENDING);

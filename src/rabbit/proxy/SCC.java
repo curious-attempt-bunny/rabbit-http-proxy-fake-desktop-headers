@@ -18,6 +18,11 @@ public class SCC {
     private final HttpHeader header;
     private final RequestHandler rh;
 
+    /** Create a new SCC, a helper that sets up resources from the cache.
+     * @param con the Connection handling the request
+     * @param header the request header
+     * @param rh the RequestHandler that will be filled in.
+     */
     public SCC (Connection con, HttpHeader header, 
 		RequestHandler rh) {
 	this.con = con;
@@ -27,6 +32,7 @@ public class SCC {
 
     /** 
      * @return null if everything looks ok, non-null on an errornous request.
+     * @throws IOException if the cached resource can not be read
      */
     public HttpHeader establish () throws IOException {
 	String ifRange = header.getHeader ("If-Range");

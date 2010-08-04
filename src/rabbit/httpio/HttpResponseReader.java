@@ -24,6 +24,19 @@ public class HttpResponseReader
     private final HttpResponseListener listener;
     private final HttpHeaderSender sender;
 
+    /** Create a new HttpResponseReader.
+     * @param channel the Channel to the client
+     * @param nioHandler the NioHandler to use for network and background tasks
+     * @param tl the network statistics gatherer
+     * @param bufHandler the BufferHandler to use
+     * @param header the request to send
+     * @param fullURI if true the request will have a full uri instead of just
+     *        a relative one
+     * @param strictHttp if true then use strict http
+     * @param listener the listener that will be notified when the response has
+     *        been read.
+     * @throws IOException if the request can not be sent
+     */
     public HttpResponseReader (SocketChannel channel, NioHandler nioHandler, 
 			       TrafficLogger tl, BufferHandler bufHandler, 
 			       HttpHeader header, boolean fullURI, 
@@ -40,6 +53,8 @@ public class HttpResponseReader
 				       header, fullURI, this);
     }
 
+    /** Start the process of sending the header and reading the response.
+     */
     public void sendRequestAndWaitForResponse () {
 	sender.sendHeader ();
     }

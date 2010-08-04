@@ -53,6 +53,7 @@ class StandardResponseHeaders implements HttpGenerator {
     }
 
     /** Get a new HttpHeader initialized with some data.
+     * @param sc the StatusCode to get a header for
      * @return a new HttpHeader.
      */
     public HttpHeader getHeader (StatusCode sc) {

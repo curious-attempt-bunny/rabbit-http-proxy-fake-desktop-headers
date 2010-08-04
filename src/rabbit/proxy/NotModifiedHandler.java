@@ -10,7 +10,10 @@ import rabbit.http.HttpHeader;
 class NotModifiedHandler {
     /** Check if the request allows us to use a "304 Not modified" response.
      * @param in the request being made.
+     * @param httpGenerator the HttpGenerator to use when creating the
+     *        response headers
      * @param rh the RequestHandler for this request
+     * @return the response header or null
      */
     public HttpHeader is304 (HttpHeader in, HttpGenerator httpGenerator,
 			     RequestHandler rh) {

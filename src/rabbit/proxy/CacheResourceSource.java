@@ -13,6 +13,15 @@ import rabbit.io.BufferHandler;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class CacheResourceSource extends FileResourceSource {
+    
+    /** Create a new CacheResourceSource.
+     * @param cache the Cache that has the cached resource
+     * @param entry the CacheEntry for the resource
+     * @param tr the NioHandler to use for network and background tasks
+     *        when serving this resource
+     * @param bufHandler the BufferHandler to use for this resource
+     * @throws IOException if the cached resource is not available
+     */
     public CacheResourceSource (Cache<HttpHeader, HttpHeader> cache,
 				CacheEntry<HttpHeader, HttpHeader> entry, 
 				NioHandler tr, BufferHandler bufHandler) 

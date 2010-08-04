@@ -29,6 +29,16 @@ public class RandomCacheResourceSource extends CacheResourceSource {
     private enum State { SEND_HEADER, SEND_DATA }
     private State state = State.SEND_HEADER;
 
+    /** Create a new ResourceSource that will get a list of ranges from a
+     *  cached resource.
+     * @param cache the Cache holding the resource
+     * @param rh the RequestHandler for the request
+     * @param tr the NioHandler to use for network and background tasks
+     * @param bufHandler the BufferHandler to use when serving the resource
+     * @param ranges the wanted ranges
+     * @param totalSize the total size of the wanted ranges
+     * @throws IOException if the cached resource can not be read
+     */
     public RandomCacheResourceSource (Cache<HttpHeader, HttpHeader> cache,
 				      RequestHandler rh,
 				      NioHandler tr, BufferHandler bufHandler,
@@ -59,6 +69,9 @@ public class RandomCacheResourceSource extends CacheResourceSource {
 
     /** Fill the buffer with data for the current range. 
      *  If the range is fully handled then currentRange will be incremented.
+     * @param buffer the ByteBuffer to fill with data
+     * @param r the range to fill data for
+     * @throws IOException if reading the resource fails
      */
     private void updateBufferAndPosition (ByteBuffer buffer, Range r) 
 	throws IOException {
@@ -115,8 +128,10 @@ public class RandomCacheResourceSource extends CacheResourceSource {
     }
 
     /** Write the current MultipartHeader to the buffer. 
+     * @param buffer the ByteBuffer to write the multipart header to
+     * @throws IOException if the header can not be converted to US-ASCII
      */
-    private void writeHeader (ByteBuffer buffer) {
+    private void writeHeader (ByteBuffer buffer) throws IOException {
 	MultipartHeader h = 
 	    new MultipartHeader (Header.CRLF + "--" + separator);
 	Range r = ranges.get (currentRange);
@@ -124,7 +139,7 @@ public class RandomCacheResourceSource extends CacheResourceSource {
 	    h.setHeader ("Content-Type", contentType);
 	h.setHeader ("Content-Range", "bytes " + r.getStart () + "-" + 
 		     r.getEnd () + "/" + totalSize);
-	buffer.put (h.toString ().getBytes ());
+	buffer.put (h.toString ().getBytes ("US-ASCII"));
     }
     
     private boolean getNextBuffer (ByteBuffer buffer) 

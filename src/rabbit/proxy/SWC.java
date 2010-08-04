@@ -41,6 +41,14 @@ public class SWC implements HttpHeaderSentListener,
     private Exception lastException;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
+    /** Create a new connection establisher.
+     * @param con the Connection handling the request
+     * @param resolver the dns resolver
+     * @param header the actual request
+     * @param tlh the traffic statistics gatherer
+     * @param crh the handler for client data
+     * @param rh the RequestHandler to use
+     */
     public SWC (Connection con, Resolver resolver, HttpHeader header,
 		TrafficLoggerHandler tlh, ClientResourceHandler crh,
 		RequestHandler rh) {
@@ -53,6 +61,8 @@ public class SWC implements HttpHeaderSentListener,
 	method = header.getMethod ().trim ();
     }
 
+    /** Try to establish a web connection.
+     */
     public void establish () {
 	attempts++;
 	con.getCounter ().inc ("Trying to establish a WebConnection: " +
@@ -94,6 +104,9 @@ public class SWC implements HttpHeaderSentListener,
 	}
     }
 
+    /** Check if the full uri should be included in the request.
+     * @return true if the upstream server need the full uri in the request
+     */
     public boolean useFullURI () {
 	return resolver.isProxyConnected ();
     }
@@ -209,6 +222,7 @@ public class SWC implements HttpHeaderSentListener,
     }
 
     /** Calculate the age of the resource, needs ntp to be accurate.
+     * @param rh the RequestHandler holding the headers
      */
     private void setAge (RequestHandler rh) {
 	long now = System.currentTimeMillis ();

@@ -30,6 +30,17 @@ public class WebConnectionResourceSource
     private Long timeout;
     private int fullReads = 0;
     
+    /** Create a new ConnectionResourceSource that gets the data from the network.
+     * @param con the Connection handling the request
+     * @param nioHandler the NioHandler to use for network and background tasks
+     * @param wc the WebConection connected to the upstream server
+     * @param bufHandle the BufferHandle to use
+     * @param tl the TrafficLogger to use for network statistics
+     * @param isChunked flag indicating if the upstream data is chunked or not
+     * @param dataSize the size of the data, may be -1 if size is unknown
+     * @param strictHttp if true strict http will be used when communcating
+     *        with the upstream server
+     */
     public WebConnectionResourceSource (ConnectionHandler con, 
 					NioHandler nioHandler, WebConnection wc, 
 					BufferHandle bufHandle, 

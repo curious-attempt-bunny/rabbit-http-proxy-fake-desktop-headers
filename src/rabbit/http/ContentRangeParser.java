@@ -43,17 +43,23 @@ public class ContentRangeParser {
 	}
     }
 
-    /** Check if the content range was valid. */
+    /** Check if the content range was valid. 
+     * @return true if the parsed content range was valid
+     */
     public boolean isValid () {
 	return valid;
     }
 
-    /** Get the start index */
+    /** Get the start index
+     * @return the start index of the range
+     */
     public long getStart () {
 	return start;
     }
     
-    /** Get the end index. */
+    /** Get the end index.
+     * @return the end index of the range
+     */
     public long getEnd () {
 	return end;
     }

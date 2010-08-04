@@ -43,6 +43,7 @@ public class Config {
 
     /** Create a Config for the specified file
      * @param filename the File we read the config from
+     * @throws IOException if the given file can not be read
      */
     public Config (String filename) throws IOException {
 	BufferedReader br = new BufferedReader (new FileReader (filename));
@@ -51,6 +52,7 @@ public class Config {
 
     /** Create a Config for the specified file
      * @param file the File we read the config from
+     * @throws IOException if the given file can not be read
      */
     public Config (File file) throws IOException {
 	BufferedReader br = new BufferedReader (new FileReader (file));
@@ -59,6 +61,7 @@ public class Config {
 
     /** Create a Config by reading it from a stream.
      * @param is the stream to read the config from.
+     * @throws IOException if the given input stream can not be read
      */
     public Config (InputStream is) throws IOException {
 	BufferedReader br = new BufferedReader (new InputStreamReader (is));
@@ -67,6 +70,7 @@ public class Config {
 
     /** Create a Config by reading it from a reader.
      * @param reader the Reader to read the config from.
+     * @throws IOException if the given Reader can not be read
      */
     public Config (Reader reader) throws IOException {
 	BufferedReader br = new BufferedReader (reader);
@@ -75,6 +79,7 @@ public class Config {
 
     /** read in a Config from a reader.
      * @param br the reader that has the Config.
+     * @throws IOException if the given Reader can not be read
      */
     private void readConfig (BufferedReader br) throws IOException {
 	String line;
@@ -192,6 +197,7 @@ public class Config {
     }
 
     /** save the config to a OutputStream
+     * @param os the OutputStream to write to
      */
     public void save(OutputStream os) {
 	PrintWriter dos = new PrintWriter (os);
