@@ -25,6 +25,7 @@ import rabbit.util.SimpleUserHandler;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class HttpBaseFilter implements HttpFilter {
+    /** Constant for requests that want an unfiltered resource. */
     public static final String NOPROXY = "http://noproxy.";
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
@@ -124,6 +125,7 @@ public class HttpBaseFilter implements HttpFilter {
      * @param requri the requested resource.
      * @param header the actual request.
      * @param con the Connection.
+     * @return null if the request is allowed or an error response header
      */
     private HttpHeader handleURLSetup (String requri, HttpHeader header,
 				       Connection con) {
@@ -473,6 +475,11 @@ public class HttpBaseFilter implements HttpFilter {
 
 	return null;
     }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }    
 
     public void setup (SProperties properties) {
 	removes.clear ();

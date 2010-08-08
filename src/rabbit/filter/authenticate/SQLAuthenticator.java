@@ -40,6 +40,10 @@ public class SQLAuthenticator implements Authenticator {
     private final AtomicReference<Connection> db =
 	new AtomicReference<Connection> (null);
 
+    /** Create a new SQLAuthenticator that will be configured using
+     *  the given properties.
+     * @param props the configuration for this authenticator
+     */
     public SQLAuthenticator (SProperties props) {
 	String driver = props.getProperty ("driver");
 	try {

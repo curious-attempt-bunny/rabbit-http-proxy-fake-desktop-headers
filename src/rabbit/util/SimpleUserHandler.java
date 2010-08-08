@@ -23,9 +23,6 @@ public class SimpleUserHandler {
     private final Logger logger =
 	Logger.getLogger (getClass ().getName ());
 
-    public SimpleUserHandler () {
-    }
-
     /** Set the file to use for users, will read the files.
      *  Will discard any previous loaded users.
      * @param userFile the filename to read the users from.
@@ -50,6 +47,8 @@ public class SimpleUserHandler {
 
     /** Load the users from the given Reader.
      * @param r the Reader with the users.
+     * @return a Map with usernames and passwords
+     * @throws IOException if reading the users fail
      */
     public Map<String, String> loadUsers (Reader r)
 	throws IOException {
@@ -69,6 +68,7 @@ public class SimpleUserHandler {
 
     /** Saves the users from the given Reader.
      * @param r the Reader with the users.
+     * @throws IOException if reading the users fail if writing users fails
      */
     public void saveUsers (Reader r) throws IOException {
 	if (userFile == null)
@@ -89,12 +89,14 @@ public class SimpleUserHandler {
     }
 
     /** Return the hash of users.
+     * @return the Map of usernames to passwords
      */
     public Map<String, String> getUsers () {
 	return users;
     }
 
-    /** Return the hash of users.
+    /** Set the usernames and passwords to use for authentication.
+     * @param users the new set of usernames and passwords
      */
     public void setUsers (Map<String, String> users) {
 	this.users = users;

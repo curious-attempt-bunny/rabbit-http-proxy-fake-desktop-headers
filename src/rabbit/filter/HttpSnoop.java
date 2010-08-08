@@ -16,12 +16,6 @@ public class HttpSnoop implements HttpFilter {
     private enum SnoopMode { NORMAL, REQUEST_LINE, FULL }
     private SnoopMode mode;
 
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     * @param socket the SocketChannel that made the request.
-     * @param header the actual request made.
-     * @param con the Connection handling the request.
-     * @return This method always returns null.
-     */
     public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
 	if (mode == SnoopMode.REQUEST_LINE) {
@@ -61,12 +55,6 @@ public class HttpSnoop implements HttpFilter {
 	}
     }
 
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     * @param socket the Socket that made the request.
-     * @param header the actual request made.
-     * @param con the Connection handling the request.
-     * @return This method always returns null.
-     */
     public HttpHeader doHttpOutFiltering (SocketChannel socket,
 					  HttpHeader header, Connection con) {
 	if (mode == SnoopMode.REQUEST_LINE) {
@@ -75,6 +63,16 @@ public class HttpSnoop implements HttpFilter {
 	} else {
 	    System.out.print (con.getRequestLine () + "\n" +
 			      header.toString ());
+	}
+	return null;
+    }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	if (mode == SnoopMode.REQUEST_LINE) {
+	    System.out.println (con.getRequestLine ());
+	} else {
+	    System.out.print (header.toString ());
 	}
 	return null;
     }

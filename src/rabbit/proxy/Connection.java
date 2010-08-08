@@ -744,7 +744,15 @@ public class Connection {
 	status = "Handling ssl request";
 	SSLHandler sslh = new SSLHandler (proxy, this, request, tlh);
 	if (sslh.isAllowed ()) {
-	    sslh.handle (channel, bh);
+	    HttpHeaderFilterer filterer = proxy.getHttpHeaderFilterer ();
+	    HttpHeader badresponse = filterer.filterConnect (this, channel, request);
+	    if (badresponse != null) {
+		statusCode = badresponse.getStatusCode ();
+		// Send response and close
+		sendAndClose (badresponse);
+	    } else {
+		sslh.handle (channel, bh);
+	    }
 	} else {
 	    HttpHeader badresponse = responseHandler.get403 ();
 	    sendAndClose (badresponse);

@@ -17,13 +17,6 @@ public class ReverseProxy implements HttpFilter {
     private Pattern deny = null;
     private boolean allowMeta = false;
 
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     * @param socket the SocketChannel that made the request.
-     * @param header the actual request made.
-     * @param con the Connection handling the request.
-     * @return null if everything is fine or a HttpHeader 
-     *         describing the error (like a 403).
-     */
     public HttpHeader doHttpInFiltering (SocketChannel socket, 
 					 HttpHeader header, Connection con) {
 	String s = header.getRequestURI ();
@@ -46,14 +39,12 @@ public class ReverseProxy implements HttpFilter {
 	return null;
     }
     
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     * @param socket the SocketChannel that made the request.
-     * @param header the actual request made.
-     * @param con the Connection handling the request.
-     * @return null if everything is fine or a HttpHeader 
-     *         describing the error (like a 403).
-     */
     public HttpHeader doHttpOutFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
 					  HttpHeader header, Connection con) {
 	return null;
     }

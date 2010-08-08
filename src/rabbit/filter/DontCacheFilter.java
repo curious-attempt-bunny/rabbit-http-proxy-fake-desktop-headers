@@ -32,11 +32,6 @@ public class DontCacheFilter implements HttpFilter {
     private Pattern dontCacheMime;
     private Pattern onlyCacheMime;
     
-    /** Create a new DontCacheFilter.
-     */
-    public DontCacheFilter () {
-    }
-
     /** Test if a socket/header combination is valid or return a new HttpHeader.
      *  If the request matches a certain criteria dont cache it. This filter is
      *  good for pages that done send cache-control headers correctly. 
@@ -74,6 +69,11 @@ public class DontCacheFilter implements HttpFilter {
 	onlyCache (con, onlyCacheMime, mimetype);
 	return null;
     }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }    
 
     /** If the string toCheck match the given pattern, 
      *  then do not cache this resource.

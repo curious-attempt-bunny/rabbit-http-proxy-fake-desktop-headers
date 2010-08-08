@@ -33,13 +33,12 @@ public class ProxyAuth implements HttpFilter {
     private final Map<String, AuthUserInfo> cache =
 	new ConcurrentHashMap<String, AuthUserInfo> ();
 
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     *  Check that the user has been authenticate..
+    /** Check that the user has been authenticated..
      * @param socket the SocketChannel that made the request.
      * @param header the actual request made.
      * @param con the Connection handling the request.
      * @return null if everything is fine or a HttpHeader
-     *         describing the error (like a 403).
+     *         describing the error (a 407).
      */
     public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
@@ -56,7 +55,7 @@ public class ProxyAuth implements HttpFilter {
 	if (hasValidCache (token, ce)) {
 	    if (oneIpOnly) {
 		InetAddress ia = channel.socket ().getInetAddress ();
-		if (!ce.correctSocketAddress (ia)) 
+		if (!ce.correctSocketAddress (ia))
 		    return getError (header, con);
 	    }
 	    return null;
@@ -76,7 +75,7 @@ public class ProxyAuth implements HttpFilter {
     }
 
     private boolean hasValidCache (String token, AuthUserInfo ce) {
-        return ce != null && ce.stillValid() && ce.correctToken(token);
+	return ce != null && ce.stillValid() && ce.correctToken(token);
     }
 
     private void storeInCache (String user, String token,
@@ -100,14 +99,12 @@ public class ProxyAuth implements HttpFilter {
 	}
     }
 
-    /** test if a socket/header combination is valid or return a new HttpHeader.
-     *  does nothing.
-     * @param socket the SocketChannel that made the request.
-     * @param header the actual request made.
-     * @param con the Connection handling the request.
-     * @return This method always returns null.
-     */
     public HttpHeader doHttpOutFiltering (SocketChannel socket,
+					  HttpHeader header, Connection con) {
+	return null;
+    }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket,
 					  HttpHeader header, Connection con) {
 	return null;
     }
@@ -119,9 +116,9 @@ public class ProxyAuth implements HttpFilter {
 	String ct = properties.getProperty ("cachetime", "0");
 	cacheTime = Integer.parseInt (ct);
 	String ra = properties.getProperty ("one_ip_only", "true");
-	oneIpOnly = Boolean.valueOf (ra);
+	oneIpOnly = Boolean.parseBoolean (ra);
 	String allow = properties.getProperty ("allow_without_auth");
-	if (allow != null) 
+	if (allow != null)
 	    noAuthPattern = Pattern.compile (allow);
 	String authType = properties.getProperty ("authenticator", "plain");
 	if ("plain".equalsIgnoreCase (authType)) {

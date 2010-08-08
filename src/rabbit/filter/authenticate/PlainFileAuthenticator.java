@@ -12,7 +12,11 @@ import rabbit.util.SimpleUserHandler;
  */
 public class PlainFileAuthenticator implements Authenticator {
     private final SimpleUserHandler userHandler;
-    
+
+    /** Create a new PlainFileAuthenticator that will be configured using
+     *  the given properties.
+     * @param props the configuration for this authenticator
+     */
     public PlainFileAuthenticator (SProperties props) {
 	String userFile = props.getProperty ("userfile", "conf/allowed");
 	userHandler = new SimpleUserHandler ();

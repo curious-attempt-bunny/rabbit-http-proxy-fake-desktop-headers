@@ -21,11 +21,6 @@ public class DontFilterFilter implements HttpFilter {
     private Pattern pattern;
     private Pattern uap;
 
-    /** Create a new Filter.
-     */
-    public DontFilterFilter () {
-    }
-    
     /** Test if a socket/header combination is valid or return a new HttpHeader.
      *  If the request matches a certain criteria dont filter it. This filter 
      *  is good for pages with broken HTML that would wreck the HTML parser. 
@@ -62,6 +57,11 @@ public class DontFilterFilter implements HttpFilter {
 					  HttpHeader header, Connection con) {
 	return null;
     }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }    
 
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.

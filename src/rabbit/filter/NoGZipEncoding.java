@@ -55,9 +55,13 @@ public class NoGZipEncoding implements HttpFilter {
 
     public HttpHeader doHttpOutFiltering (SocketChannel socket, 
 					  HttpHeader header, Connection con) {
-	// nothing
 	return null;
     }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }    
 
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.

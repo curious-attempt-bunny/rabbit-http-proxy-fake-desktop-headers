@@ -454,7 +454,8 @@ public class HttpProxy {
 
 	String in = config.getProperty ("Filters", "httpinfilters","");
 	String out = config.getProperty ("Filters", "httpoutfilters","");
-	httpHeaderFilterer = new HttpHeaderFilterer (in, out, config);
+	String connect = config.getProperty ("Filters", "conectfilters","");
+	httpHeaderFilterer = new HttpHeaderFilterer (in, out, connect, config);
     }
 
 

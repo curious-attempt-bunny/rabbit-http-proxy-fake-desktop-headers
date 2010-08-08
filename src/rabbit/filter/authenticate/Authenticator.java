@@ -7,7 +7,11 @@ import rabbit.proxy.Connection;
  */
 public interface Authenticator {
 
-    /** Find the token used to authenticate */
+    /** Find the token used to authenticate
+     * @param header the request
+     * @param con the Connection handling the request
+     * @return the authentication token
+     */
     String getToken (HttpHeader header, Connection con);
 
     /** Try to authenticate the user.

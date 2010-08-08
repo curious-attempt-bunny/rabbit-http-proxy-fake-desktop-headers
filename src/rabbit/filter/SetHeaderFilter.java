@@ -24,19 +24,25 @@ public class SetHeaderFilter implements HttpFilter {
 	    }
 	}
     }
-    
-    public HttpHeader doHttpInFiltering (SocketChannel socket, 
-					 HttpHeader header, 
+
+    public HttpHeader doHttpInFiltering (SocketChannel socket,
+					 HttpHeader header,
 					 Connection con) {
 	addHeaders (header, "request.");
 	return null;
-    }    
+    }
 
-    public HttpHeader doHttpOutFiltering (SocketChannel socket, 
-					  HttpHeader header, 
+    public HttpHeader doHttpOutFiltering (SocketChannel socket,
+					  HttpHeader header,
 					  Connection con) {
 
 	addHeaders (header, "response.");
+	return null;
+    }
+
+    public HttpHeader doConnectFiltering (SocketChannel socket,
+					  HttpHeader header, Connection con) {
+	addHeaders (header, "connect.");
 	return null;
     }
 

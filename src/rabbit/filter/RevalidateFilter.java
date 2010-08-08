@@ -34,13 +34,17 @@ public class RevalidateFilter implements HttpFilter {
     public HttpHeader doHttpOutFiltering (SocketChannel socket, 
 					  HttpHeader header, 
 					  Connection con) {
-	// nothing to do
 	return null;
     }
 
+    public HttpHeader doConnectFiltering (SocketChannel socket, 
+					  HttpHeader header, Connection con) {
+	return null;
+    }    
+
     public void setup (SProperties properties) {
 	String always = properties.getProperty ("alwaysrevalidate", "false");
-	alwaysRevalidate = Boolean.valueOf (always);
+	alwaysRevalidate = Boolean.parseBoolean (always);
 	if (!alwaysRevalidate) {
 	    String mustRevalidate = properties.getProperty ("revalidate");
 	    if (mustRevalidate == null) {
