@@ -105,9 +105,12 @@ class HttpHeaderFilterer {
 
     private void loadHttpFilters (String filters, List<HttpFilter> ls,
 				  Config config) {
+	Logger log = Logger.getLogger(getClass().getName());
 	String[] filterArray = filters.split (",");
 	for (String className : filterArray) {
-	    Logger log = Logger.getLogger(getClass().getName());
+	    className = className.trim ();
+	    if (className.isEmpty ())
+		continue;
 	    try {
 		className = className.trim();
 		Class<? extends HttpFilter> cls =

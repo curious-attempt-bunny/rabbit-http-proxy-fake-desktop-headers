@@ -254,7 +254,7 @@ public class HttpBaseFilter implements HttpFilter {
 
     public HttpHeader doHttpInFiltering (SocketChannel socket,
 					 HttpHeader header, Connection con) {
-	// ok, no real header then dont do a thing.
+	// ok, no real header then don't do a thing.
 	if (header.isDot9Request ()) {
 	    con.setMayCache (false);
 	    con.setMayUseCache (false);
@@ -376,11 +376,8 @@ public class HttpBaseFilter implements HttpFilter {
 	    return headerr;
 
 	removeConnectionTokens (header);
-	int rsize = removes.size ();
-	for (int i = 0; i < rsize; i++) {
-	    String r = removes.get (i);
+	for (String r : removes)
 	    header.removeHeader (r);
-	}
 
 	ProxyChain proxyChain = con.getProxy ().getProxyChain ();
 	Resolver resolver = proxyChain.getResolver (requri);
@@ -500,5 +497,5 @@ public class HttpBaseFilter implements HttpFilter {
     public boolean isPublic (URL url) {
 	String file = url.getFile ();
         return file.startsWith ("/FileSender/public/");
-	}
+    }
 }
