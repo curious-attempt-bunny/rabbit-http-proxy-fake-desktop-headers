@@ -8,6 +8,8 @@ public class GZipPacker {
     private GZipPackState state;
     
     /** Create a gzip packer that sends events to the given listener. 
+     * @param listener the listener that will be notifiec when data has
+     *        been packed.
      */
     public GZipPacker (GZipPackListener listener) {
 	state = new HeaderWriter (listener);
