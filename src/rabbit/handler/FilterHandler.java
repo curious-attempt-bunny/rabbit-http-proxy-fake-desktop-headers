@@ -41,6 +41,7 @@ public class FilterHandler extends GZipHandler {
     private Iterator<ByteBuffer> sendBlocks = null;
 
     private GZipUnpacker gzu = null;
+    private GZListener gzListener = null;
 
     /** Create a new FilterHandler that is uninitialized. Normally this should
      *  only be used for the factory creation.
@@ -117,9 +118,11 @@ public class FilterHandler extends GZipHandler {
     private void setupRepacking (String ce) {
 	ce = ce.toLowerCase ();
 	if (ce.equals ("gzip")) {
-	    gzu = new GZipUnpacker (new GZListener (), false);
+	    gzListener = new GZListener ();
+	    gzu = new GZipUnpacker (gzListener, false);
 	} else if (ce.equals("deflate")) {
-	    gzu = new GZipUnpacker (new GZListener (), true);
+	    gzListener = new GZListener ();
+	    gzu = new GZipUnpacker (gzListener, true);
 	} else {
 	    getLogger ().warning ("Do not know how to handle encoding: " + ce);
 	}
@@ -152,13 +155,24 @@ public class FilterHandler extends GZipHandler {
     }
 
     private class GZListener implements GZipUnpackListener {
+	private boolean gotData = false;
 	private final byte[] buffer = new byte[4096];
 	public void unpacked (byte[] buf, int off, int len) {
+	    gotData = true;
 	    handleArray (buf, off, len);
+	}
+
+	public void clearDataFlag () {
+	    gotData = false;
+	}
+
+	public boolean gotData () {
+	    return gotData;
 	}
 
 	public void finished () {
 	    gzu = null;
+	    gzListener = null;
 	    finishData ();
 	}
 
@@ -214,9 +228,11 @@ public class FilterHandler extends GZipHandler {
 
     private void forwardArrayToHandler (byte[] arr, int off, int len) {
 	if (gzu != null) {
+	    gzListener.clearDataFlag ();
 	    gzu.setInput (arr, off, len);
-	    // if gzu generates any data block they will be sent and
-	    // any waitForData will be done by blockSent()
+	    // gzu may be null if we get into finished mode
+	    if (gzu != null && gzu.needsInput () && !gzListener.gotData ())
+		waitForData ();
 	} else {
 	    handleArray (arr, off, len);
 	}
