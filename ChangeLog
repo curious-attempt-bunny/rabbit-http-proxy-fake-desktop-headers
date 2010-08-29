@@ -1,5 +1,6 @@
 version 4.8 (20xx-yy-zz) Big javadoc update. Add support for filtering
-	of connect requests.
+	of connect requests. Fixed the problem where the log file got
+	filled with IllegalStateException when repack was on.
 
 version 4.7 (2010-07-25) Fixed the problem 401 and 407 responses when
 	using FileTemplateHttpGeneratorFactory. Added a proxy chain

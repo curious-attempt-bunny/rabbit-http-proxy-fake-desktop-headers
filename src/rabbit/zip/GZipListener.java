@@ -6,6 +6,7 @@ package rabbit.zip;
  */
 public interface GZipListener {
     /** Get the data buffer the listener wants the handled data in.
+     * @return the data buffer
      */
     byte[] getBuffer ();
 

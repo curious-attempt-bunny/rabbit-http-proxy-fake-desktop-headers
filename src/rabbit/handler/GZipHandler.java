@@ -25,6 +25,7 @@ public class GZipHandler extends BaseHandler {
     /** For creating the factory.
      */
     public GZipHandler () {
+	// empty
     }
 
     /** Create a new GZipHandler for the given request.
@@ -49,7 +50,7 @@ public class GZipHandler extends BaseHandler {
 
     protected void setupHandler () {
 	if (compress) {
-	    isCompressing = willCompress (request);
+	    isCompressing = willCompress ();
 	    if (isCompressing) {
 		response.removeHeader ("Content-Length");
 		response.setHeader ("Content-Encoding", "gzip");
@@ -61,7 +62,7 @@ public class GZipHandler extends BaseHandler {
 	}
     }
 
-    protected boolean willCompress (HttpHeader request) {
+    protected boolean willCompress () {
 	String ce = response.getHeader ("Content-Encoding");
 	if (ce == null)
 	    return true;

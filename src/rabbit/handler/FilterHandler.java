@@ -42,8 +42,11 @@ public class FilterHandler extends GZipHandler {
 
     private GZipUnpacker gzu = null;
 
-    // For creating the factory.
+    /** Create a new FilterHandler that is uninitialized. Normally this should
+     *  only be used for the factory creation.
+     */
     public FilterHandler () {
+	// empty
     }
 
     /** Create a new FilterHandler for the given request.
@@ -56,6 +59,9 @@ public class FilterHandler extends GZipHandler {
      * @param mayFilter May we filter this request?
      * @param size the size of the data beeing handled.
      * @param compress if we want this handler to compress or not.
+     * @param repack if true unpack, filter and possibly repack compressed
+     *        resources.
+     * @param filterClasses the filters to use
      */
     public FilterHandler (Connection con, TrafficLoggerHandler tlh,
 			  HttpHeader request, HttpHeader response,
@@ -141,8 +147,8 @@ public class FilterHandler extends GZipHandler {
     }
 
     @Override
-    protected boolean willCompress (HttpHeader request) {
-	return gzu != null || super.willCompress (request);
+    protected boolean willCompress () {
+	return gzu != null || super.willCompress ();
     }
 
     private class GZListener implements GZipUnpackListener {
@@ -209,9 +215,8 @@ public class FilterHandler extends GZipHandler {
     private void forwardArrayToHandler (byte[] arr, int off, int len) {
 	if (gzu != null) {
 	    gzu.setInput (arr, off, len);
-	    if ((sendBlocks == null || !sendBlocks.hasNext ()) &&
-		(gzu != null && gzu.needsInput ()))
-		waitForData ();
+	    // if gzu generates any data block they will be sent and
+	    // any waitForData will be done by blockSent()
 	} else {
 	    handleArray (arr, off, len);
 	}

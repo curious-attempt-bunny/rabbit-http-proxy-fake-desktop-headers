@@ -19,12 +19,16 @@ public class GZipUnpacker {
     }
 
     /** Check if the unpacker currently needs more data 
+     * @return true if more input data is currently needed
      */
     public boolean needsInput () {
 	return state.needsInput ();
     }
     
     /** Add more compressed data to the unpacker.
+     * @param buf the array holding the new data
+     * @param off the start offset of the data to use
+     * @param len the length of the data
      */
     public void setInput (byte[] buf, int off, int len) {
 	state.handleBuffer (this, buf, off, len);
