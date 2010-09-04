@@ -11,10 +11,10 @@ import rabbit.io.WebConnection;
 import rabbit.util.TrafficLogger;
 
 /** A resource source that gets the data from a WebConnection
- * 
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-public class WebConnectionResourceSource 
+public class WebConnectionResourceSource
     implements ResourceSource, ReadHandler, ChunkDataFeeder {
     private final ConnectionHandler con;
     private final NioHandler nioHandler;
@@ -24,12 +24,12 @@ public class WebConnectionResourceSource
     private BlockListener listener;
     private final boolean isChunked;
     private final long dataSize;
-    private long totalRead = 0;    
+    private long totalRead = 0;
     private int currentMark = 0;
     private ChunkHandler chunkHandler;
     private Long timeout;
     private int fullReads = 0;
-    
+
     /** Create a new ConnectionResourceSource that gets the data from the network.
      * @param con the Connection handling the request
      * @param nioHandler the NioHandler to use for network and background tasks
@@ -41,10 +41,10 @@ public class WebConnectionResourceSource
      * @param strictHttp if true strict http will be used when communcating
      *        with the upstream server
      */
-    public WebConnectionResourceSource (ConnectionHandler con, 
-					NioHandler nioHandler, WebConnection wc, 
-					BufferHandle bufHandle, 
-					TrafficLogger tl, boolean isChunked, 
+    public WebConnectionResourceSource (ConnectionHandler con,
+					NioHandler nioHandler, WebConnection wc,
+					BufferHandle bufHandle,
+					TrafficLogger tl, boolean isChunked,
 					long dataSize, boolean strictHttp) {
 	this.con = con;
 	this.nioHandler = nioHandler;
@@ -58,8 +58,8 @@ public class WebConnectionResourceSource
     }
 
     public String getDescription () {
-	return "WebConnectionResourceSource: length: "+ dataSize + 
-	    ", read: " + totalRead + ", chunked: " + isChunked + 
+	return "WebConnectionResourceSource: length: "+ dataSize +
+	    ", read: " + totalRead + ", chunked: " + isChunked +
 	    ", address: " + wc.getAddress ();
     }
 
@@ -74,21 +74,23 @@ public class WebConnectionResourceSource
 	return dataSize;
     }
 
-    public long transferTo (long position, long count, 
+    public long transferTo (long position, long count,
 			    WritableByteChannel target)
 	throws IOException {
 	throw new IllegalStateException ("transferTo can not be used.");
     }
-    
+
     public void addBlockListener (BlockListener listener) {
-	this.listener = listener;
 	if (isChunked)
 	    chunkHandler.setBlockListener (listener);
+	else
+	    this.listener = listener;
+
 	if (dataSize > -1 && totalRead >= dataSize) {
 	    cleanupAndFinish ();
 	} else if (bufHandle.isEmpty ()) {
 	    register ();
-	} else {       
+	} else {
 	    handleBlock ();
 	}
     }
@@ -112,8 +114,10 @@ public class WebConnectionResourceSource
 	    totalRead = chunkHandler.getTotalRead ();
 	} else {
 	    ByteBuffer buffer = bufHandle.getBuffer ();
-	    totalRead += buffer.remaining ();		
-	    listener.bufferRead (bufHandle);
+	    totalRead += buffer.remaining ();
+	    BlockListener bl = listener;
+	    listener = null;
+	    bl.bufferRead (bufHandle);
 	}
 	bufHandle.possiblyFlush ();
     }
@@ -129,13 +133,13 @@ public class WebConnectionResourceSource
 
     public void read () {
 	boolean useBig = fullReads > 4;
-	ByteBuffer buffer = 
+	ByteBuffer buffer =
 	    useBig ? bufHandle.getLargeBuffer () : bufHandle.getBuffer ();
 
 	buffer.position (currentMark); // keep our saved data.
 	int limit = buffer.capacity ();
 	if (dataSize > 0  && !isChunked) {
-	    limit = currentMark + (int)Math.min (limit - currentMark, 
+	    limit = currentMark + (int)Math.min (limit - currentMark,
 						 dataSize - totalRead);
 	}
 	buffer.limit (limit);
@@ -166,10 +170,12 @@ public class WebConnectionResourceSource
 
     public void closed () {
 	listener.failed (new IOException ("channel closed"));
+	listener = null;
     }
 
     public void timeout () {
 	listener.timeout ();
+	listener = null;
     }
 
     public Long getTimeout () {
@@ -185,7 +191,7 @@ public class WebConnectionResourceSource
 	    ByteBuffer buffer = bufHandle.getBuffer ();
 	    buffer.position (buffer.limit ());
 	}
-	    
+
 	bufHandle.possiblyFlush ();
 	con.releaseConnection (wc);
     }
