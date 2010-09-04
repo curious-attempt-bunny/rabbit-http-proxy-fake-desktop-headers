@@ -29,9 +29,9 @@ class Compressor implements GZipPackState {
 
     public void handleCurrentData (GZipPacker packer) {
 	if (def.finished ()) {
-	    GZipPackState t = 
-		new TrailerWriter (listener, 
-				   (int)crc.getValue (), 
+	    GZipPackState t =
+		new TrailerWriter (listener,
+				   (int)crc.getValue (),
 				   def.getTotalIn ());
 	    packer.setState (t);
 	    t.handleCurrentData (packer);
@@ -41,9 +41,9 @@ class Compressor implements GZipPackState {
 	if (!finished && def.needsInput ())
 	    return;
 	byte[] packed = listener.getBuffer ();
-	    int len = def.deflate (packed, 0, packed.length);
-	    listener.packed (packed, 0, len);
-    }    
+	int len = def.deflate (packed, 0, packed.length);
+	listener.packed (packed, 0, len);
+    }
 
     public void finish () {
 	if (def.finished ())
