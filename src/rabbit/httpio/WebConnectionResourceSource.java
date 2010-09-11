@@ -3,6 +3,7 @@ package rabbit.httpio;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.util.logging.Logger;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.ReadHandler;
 import rabbit.io.BufferHandle;
@@ -169,13 +170,23 @@ public class WebConnectionResourceSource
     }
 
     public void closed () {
-	listener.failed (new IOException ("channel closed"));
-	listener = null;
+	if (listener != null) {
+	    listener.failed (new IOException ("channel closed"));
+	    listener = null;
+	} else {
+	    Logger logger = Logger.getLogger (getClass ().getName ());
+	    logger.severe ("Got close but no listener to tell!");
+	}
     }
 
     public void timeout () {
-	listener.timeout ();
-	listener = null;
+	if (listener != null) {
+	    listener.timeout ();
+	    listener = null;
+	} else {
+	    Logger logger = Logger.getLogger (getClass ().getName ());
+	    logger.severe ("Got timeout but no listener to tell!");
+	}
     }
 
     public Long getTimeout () {
