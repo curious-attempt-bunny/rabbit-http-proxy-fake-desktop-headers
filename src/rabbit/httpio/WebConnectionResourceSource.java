@@ -82,10 +82,12 @@ public class WebConnectionResourceSource
     }
 
     public void addBlockListener (BlockListener listener) {
+	if (this.listener != null)
+	    throw new RuntimeException ("Trying to overwrite block listener: " +
+					this.listener + " with: " + listener);
+	this.listener = listener;
 	if (isChunked)
 	    chunkHandler.setBlockListener (listener);
-	else
-	    this.listener = listener;
 
 	if (dataSize > -1 && totalRead >= dataSize) {
 	    cleanupAndFinish ();
@@ -110,14 +112,14 @@ public class WebConnectionResourceSource
     }
 
     private void handleBlock () {
+	BlockListener bl = listener;
+	listener = null;
 	if (isChunked) {
 	    chunkHandler.handleData (bufHandle);
 	    totalRead = chunkHandler.getTotalRead ();
 	} else {
 	    ByteBuffer buffer = bufHandle.getBuffer ();
 	    totalRead += buffer.remaining ();
-	    BlockListener bl = listener;
-	    listener = null;
 	    bl.bufferRead (bufHandle);
 	}
 	bufHandle.possiblyFlush ();
