@@ -236,7 +236,7 @@ public class HttpBaseFilter implements HttpFilter {
 	    if (bi.equals (ZERO)) {
 		if (header.getMethod ().equals ("TRACE")) {
 		    HttpHeader ret = con.getHttpGenerator ().get200 ();
-		    ret.setContent (header.toString ());
+		    ret.setContent (header.toString (), "UTF-8");
 		    return ret;
 		}
 		HttpHeader ret = con.getHttpGenerator ().get200 ();

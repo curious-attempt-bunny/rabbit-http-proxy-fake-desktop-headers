@@ -138,7 +138,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	    "Unable to handle request:<br><b><pre>\n" +
 	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
 	    "</pre></b></body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -159,7 +159,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	String page = HtmlPage.getPageHeader (con, sc) +
 	    "Access to: <b>" + HtmlEscapeUtils.escapeHtml (url.toString ()) +
 	    "</b><br>requires some authentication\n</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -171,7 +171,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	HttpHeader header = getHeader (_403);
 	String page = HtmlPage.getPageHeader (con, _403) +
 	    "That is forbidden</body></html>";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -184,7 +184,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	String page = HtmlPage.getPageHeader (con, _404) +
 	    "File '" + HtmlEscapeUtils.escapeHtml (file) +
 	    "' not found.</body></html>";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -203,7 +203,7 @@ class StandardResponseHeaders implements HttpGenerator {
     public HttpHeader get412 () {
 	HttpHeader header = getHeader (_412);
 	String page = HtmlPage.getPageHeader (con, _412) + "</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -213,7 +213,7 @@ class StandardResponseHeaders implements HttpGenerator {
     public HttpHeader get414 () {
 	HttpHeader header = getHeader (_414);
 	String page = HtmlPage.getPageHeader (con, _414) + "</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -227,7 +227,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	    "Request out of range: " +
 	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
 	    ".</b>\n</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -241,7 +241,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	    "RabbIT does not handle the '" +
 	    HtmlEscapeUtils.escapeHtml (expectation) +
 	    "' kind of expectations yet.</b>\n</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -284,7 +284,7 @@ class StandardResponseHeaders implements HttpGenerator {
 	    "Error is:<BR><pre>\n" +
 	    StackTraceUtil.getStackTrace (exception) +
 	    "</pre><br><hr noshade>\n</body></html>\n";
-	header.setContent (page);
+	header.setContent (page, "UTF-8");
 	return header;
     }
 
@@ -324,7 +324,7 @@ class StandardResponseHeaders implements HttpGenerator {
 		message = "<xmp>" + StackTraceUtil.getStackTrace (e) + "</xmp>";
 	    content.append ("</b><br>" + message + "</body></html>\n");
 
-	    header.setContent (content.toString ());
+	    header.setContent (content.toString (), "UTF-8");
 	} catch (MalformedURLException ex) {
 	    throw new RuntimeException (ex);
 	}

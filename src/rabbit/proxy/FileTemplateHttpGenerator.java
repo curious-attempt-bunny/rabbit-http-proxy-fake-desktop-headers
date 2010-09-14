@@ -205,7 +205,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 		    parser.setText (buf);
 		    HtmlBlock block = parser.parse ();
 		    replaceTemplates (sc, block, td);
-		    ret.setContent (block.toString ());
+		    ret.setContent (block.toString (), "UTF-8");
 		} finally {
 		    Closer.close (dis, logger);
 		}

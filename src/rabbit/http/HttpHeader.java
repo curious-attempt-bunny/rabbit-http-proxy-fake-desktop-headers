@@ -3,6 +3,7 @@ package rabbit.http;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import rabbit.util.StringCache;
 
 /** A class to handle http headers.
@@ -16,7 +17,7 @@ public class HttpHeader extends GeneralHeader {
     private String httpVersion = null;
     private int hashCodeValue;
 
-    private transient String content;
+    private transient byte[] content;
 
     /** Create a new HTTPHeader from scratch
      */
@@ -38,6 +39,29 @@ public class HttpHeader extends GeneralHeader {
 	super.fillBuffer (sb);
 	if (content != null)
 	    sb.append (content);
+    }
+
+    /** Convert this header to a byte[].
+     *  The header lines are converted to US-ASCII and any content is
+     *  appended.
+     * @return the content of this header
+     */
+    public byte[] getBytes () {
+	StringBuilder sb = new StringBuilder ();
+	sb.append (getRequestLine ());
+	sb.append (Header.CRLF);
+	super.fillBuffer (sb);
+	try {
+	    byte[] header = sb.toString ().getBytes ("US-ASCII");
+	    if (content == null)
+		return header;
+	    byte[] res = new byte[header.length + content.length];
+	    System.arraycopy (header, 0, res, 0, header.length);
+	    System.arraycopy (content, 0, res, header.length, content.length);
+	    return res;
+	} catch (UnsupportedEncodingException e) {
+	    throw new RuntimeException ("Failed to find ascii", e);
+	}
     }
 
     /** Get the statusline of this header (only valid for responses).
@@ -245,16 +269,32 @@ public class HttpHeader extends GeneralHeader {
      *  As a side effect the &quot;Content-Length&quot; header is also set.
      * @param content the binary content.
      */
-    public void setContent (String content) {
+    public void setContent (byte[] content) {
 	this.content = content;
-	// TODO: content length is not correct, should be byte length.
-	setHeader ("Content-Length", "" + content.length ());
+	setHeader ("Content-Length", "" + content.length);
+    }
+
+    /** Set the Content for the request/response
+     *  Mostly not used for responses.
+     *  As a side effect the &quot;Content-Length&quot; header is also set.
+     * @param data the String to set
+     * @param charset the character encoding to use when converting the
+     *        string to bytes
+     * @throws IllegalArgumentException if the charset is unknown
+     */
+    public void setContent (String data, String charset) {
+	try {
+	    setContent (data.getBytes (charset));
+	} catch (UnsupportedEncodingException e) {
+	    throw new IllegalArgumentException ("Unknown encoding: " + charset,
+						e);
+	}
     }
 
     /** Get the current content for this request/response.
      * @return the resource associated with this header, may be null
      */
-    public String getContent () {
+    public byte[] getContent () {
 	return content;
     }
 

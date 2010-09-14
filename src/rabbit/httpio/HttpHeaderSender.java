@@ -47,19 +47,20 @@ public class HttpHeaderSender implements BlockSentListener {
 
     private ByteBuffer getBuffer (HttpHeader header) throws IOException {
 	String uri = header.getRequestURI ();
-	if (header.isRequest () && !header.isSecure () &&
-	    !fullURI && uri.charAt (0) != '/') {
-	    URL url = new URL (uri);
-	    String file = url.getFile ();
-	    if (file.equals (""))
-		file = "/";
-	    header.setRequestURI (file);
+	try {
+	    if (header.isRequest () && !header.isSecure () &&
+		!fullURI && uri.charAt (0) != '/') {
+		URL url = new URL (uri);
+		String file = url.getFile ();
+		if (file.equals (""))
+		    file = "/";
+		header.setRequestURI (file);
+	    }
+	    byte[] bytes = header.getBytes ();
+ 	    return ByteBuffer.wrap (bytes);	    
+	} finally {
+	    header.setRequestURI (uri);
 	}
-	String s = header.toString ();
-	byte[] bytes = s.getBytes ("ASCII");
-	ByteBuffer buf = ByteBuffer.wrap (bytes);
-	header.setRequestURI (uri);
-	return buf;
     }
 
     public void timeout () {

@@ -33,7 +33,7 @@ public class Address {
 	return hash;
     }
 	
-    /** Compare this objcet agains another object.
+    /** Compare this object against another object.
      * @param o the Object to compare against.
      * @return true if the other Object is an Address connected to 
      *  the same InetAddress and port, false otherwise.
