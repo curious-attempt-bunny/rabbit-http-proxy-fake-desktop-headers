@@ -1,8 +1,9 @@
 package rabbit.filter;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.net.InetAddress;
@@ -22,7 +23,6 @@ import rabbit.util.SProperties;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class AccessFilter implements IPAccessFilter {
-    private String accessfile;
     private List<IPAccess> allowed = new ArrayList<IPAccess> ();
     private List<IPAccess> denied = new ArrayList<IPAccess> ();
     private static final String DEFAULTCONFIG = "conf/access";
@@ -59,19 +59,23 @@ public class AccessFilter implements IPAccessFilter {
      */
     private void loadAccess (String filename) {
 	filename = filename.replace ('/', File.separatorChar);
-	accessfile = filename;
 	
-	FileReader fr = null;
+	FileInputStream is = null;
 	try {
-	    fr = new FileReader (accessfile);
-	    loadAccess (fr);	    
+	    is = new FileInputStream (filename);
+	    Reader r = new InputStreamReader (is, "UTF-8");
+	    try {
+		loadAccess (r);
+	    } finally {
+		Closer.close (r, logger);
+	    }
 	} catch (IOException e) {
 	    logger.log (Level.WARNING, 
-			"Accessfile '" + accessfile + 
+			"Accessfile '" + filename +
 			"' not found: no one allowed",
 			e);
 	} finally {
-	    Closer.close (fr, logger);
+	    Closer.close (is, logger);
 	}
     }
     
