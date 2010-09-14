@@ -42,11 +42,10 @@ public class IPAccess {
     private long getLongFromIP (InetAddress ia) {
 	byte[] address = ia.getAddress ();
 	long ret = 0;
-	for (int i = 0; i < address.length; i++) {
-	    ret <<= 8;
-	    long a = address[i] & 0xff; // byte is signed, signextension is evil..
-	    ret |= a;
-	}
+        for (byte addres : address) {
+            ret <<= 8;
+	    ret |= (addres & 0xffL); // byte is signed, sign extension is evil.
+        }
 	return ret;
     }
 
