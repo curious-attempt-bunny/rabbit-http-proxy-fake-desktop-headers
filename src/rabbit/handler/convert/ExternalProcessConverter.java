@@ -11,13 +11,17 @@ import rabbit.util.SProperties;
 public class ExternalProcessConverter implements ImageConverter {
     private static final String STD_CONVERT = "/usr/bin/gm";
     private static final String STD_CONVERT_ARGS =
-    "conovert -quality 10 -flatten $filename +profile \"*\" jpeg:$filename.c";
+    "convert -quality 10 -flatten $filename +profile \"*\" jpeg:$filename.c";
 
     private final boolean canConvert;
     private final String convert;
     private final String convertArgs;
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
+    /** Create a new ExternalProcessConverter configured from the given
+     *  properties.
+     * @param props the configuration for this converter
+     */
     public ExternalProcessConverter (SProperties props) {
 	convert = props.getProperty ("convert", STD_CONVERT);
 	convertArgs = props.getProperty ("convertargs", STD_CONVERT_ARGS);
@@ -65,6 +69,10 @@ public class ExternalProcessConverter implements ImageConverter {
 	}
     }
 
+    /** Close the streams to the external process.
+     * @param ps the Process that did the image conversion
+     * @throws IOException if close fails
+     */
     public void closeStreams (Process ps) throws IOException {
 	ps.getInputStream ().close ();
 	ps.getOutputStream ().close ();
