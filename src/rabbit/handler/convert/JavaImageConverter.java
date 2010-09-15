@@ -1,6 +1,7 @@
 package rabbit.handler.convert;
 
 import java.awt.Graphics;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +47,8 @@ public class JavaImageConverter implements ImageConverter {
 	    return;
 	}
 	try {
-	    if (origImage.getType () == BufferedImage.TYPE_CUSTOM)
+	    if (origImage.getType () == BufferedImage.TYPE_CUSTOM ||
+		origImage.getTransparency () != Transparency.OPAQUE)
 		origImage = getRGBImage (origImage);
 	    ImageWriter writer = getImageWriter ();
 	    try {
@@ -116,9 +118,10 @@ public class JavaImageConverter implements ImageConverter {
     }
 
     private BufferedImage getRGBImage (BufferedImage orig) {
+	// Image without alpha channel since jpeg has no alpha
 	BufferedImage newImage = 
 	    new BufferedImage (orig.getWidth (), orig.getHeight (), 
-			       BufferedImage.TYPE_INT_RGB);
+			       BufferedImage.TYPE_3BYTE_BGR);
 	try {
 	    Graphics g2 = newImage.getGraphics (); 
 	    try {
