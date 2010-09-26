@@ -1,5 +1,6 @@
 package rabbit.handler.convert;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
@@ -125,6 +126,8 @@ public class JavaImageConverter implements ImageConverter {
 	try {
 	    Graphics g2 = newImage.getGraphics (); 
 	    try {
+		g2.setColor (Color.WHITE);
+		g2.fillRect (0, 0, orig.getWidth (), orig.getHeight ());
 		g2.drawImage (orig, 0, 0, null);
 	    } finally {
 		g2.dispose ();
