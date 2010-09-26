@@ -21,9 +21,11 @@ public abstract class HtmlFilter implements HtmlFilterFactory {
     /** Create the factory.
      */
     public HtmlFilter () {
+	// empty
     }
 
     /** Create a new HtmlFilter for the given request, response pair.
+     * @param con the Connection handling the request
      * @param request the actual request made.
      * @param response the actual response being sent.
      */
@@ -43,6 +45,7 @@ public abstract class HtmlFilter implements HtmlFilterFactory {
     /** If the filter determines that the page is not cacheable it
      *  can negate this, and FilterHandler will not cache it.
      *  This method returns true, override in sub classes when needed.
+     * @return true
      */
     public boolean isCacheable() {
 	return true;

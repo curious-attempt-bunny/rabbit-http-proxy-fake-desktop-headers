@@ -147,6 +147,7 @@ public class Token {
     }
 
     /** Get the length of this token.
+     * @return the length in chars
      */
     public int getLength () {
 	return len;

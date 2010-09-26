@@ -24,6 +24,9 @@ public class HtmlBlock {
 
     /** Create a HtmlBLock from the given byte array.
      * @param page the byte array that is the real page
+     * @param length the number of chars that may be used
+     * @param cs the Charset
+     * @param decodeRest the remaining bytes of the decode
      */
     public HtmlBlock (char[] page, int length, Charset cs, byte[] decodeRest) {
 	if (page == null)
@@ -56,6 +59,7 @@ public class HtmlBlock {
 
     /** Check if this block has any rest data, that is bytes 
      *  that will not be used. 
+     * @return true if there is any decode rest bytes
      */
     public boolean hasRests () {
 	return restSize () > 0 || 
@@ -63,6 +67,7 @@ public class HtmlBlock {
     }
 
     /** Get the rest as a byte[] 
+     * @return the bytes that were not used in the parsing
      */
     public byte[] getRestBlock () {
 	byte[] pr = null;
@@ -161,6 +166,9 @@ public class HtmlBlock {
 	return res.toString ();
     }
 
+    /** Get the bytes for this block
+     * @return the ByteBuffers holding the bytes for this block
+     */
     public List<ByteBuffer> getBlocks () {
 	List<ByteBuffer> bufs = new ArrayList<ByteBuffer> ();
 	int start = 0;

@@ -126,6 +126,10 @@ public class TagType {
 	this.type = type;
     }
     
+    /** Get the TagType matching the given String.
+     * @param type the String to get the TagType for
+     * @return a TagType or null if no matching TagType exists
+     */
     public static TagType getTagType (String type) {
 	return types.get (type);
     }

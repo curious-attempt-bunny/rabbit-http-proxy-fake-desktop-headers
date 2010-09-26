@@ -28,11 +28,14 @@ public class AdFilter extends HtmlFilter {
     /** The pattern. */
     private Pattern adPattern;
 
-    // For the factory.
+    /** Create a new AdFilter factory
+     */
     public AdFilter () {
+	// empty
     }
 
     /** Create a new AdFilter for the given request, response pair.
+     * @param con the Connection handling the request
      * @param request the actual request made.
      * @param response the actual response being sent.
      */
@@ -58,6 +61,8 @@ public class AdFilter extends HtmlFilter {
 
     /** Check if the given tag ends the current a-tag.
      *  Some sites have broken html (linuxtoday.com!).
+     * @param tt the TagType to check
+     * @return true if the tag is an end tag
      */
     private boolean isAEnder (TagType tt) {
 	return tt == TagType.SA || tt == TagType.STD || tt == TagType.STR;
@@ -106,6 +111,7 @@ public class AdFilter extends HtmlFilter {
 
     /** Check if a string is evil (that is its probably advertising).
      * @param str the String to check.
+     * @return true if the given string seems to contain advertising links
      */
     public boolean isEvil (String str) {
 	if (str == null)

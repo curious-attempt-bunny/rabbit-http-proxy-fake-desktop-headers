@@ -12,6 +12,7 @@ public interface HtmlFilterFactory {
      * @param con the Connection handling the request.
      * @param request the actual request made.
      * @param response the actual response being sent.
+     * @return the new filter
      */
     public HtmlFilter newFilter (Connection con, 
 				 HttpHeader request, 

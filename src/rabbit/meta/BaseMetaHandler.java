@@ -82,7 +82,7 @@ public abstract class BaseMetaHandler
 	con.logAndRestart ();
     }
 
-    protected void endChunking () throws IOException {
+    protected void endChunking () {
 	mode = Mode.CLEANUP;
 	ChunkEnder ce = new ChunkEnder ();
 	ce.sendChunkEnding (con.getChannel (), con.getNioHandler (), 

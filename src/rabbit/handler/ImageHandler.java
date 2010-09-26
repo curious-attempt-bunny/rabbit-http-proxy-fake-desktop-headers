@@ -180,7 +180,6 @@ public class ImageHandler extends BaseHandler {
     }
 
     /** Read in the image
-     * @throws IOException if reading of the image fails.
      */
     protected void readImage ()  {
 	String enc = response.getHeader ("Content-Encoding");
@@ -293,7 +292,6 @@ public class ImageHandler extends BaseHandler {
     }
 
     /** Convert the image into a small low quality image (normally a jpeg).
-     * @throws IOException if conversion fails.
      */
     protected void convertImage () {
 	TaskIdentifier ti = getTaskIdentifier (this, "convertImage");
@@ -439,18 +437,30 @@ public class ImageHandler extends BaseHandler {
 	return ctype;
     }
 
+    /** Śet the convert flag
+     * @param doConvert if true then image conversion will be tried
+     */
     public void setDoConvert (boolean doConvert) {
 	this.doConvert = doConvert;
     }
 
+    /** Get the convert flag
+     * @return true if image conversion should be used
+     */
     public boolean getDoConvert () {
 	return doConvert;
     }
 
+    /** Get the current configuration of this handler
+     * @return the current configuration
+     */
     public SProperties getConfig () {
 	return config;
     }
 
+    /** Only try to convert images larger than this size
+     * @return the minimum size of images to run conversion on
+     */
     public int getMinSizeToConvert () {
 	return minSizeToConvert;
     }

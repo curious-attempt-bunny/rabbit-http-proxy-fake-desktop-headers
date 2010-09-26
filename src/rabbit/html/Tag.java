@@ -9,7 +9,7 @@ import java.util.List;
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class Tag {
-    
+
     private String type = null;
     private String lowerCaseType = null;
     private TagType tagtype = null;
@@ -25,9 +25,9 @@ public class Tag {
 	public String lcKey;
 	/** The value of this pair. */
 	public String value;
-	
-	
-	/** Create a new pair with given key and value. 
+
+
+	/** Create a new pair with given key and value.
 	 * @param key the key.
 	 * @param value the value.
 	 */
@@ -45,16 +45,20 @@ public class Tag {
 	    return key + "=" + value;
 	}
 
+	/** Get the lower case key
+	 * @return the key in lower case
+	 */
 	public String getLowerCaseKey () {
 	    if (lcKey == null)
 		lcKey = key.toLowerCase ();
 	    return lcKey;
 	}
     }
-    
-    /* Create a new Tag without type and with no arguments.
+
+    /** Create a new Tag without type and with no arguments.
      */
     public Tag () {
+	// empty
     }
 
     /** Create a new Tag with given type
@@ -63,7 +67,7 @@ public class Tag {
     public Tag (String type) {
 	setType (type);
     }
-    
+
     /** Set the Type of this Tag.
      * @param type the new type of this tag.
      */
@@ -72,7 +76,7 @@ public class Tag {
 	this.lowerCaseType = type.toLowerCase ();
 	this.tagtype = TagType.getTagType (lowerCaseType);
     }
-    
+
     /** Get the type of this tag.
      * @return the type of this tag.
      */
@@ -82,18 +86,18 @@ public class Tag {
 
     /** Get the lowercase type of this tag.
      * @return the type of this tag.
-     */ 
+     */
     public String getLowerCaseType () {
 	return lowerCaseType;
     }
 
-    /** Get the tagtype of this tag. 
+    /** Get the tagtype of this tag.
      * @return the TagType of this tag.
      */
     public TagType getTagType () {
 	return tagtype;
     }
-    
+
     /** Get the parent token of this tag.
      * @return the parent Token for this tag.
      */
@@ -119,9 +123,9 @@ public class Tag {
     /** Add a new key/value Pair to this tag.
      * @param key the key.
      * @param value the value.
-     * @param changed if true this tag is changed by this (that is a new 
+     * @param changed if true this tag is changed by this (that is a new
      *                parameter is added)
-     *                if false this tag is still considered unchanged after 
+     *                if false this tag is still considered unchanged after
      *                this operation (useful while parsing a page).
      */
     public void addArg (String key, String value, boolean changed) {
@@ -136,7 +140,7 @@ public class Tag {
      * @param remover the attribute key to remove.
      */
     public void removeAttribute (String remover) {
-	if (values == null) 
+	if (values == null)
 	    return;
 	remover = remover.toLowerCase ();
 	int vsize = values.size ();
@@ -150,14 +154,14 @@ public class Tag {
 	    }
 	}
     }
-    
+
     /** Get the value of the given key.
      * @param key the attribute to get the value from.
      * @return the value or null (if not found of key has no value).
      */
     public String getAttribute (String key) {
 	if (values != null) {
-	    key = key.toLowerCase ();	
+	    key = key.toLowerCase ();
 	    int vsize = values.size ();
 	    for (int i = 0; i < vsize; i++) {
 		Pair p = values.get (i);
@@ -210,13 +214,8 @@ public class Tag {
 		res.append (values.get (i));
 	    }
 	}
-	
+
 	res.append (">");
 	return res.toString ();
     }
 }
-
-
-
-
-
