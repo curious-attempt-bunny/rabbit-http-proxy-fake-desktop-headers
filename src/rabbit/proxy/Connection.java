@@ -137,11 +137,20 @@ public class Connection {
 	}
     }
 
+    private boolean connectionReset (Throwable t) {
+	if (t instanceof IOException)
+	    return "Connection reset by peer".equals (t.getMessage ());
+	return false;
+    }
+
     private void handleFailedRequestRead (Throwable t) {
 	if (t instanceof RequestLineTooLongException) {
 	    HttpHeader err = getHttpGenerator ().get414 ();
 	    // Send response and close
 	    sendAndClose (err);
+	} else if (connectionReset (t)) {
+	    logger.log (Level.INFO, "Exception when reading request: " + t);
+	    closeDown ();
 	} else {
 	    logger.log (Level.INFO, "Exception when reading request", t);
 	    closeDown ();
