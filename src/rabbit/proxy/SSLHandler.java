@@ -16,6 +16,7 @@ import rabbit.io.Resolver;
 import rabbit.io.WebConnection;
 import rabbit.io.WebConnectionListener;
 import rabbit.util.Base64;
+import org.khelekore.rnio.impl.Closer;
 
 /** A handler that shuttles ssl traffic
  *
@@ -115,13 +116,14 @@ public class SSLHandler implements TunnelDoneListener {
 	}
 
 	public void timeout () {
-	    String err = "SSLHandler: Timeout waiting for web connection";
+	    String err =
+		"SSLHandler: Timeout waiting for web connection: " + uri;
 	    logger.warning (err);
 	    closeDown ();
 	}
 
 	public void failed (Exception e) {
-	    warn ("SSLHandler: failed to get web connection", e);
+	    warn ("SSLHandler: failed to get web connection to: " + uri, e);
 	    closeDown ();
 	}
     }
@@ -131,14 +133,8 @@ public class SSLHandler implements TunnelDoneListener {
 	    bh.possiblyFlush ();
 	if (sbh != null)
 	    sbh.possiblyFlush ();
-	if (wc != null) {
-	    try {
-		wc.close ();
-	    } catch (IOException e) {
-		warn ("failed to close webconnection", e);
-	    }
-	    wc = null;
-	}
+	Closer.close (wc, logger);
+	wc = null;
 	con.logAndClose (null);
     }
 
@@ -158,7 +154,8 @@ public class SSLHandler implements TunnelDoneListener {
 					resolver.isProxyConnected (), cr);
 	    hrr.sendRequestAndWaitForResponse ();
 	} catch (IOException e) {
-	    warn ("IOException when waiting for chained response", e);
+	    warn ("IOException when waiting for chained response: " +
+		  request.getRequestURI (), e);
 	    closeDown ();
 	}
     }
@@ -176,12 +173,15 @@ public class SSLHandler implements TunnelDoneListener {
 	}
 
 	public void failed (Exception cause) {
-	    warn ("SSLHandler: failed to get chained response", cause);
+	    warn ("SSLHandler: failed to get chained response: " +
+		  request.getRequestURI (), cause);
 	    closeDown ();
 	}
 
 	public void timeout () {
-	    logger.warning ("SSLHandler: Timeout waiting for chained response");
+	    String err = "SSLHandler: Timeout waiting for chained response: " +
+		request.getRequestURI ();
+	    logger.warning (err);
 	    closeDown ();
 	}
     }
@@ -215,12 +215,14 @@ public class SSLHandler implements TunnelDoneListener {
 	}
 
 	public void timeout () {
-	    logger.warning ("SSLHandler: Timeout when sending http header");
+	    logger.warning ("SSLHandler: Timeout when sending http header: " +
+			    request.getRequestURI ());
 	    closeDown ();
 	}
 
 	public void failed (Exception e) {
-	    warn ("SSLHandler: Exception when sending http header", e);
+	    warn ("SSLHandler: Exception when sending http header: " +
+		  request.getRequestURI (), e);
 	    closeDown ();
 	}
     }
@@ -238,11 +240,7 @@ public class SSLHandler implements TunnelDoneListener {
     public void tunnelClosed () {
 	if (wc != null) {
 	    con.logAndClose (null);
-	    try {
-		wc.close ();
-	    } catch (IOException e) {
-		warn ("Failed to close webconnection", e);
-	    }
+	    Closer.close (wc, logger);
 	}
 	wc = null;
     }

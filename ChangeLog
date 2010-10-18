@@ -4,7 +4,7 @@ version 4.8 (20xx-yy-zz) Big javadoc update. Add support for filtering
 	character encodings and http header content better. Handle semi
 	transparent images better when using the java based image
 	converter. Updated dnsjava to 2.1.0. Shorten the log from
-	"Connection reset by peer".
+	"Connection reset by peer". Added addresses to SSLHandlers logs.
 
 version 4.7 (2010-07-25) Fixed the problem 401 and 407 responses when
 	using FileTemplateHttpGeneratorFactory. Added a proxy chain
