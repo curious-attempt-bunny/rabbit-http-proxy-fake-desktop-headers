@@ -22,6 +22,7 @@ import org.khelekore.rnio.impl.Acceptor;
 import org.khelekore.rnio.impl.AcceptorListener;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
+import org.khelekore.rnio.impl.SimpleThreadFactory;
 import rabbit.cache.Cache;
 import rabbit.cache.NCache;
 import rabbit.dns.DNSHandler;
@@ -462,7 +463,7 @@ public class HttpProxy {
     /** Run the proxy in a separate thread. */
     public void start () {
 	started = System.currentTimeMillis ();
-	nioHandler.start ();
+	nioHandler.start (new SimpleThreadFactory ());
     }
 
     /** Run the proxy in a separate thread. */

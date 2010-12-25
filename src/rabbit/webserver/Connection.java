@@ -37,13 +37,18 @@ public class Connection {
 
     private final Logger logger = Logger.getLogger (getClass ().getName ());
 
-    /** Create a new Connection for the given web server and socket channel. */
+    /** Create a new Connection for the given web server and socket channel.
+     * @param sws the web server
+     * @param sc the channel for the request
+     */
     public Connection (SimpleWebServer sws, SocketChannel sc) {
 	this.sws = sws;
 	this.sc = sc;
     }
 
-    /** Set up a http reader to listen for http request. */
+    /** Set up a http reader to listen for http request.
+     * @throws IOException if reading the request fails
+     */
     public void readRequest () throws IOException {
 	if (clientBufferHandle == null)
 	    clientBufferHandle = 

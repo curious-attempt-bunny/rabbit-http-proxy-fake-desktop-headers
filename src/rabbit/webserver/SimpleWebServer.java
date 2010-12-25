@@ -13,6 +13,7 @@ import org.khelekore.rnio.impl.Acceptor;
 import org.khelekore.rnio.impl.AcceptorListener;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
+import org.khelekore.rnio.impl.SimpleThreadFactory;
 import rabbit.io.BufferHandler;
 import rabbit.io.CachingBufferHandler;
 import rabbit.util.SimpleTrafficLogger;
@@ -73,7 +74,7 @@ public class SimpleWebServer {
     /** Start serving requests. 
      */
     public void start ()  {
-	nioHandler.start ();
+	nioHandler.start (new SimpleThreadFactory ());
 	setupServerSocket ();
     }
 

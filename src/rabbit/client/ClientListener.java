@@ -11,6 +11,7 @@ public interface ClientListener {
     /** Handle a redirected request
      * @param request the request that was redirected
      * @param location the location the redirect gives
+     * @param base the actual client
      */
     void redirected (HttpHeader request, String location, ClientBase base);
 
@@ -22,15 +23,24 @@ public interface ClientListener {
     void handleResponse (HttpHeader request, HttpHeader response, 
 			 WebConnectionResourceSource wcrs);
     
-    /** Check if this client request wants to automatically follow redirects */
+    /** Check if this client request wants to automatically follow redirects
+     * @return true if the client should follow redirects automatically
+     */
     boolean followRedirects ();
 
-    /** A request has been fully handled. */
+    /** A request has been fully handled.
+     * @param request the request that has been fully handled
+     */
     void requestDone (HttpHeader request);
 
-    /** Handle a timeout of a given request. */
+    /** Handle a timeout of a given request.
+     * @param request the request that had a timeout
+     */
     void handleTimeout (HttpHeader request);
 
-    /** Handle a failure of a given request. */
+    /** Handle a failure of a given request.
+     * @param request the request that failed
+     * @param e the actual exception that occurred
+     */
     void handleFailure (HttpHeader request, Exception e);
 }

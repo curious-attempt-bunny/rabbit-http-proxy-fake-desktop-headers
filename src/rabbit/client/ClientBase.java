@@ -9,6 +9,7 @@ import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
+import org.khelekore.rnio.impl.SimpleThreadFactory;
 import rabbit.dns.DNSJavaHandler;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.HttpResponseListener;
@@ -38,13 +39,14 @@ public class ClientBase {
     private final BufferHandler bufHandler;
 
     /** Create a new ClientBase.
+     * @throws IOException if creating the nio handler fails
      */
     public ClientBase () throws IOException {
 	ExecutorService es = Executors.newCachedThreadPool ();
 	StatisticsHolder sh = new BasicStatisticsHolder ();
 	nioHandler =
 	    new MultiSelectorNioHandler (es, sh, 4, 15000L);
-	nioHandler.start ();
+	nioHandler.start (new SimpleThreadFactory ());
 	DNSJavaHandler jh = new DNSJavaHandler ();
 	jh.setup (null);
 	ProxyChain proxyChain = new SimpleProxyChain (nioHandler, jh);
@@ -58,6 +60,8 @@ public class ClientBase {
     /** Submit a new request, using the given method to the given url.
      * @param method HEAD or GET or POST or ...
      * @param url the url to do the http request against.
+     * @return the header of the request
+     * @throws IOException if the url is not really an URL
      */
     public HttpHeader getRequest (String method, String url)
 	throws IOException {
@@ -69,14 +73,16 @@ public class ClientBase {
 	return ret;
     }
 
-    public ConnectionHandler getConnectionHandler () {
-	return connectionHandler;
-    }
-
+    /** Get the NioHandler that this client is using
+     * @return the current NioHandler
+     */
     public NioHandler getNioHandler () {
 	return nioHandler;
     }
 
+    /** Get the logger that this client is using
+     * @return the current logger
+     */
     public Logger getLogger () {
 	return logger;
     }
@@ -88,6 +94,8 @@ public class ClientBase {
     }
 
     /** Send a request and let the client be notified on response.
+     * @param request the request to send
+     * @param client the listener to notify with the response
      */
     public void sendRequest (HttpHeader request, ClientListener client) {
 	WebConnectionListener wcl = new WCL (request, client);
@@ -176,6 +184,8 @@ public class ClientBase {
     }
 
     /** Check if the status code is a redirect code.
+     * @param status the status code to check
+     * @return true if the status code is a redirect
      */
     private boolean isRedirect (int status) {
 	return status == 301 || status == 302 ||
@@ -183,6 +193,10 @@ public class ClientBase {
     }
 
     /** Create the url that the response redirected the request to.
+     * @param request the actual request made
+     * @param location the redirect location
+     * @return the redirected url
+     * @throws IOException if the redirect url can not be created
      */
     public URL getRedirectedURL (HttpHeader request, String location)
 	throws IOException {
