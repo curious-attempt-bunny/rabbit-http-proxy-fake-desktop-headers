@@ -230,7 +230,15 @@ public class Connection {
 			readMultiPart (ct);
 	    }
 
-	    filterAndHandleRequest ();
+	    TaskIdentifier ti =
+		new DefaultTaskIdentifier (getClass ().getSimpleName () +
+					   ".filterAndHandleRequest: ",
+					   request.getRequestURI ());
+	    getNioHandler ().runThreadTask (new Runnable () {
+		    public void run () {
+			filterAndHandleRequest ();
+		    }
+		}, ti);
 	} catch (Throwable t) {
 	    handleInternalError (t);
 	}
@@ -247,8 +255,6 @@ public class Connection {
 
     /** Filter the request and handle it.
      */
-    // TODO: filtering here may block! be prepared to run filters in a
-    // TODO: separate thread.
     private void filterAndHandleRequest () {
 	// Filter the request based on the header.
 	// A response means that the request is blocked.
@@ -306,16 +312,7 @@ public class Connection {
 	status = "Handling request";
 	final RequestHandler rh = new RequestHandler (this);
 	if (proxy.getCache ().getMaxSize () > 0) {
-	    // memory consistency is guarded by the underlying SynchronousQueue
-	    TaskIdentifier ti =
-		new DefaultTaskIdentifier (getClass ().getSimpleName () +
-					   ".fillInCacheEntries: ",
-					   request.getRequestURI ());
-	    getNioHandler ().runThreadTask (new Runnable () {
-		    public void run () {
-			fillInCacheEntries (rh);
-		    }
-		}, ti);
+	    fillInCacheEntries (rh);
 	} else {
 	    handleRequestBottom (rh);
 	}
