@@ -100,12 +100,11 @@ public class HierContext implements Context {
 
 	    // Call getObjectInstance for using any object factories
 	    try {
-		return NamingManager.getObjectInstance (inter,
-		    new CompositeName ().add (atom),
-		    this, myEnv);
+		Name cn = new CompositeName ().add (atom);
+		return NamingManager.getObjectInstance (inter, cn, this, myEnv);
 	    } catch (Exception e) {
-		NamingException ne = new NamingException (
-		    "getObjectInstance failed");
+		NamingException ne =
+		    new NamingException ("getObjectInstance failed");
 		ne.setRootCause (e);
 		throw ne;
 	    }
@@ -136,14 +135,12 @@ public class HierContext implements Context {
 	if (name.size () == 1) {
 	    // Atomic name: Find object in internal data structure
 	    if (inter != null) {
-		throw new NameAlreadyBoundException (
-		    "Use rebind to override");
+		throw new NameAlreadyBoundException ("Use rebind to override");
 	    }
 
 	    // Call getStateToBind for using any state factories
-	    obj = NamingManager.getStateToBind (obj,
-		    new CompositeName ().add (atom),
-		    this, myEnv);
+	    Name cn = new CompositeName ().add (atom);
+	    obj = NamingManager.getStateToBind (obj, cn, this, myEnv);
 
 	    // Add object to internal data structure
 	    bindings.put (atom, obj);
@@ -178,9 +175,8 @@ public class HierContext implements Context {
 	    // Atomic name
 
 	    // Call getStateToBind for using any state factories
-	    obj = NamingManager.getStateToBind (obj,
-		    new CompositeName ().add (atom),
-		    this, myEnv);
+	    Name cn = new CompositeName ().add (atom);
+	    obj = NamingManager.getStateToBind (obj, cn, this, myEnv);
 
 	    // Add object to internal data structure
 	    bindings.put (atom, obj);
@@ -233,8 +229,8 @@ public class HierContext implements Context {
 
 	// Simplistic implementation: support only rename within same context
 	if (oldname.size () != newname.size ()) {
-	    throw new OperationNotSupportedException (
-		"Do not support rename across different contexts");
+	    String err = "Do not support rename across different contexts";
+	    throw new OperationNotSupportedException (err);
 	}
 
 	String oldatom = oldname.get (0);
@@ -258,8 +254,8 @@ public class HierContext implements Context {
 	} else {
 	    // Simplistic implementation: support only rename within same context
 	    if (!oldatom.equals (newatom)) {
-		throw new OperationNotSupportedException (
-		    "Do not support rename across different contexts");
+		String err = "Do not support rename across different contexts";
+		throw new OperationNotSupportedException (err);
 	    }
 
 	    // Intermediate name: Consume name in this context and continue
@@ -344,8 +340,7 @@ public class HierContext implements Context {
 	if (name.size () == 1) {
 	    // Atomic name: Find object in internal data structure
 	    if (inter != null) {
-		throw new NameAlreadyBoundException (
-		    "Use rebind to override");
+		throw new NameAlreadyBoundException ("Use rebind to override");
 	    }
 
 	    // Create child
@@ -404,31 +399,21 @@ public class HierContext implements Context {
 	}
 
 	// Simplistic implementation: do not support federation
-	throw new OperationNotSupportedException (
-	    "Do not support composing composite names");
+	String err = "Do not support composing composite names";
+	throw new OperationNotSupportedException (err);
     }
 
     public Object addToEnvironment (String propName, Object propVal)
 	    throws NamingException {
-	if (myEnv == null) {
-	    myEnv = new Hashtable<Object, Object> (5, 0.75f);
-	}
 	return myEnv.put (propName, propVal);
     }
 
     public Object removeFromEnvironment (String propName)
-	    throws NamingException {
-	if (myEnv == null)
-	    return null;
-
+	throws NamingException {
 	return myEnv.remove (propName);
     }
 
     public Hashtable<?, ?> getEnvironment () throws NamingException {
-	if (myEnv == null) {
-	    // Must return non-null
-	    return new Hashtable<Object, Object> ();
-	}
 	return new Hashtable<Object, Object> (myEnv);
     }
 
@@ -462,7 +447,7 @@ public class HierContext implements Context {
 	// empty
     }
 
-    abstract class ListOf<T extends NameClassPair>
+    private abstract class ListOf<T extends NameClassPair>
 	implements NamingEnumeration<T> {
 	protected Iterator<String> names;
 
@@ -497,9 +482,8 @@ public class HierContext implements Context {
 	}
     }
 
-
     // Class for enumerating name/class pairs
-    class ListOfNames extends ListOf<NameClassPair> {
+    private class ListOfNames extends ListOf<NameClassPair> {
 	ListOfNames (Collection<String> names) {
 	    super (names);
 	}
@@ -512,7 +496,7 @@ public class HierContext implements Context {
     }
 
     // Class for enumerating bindings
-    class ListOfBindings extends ListOf<Binding> {
+    private class ListOfBindings extends ListOf<Binding> {
 
 	ListOfBindings (Collection<String> names) {
 	    super (names);
@@ -535,4 +519,4 @@ public class HierContext implements Context {
 	    return new Binding (name, obj);
 	}
     }
-};
+}
