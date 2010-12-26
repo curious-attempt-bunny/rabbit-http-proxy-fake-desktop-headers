@@ -262,9 +262,11 @@ public class HttpProxy {
 
     private void setupResources () {
 	SProperties props = config.getProperties ("data_sources");
-	if (props == null)
+	if (props == null || props.isEmpty ())
 	    return;
 	String resources = props.getProperty ("resources", "");
+	if (resources.isEmpty ())
+	    return;
 	try {
 	    ResourceLoader rl = new ResourceLoader ();
 	    for (String r : resources.split (","))

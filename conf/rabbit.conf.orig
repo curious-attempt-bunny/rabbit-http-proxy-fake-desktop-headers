@@ -90,8 +90,9 @@ error_log_level=INFO
 
 
 [data_sources]
-resources=user_database,host_blocker
-
+# Specify the DataSource configuration here
+#resources=user_database,host_blocker
+resources=
 
 [dns]
 # Select the dns handler to use. 
