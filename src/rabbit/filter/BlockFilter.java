@@ -13,6 +13,8 @@ import rabbit.util.PatternHelper;
  *  or you can specify an accept filter, using allowURLmatching.
  *
  *  If you specify an accept filter, then no other urls will be accepted. 
+ *
+ * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class BlockFilter implements HttpFilter {
     private Pattern blockPattern;

@@ -249,6 +249,8 @@ accessfilters=rabbit.filter.AccessFilter
 #                  since rabbit can repack gzip:ed and deflated files.
 # RevalidateFilter A filter that makes sure that resources are always re-validated
 # SetHeaderFilter  A filter that can add request or response headers.
+# SQLBlockFilter   A filter similar to BlockFilter, but that uses a sql database to block
+#                  access to a set of hosts
 #
 # by default we use a few filters, 
 httpinfilters=rabbit.filter.HttpBaseFilter,rabbit.filter.DontFilterFilter,rabbit.filter.BlockFilter,rabbit.filter.RevalidateFilter
@@ -368,6 +370,16 @@ blockURLmatching=(\.sex\.|[-.]ad([sx]?)\.|/ad\.|adserving\.|ad101com-|pagead/img
 # only allow access to these urls
 #allowURLmatching=(www\.)?somesite.com/
 
+
+[rabbit.filter.SQLBlockFilter]
+# return a 403 forbidden for the requests that have a host found in 
+# a database
+resource=jdbc/host_blocker_database
+user=
+password=
+select=select 1 from bad_hosts where hostname = ?
+
+
 [rabbit.filter.HttpSnoop]
 # mode can be one of NORMAL, REQUEST_LINE, FULL
 # mode defaults to NORMAL if not specified
@@ -397,16 +409,9 @@ authenticator=plain
 # For plain text file authentication:
 userfile=conf/allowed
 
-# The driver to use: 
-# org.gjt.mm.mysql.Driver for mysql
-# org.hsqldb.jdbcDriver for hssql
-# org.apache.derby.jdbc.ClientDriver for derby
-driver=
-# The url to use for the database, something like:
-# jdbc:oracle:thin:@//myhost:1521/orcl for an oracle db
-# jdbc:hsqldb:hsql://localhost for a hssql
-# jdbc:derby://localhost:1527/dbname
-url=
+# The database resource to use, 
+#resource=jdbc/host_blocker_database
+resource=
 # The database user, may be blank
 user=
 # The database password, may be blank
