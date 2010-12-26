@@ -1,36 +1,36 @@
 package rabbit.jndi;
 
-/* 
+/*
  * "@(#)HierCtx.java	1.1	00/01/18 SMI"
- * 
+ *
  * Copyright 1997, 1998, 1999 Sun Microsystems, Inc. All Rights
  * Reserved.
- * 
+ *
  * Sun grants you ("Licensee") a non-exclusive, royalty free,
  * license to use, modify and redistribute this software in source and
  * binary code form, provided that i) this copyright notice and license
- * appear on all copies of the software; and ii) Licensee does not 
+ * appear on all copies of the software; and ii) Licensee does not
  * utilize the software in a manner which is disparaging to Sun.
  *
  * This software is provided "AS IS," without a warranty of any
  * kind. ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND
- * WARRANTIES, INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE 
- * HEREBY EXCLUDED.  SUN AND ITS LICENSORS SHALL NOT BE LIABLE 
- * FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, 
- * MODIFYING OR DISTRIBUTING THE SOFTWARE OR ITS DERIVATIVES. IN 
- * NO EVENT WILL SUN OR ITS LICENSORS BE LIABLE FOR ANY LOST 
+ * WARRANTIES, INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE
+ * HEREBY EXCLUDED.  SUN AND ITS LICENSORS SHALL NOT BE LIABLE
+ * FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING,
+ * MODIFYING OR DISTRIBUTING THE SOFTWARE OR ITS DERIVATIVES. IN
+ * NO EVENT WILL SUN OR ITS LICENSORS BE LIABLE FOR ANY LOST
  * REVENUE, PROFIT OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL,
- * CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER 
- * CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT 
- * OF THE USE OF OR INABILITY TO USE SOFTWARE, EVEN IF SUN HAS 
+ * CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER
+ * CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT
+ * OF THE USE OF OR INABILITY TO USE SOFTWARE, EVEN IF SUN HAS
  * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * 
+ *
  * This software is not designed or intended for use in on-line
  * control of aircraft, air traffic, aircraft navigation or aircraft
  * communications; or in the design, construction, operation or
  * maintenance of any nuclear facility. Licensee represents and warrants
- * that it will not use or redistribute the Software for such purposes.  
+ * that it will not use or redistribute the Software for such purposes.
  */
 
 import javax.naming.*;
@@ -40,11 +40,10 @@ import java.util.*;
 /**
  * A sample service provider that implements a hierarchical namespace in memory.
  *
- *  Originally from the jndi tutorial, but patched a bit
+ *  Originally from the jndi tutorial, but patched quite a bit
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-@SuppressWarnings("unchecked")
 public class HierContext implements Context {
     protected Hashtable<Object, Object> myEnv =
 	new Hashtable<Object, Object> ();
@@ -60,8 +59,8 @@ public class HierContext implements Context {
 	}
     }
 
-    protected HierContext (HierContext parent, String name, 
-			   Hashtable<?, ?> inEnv, 
+    protected HierContext (HierContext parent, String name,
+			   Hashtable<?, ?> inEnv,
 			   Map<String, Object> bindings) {
 	this (inEnv);
 	this.parent = parent;
@@ -84,11 +83,11 @@ public class HierContext implements Context {
     }
 
     public Object lookup (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            // Asking to look up this context itself.  Create and return
-            // a new instance with its own independent environment.
-            return cloneCtx ();
-        } 
+	if (name.isEmpty ()) {
+	    // Asking to look up this context itself.  Create and return
+	    // a new instance with its own independent environment.
+	    return cloneCtx ();
+	}
 
 	// Extract components that belong to this namespace
 	String atom = name.get (0);
@@ -101,8 +100,8 @@ public class HierContext implements Context {
 
 	    // Call getObjectInstance for using any object factories
 	    try {
-		return NamingManager.getObjectInstance (inter, 
-		    new CompositeName ().add (atom), 
+		return NamingManager.getObjectInstance (inter,
+		    new CompositeName ().add (atom),
 		    this, myEnv);
 	    } catch (Exception e) {
 		NamingException ne = new NamingException (
@@ -113,11 +112,11 @@ public class HierContext implements Context {
 	}
 	// Intermediate name: Consume name in this context and continue
 	if (! (inter instanceof Context)) {
-	    String err = atom + " does not name a context, " + 
+	    String err = atom + " does not name a context, " +
 		"bindings: " + bindings;
 	    throw new NotContextException (err);
 	}
-	
+
 	return ((Context)inter).lookup (name.getSuffix (1));
     }
 
@@ -126,9 +125,9 @@ public class HierContext implements Context {
     }
 
     public void bind (Name name, Object obj) throws NamingException {
-        if (name.isEmpty ()) {
-            throw new InvalidNameException ("Cannot bind empty name");
-        }
+	if (name.isEmpty ()) {
+	    throw new InvalidNameException ("Cannot bind empty name");
+	}
 
 	// Extract components that belong to this namespace
 	String atom = name.get (0);
@@ -138,12 +137,12 @@ public class HierContext implements Context {
 	    // Atomic name: Find object in internal data structure
 	    if (inter != null) {
 		throw new NameAlreadyBoundException (
-                    "Use rebind to override");
+		    "Use rebind to override");
 	    }
 
 	    // Call getStateToBind for using any state factories
-	    obj = NamingManager.getStateToBind (obj, 
-		    new CompositeName ().add (atom), 
+	    obj = NamingManager.getStateToBind (obj,
+		    new CompositeName ().add (atom),
 		    this, myEnv);
 
 	    // Add object to internal data structure
@@ -156,7 +155,7 @@ public class HierContext implements Context {
 	    } else if (inter instanceof Context) {
 		((Context)inter).bind (name.getSuffix (1), obj);
 	    } else {
-		String err = "Intermediate already bound and " + 
+		String err = "Intermediate already bound and " +
 		    "it is not a context: name: " + name + ", inter: " + inter;
 		throw new NotContextException (err);
 	    }
@@ -168,19 +167,19 @@ public class HierContext implements Context {
     }
 
     public void rebind (Name name, Object obj) throws NamingException {
-        if (name.isEmpty ()) {
-            throw new InvalidNameException ("Cannot bind empty name");
-        }
-	
+	if (name.isEmpty ()) {
+	    throw new InvalidNameException ("Cannot bind empty name");
+	}
+
 	// Extract components that belong to this namespace
 	String atom = name.get (0);
 
 	if (name.size () == 1) {
 	    // Atomic name
- 
+
 	    // Call getStateToBind for using any state factories
-	    obj = NamingManager.getStateToBind (obj, 
-		    new CompositeName ().add (atom), 
+	    obj = NamingManager.getStateToBind (obj,
+		    new CompositeName ().add (atom),
 		    this, myEnv);
 
 	    // Add object to internal data structure
@@ -189,7 +188,7 @@ public class HierContext implements Context {
 	    // Intermediate name: Consume name in this context and continue
 	    Object inter = bindings.get (atom);
 	    if (! (inter instanceof Context)) {
-		throw new NotContextException (atom + 
+		throw new NotContextException (atom +
 		    " does not name a context");
 	    }
 	    ((Context)inter).rebind (name.getSuffix (1), obj);
@@ -201,9 +200,9 @@ public class HierContext implements Context {
     }
 
     public void unbind (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            throw new InvalidNameException ("Cannot unbind empty name");
-        }
+	if (name.isEmpty ()) {
+	    throw new InvalidNameException ("Cannot unbind empty name");
+	}
 
 	// Extract components that belong to this namespace
 	String atom = name.get (0);
@@ -216,7 +215,7 @@ public class HierContext implements Context {
 	    // Intermediate name: Consume name in this context and continue
 	    Object inter = bindings.get (atom);
 	    if (! (inter instanceof Context)) {
-		throw new NotContextException (atom + 
+		throw new NotContextException (atom +
 		    " does not name a context");
 	    }
 	    ((Context)inter).unbind (name.getSuffix (1));
@@ -228,9 +227,9 @@ public class HierContext implements Context {
     }
 
     public void rename (Name oldname, Name newname) throws NamingException {
-        if (oldname.isEmpty () || newname.isEmpty ()) {
-            throw new InvalidNameException ("Cannot rename empty name");
-        }
+	if (oldname.isEmpty () || newname.isEmpty ()) {
+	    throw new InvalidNameException ("Cannot rename empty name");
+	}
 
 	// Simplistic implementation: support only rename within same context
 	if (oldname.size () != newname.size ()) {
@@ -274,40 +273,44 @@ public class HierContext implements Context {
 	}
     }
 
-    public NamingEnumeration list (String name) throws NamingException {
+    public NamingEnumeration<NameClassPair> list (String name)
+	throws NamingException {
 	return list (new CompositeName (name));
     }
 
-    public NamingEnumeration list (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            // listing this context
-            return new ListOfNames (bindings.keySet ());
-        } 
+    public NamingEnumeration<NameClassPair> list (Name name)
+	throws NamingException {
+	if (name.isEmpty ()) {
+	    // listing this context
+	    return new ListOfNames (bindings.keySet ());
+	}
 
-        // Perhaps 'name' names a context
-        Object target = lookup (name);
-        if (target instanceof Context) {
-            return ((Context)target).list ("");
-        }
-        throw new NotContextException (name + " cannot be listed");
+	// Perhaps 'name' names a context
+	Object target = lookup (name);
+	if (target instanceof Context) {
+	    return ((Context)target).list ("");
+	}
+	throw new NotContextException (name + " cannot be listed");
     }
 
-    public NamingEnumeration listBindings (String name) throws NamingException {
+    public NamingEnumeration<Binding> listBindings (String name)
+	throws NamingException {
 	return listBindings (new CompositeName (name));
     }
 
-    public NamingEnumeration listBindings (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            // listing this context
-            return new ListOfBindings (bindings.keySet ());
-        } 
+    public NamingEnumeration<Binding> listBindings (Name name)
+	throws NamingException {
+	if (name.isEmpty ()) {
+	    // listing this context
+	    return new ListOfBindings (bindings.keySet ());
+	}
 
-        // Perhaps 'name' names a context
-        Object target = lookup (name);
-        if (target instanceof Context) {
-            return ((Context)target).listBindings ("");
-        }
-        throw new NotContextException (name + " cannot be listed");
+	// Perhaps 'name' names a context
+	Object target = lookup (name);
+	if (target instanceof Context) {
+	    return ((Context)target).listBindings ("");
+	}
+	throw new NotContextException (name + " cannot be listed");
     }
 
     public void destroySubcontext (String name) throws NamingException {
@@ -315,10 +318,10 @@ public class HierContext implements Context {
     }
 
     public void destroySubcontext (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            throw new InvalidNameException (
+	if (name.isEmpty ()) {
+	    throw new InvalidNameException (
 		"Cannot destroy context using empty name");
-        }
+	}
 
 	// Simplistic implementation: not checking for nonempty context first
 	// Use same implementation as unbind
@@ -330,19 +333,19 @@ public class HierContext implements Context {
     }
 
     public Context createSubcontext (Name name) throws NamingException {
-        if (name.isEmpty ()) {
-            throw new InvalidNameException ("Cannot bind empty name");
-        }
+	if (name.isEmpty ()) {
+	    throw new InvalidNameException ("Cannot bind empty name");
+	}
 
 	// Extract components that belong to this namespace
 	String atom = name.get (0);
 	Object inter = bindings.get (atom);
-	
+
 	if (name.size () == 1) {
 	    // Atomic name: Find object in internal data structure
 	    if (inter != null) {
 		throw new NameAlreadyBoundException (
-                    "Use rebind to override");
+		    "Use rebind to override");
 	    }
 
 	    // Create child
@@ -366,7 +369,7 @@ public class HierContext implements Context {
     }
 
     public Object lookupLink (Name name) throws NamingException {
-        return lookup (name);
+	return lookup (name);
     }
 
     public NameParser getNameParser (String name) throws NamingException {
@@ -383,10 +386,10 @@ public class HierContext implements Context {
     }
 
     public String composeName (String name, String prefix)
-            throws NamingException {
-        Name result = composeName (new CompositeName (name),
+	    throws NamingException {
+	Name result = composeName (new CompositeName (name),
 				   new CompositeName (prefix));
-        return result.toString ();
+	return result.toString ();
     }
 
     public Name composeName (Name name, Name prefix) throws NamingException {
@@ -406,26 +409,26 @@ public class HierContext implements Context {
     }
 
     public Object addToEnvironment (String propName, Object propVal)
-            throws NamingException {
-        if (myEnv == null) {
-            myEnv = new Hashtable<Object, Object> (5, 0.75f);
-        } 
-        return myEnv.put (propName, propVal);
+	    throws NamingException {
+	if (myEnv == null) {
+	    myEnv = new Hashtable<Object, Object> (5, 0.75f);
+	}
+	return myEnv.put (propName, propVal);
     }
 
-    public Object removeFromEnvironment (String propName) 
-            throws NamingException {
-        if (myEnv == null)
-            return null;
+    public Object removeFromEnvironment (String propName)
+	    throws NamingException {
+	if (myEnv == null)
+	    return null;
 
-        return myEnv.remove (propName);
+	return myEnv.remove (propName);
     }
 
     public Hashtable<?, ?> getEnvironment () throws NamingException {
-        if (myEnv == null) {
-            // Must return non-null
-            return new Hashtable<Object, Object> ();
-        }
+	if (myEnv == null) {
+	    // Must return non-null
+	    return new Hashtable<Object, Object> ();
+	}
 	return new Hashtable<Object, Object> (myEnv);
     }
 
@@ -445,11 +448,11 @@ public class HierContext implements Context {
 	    name.add (0, ancestor.myAtomicName);
 	    ancestor = ancestor.parent;
 	}
-	    
-        return name.toString ();
+
+	return name.toString ();
     }
 
-    public String toString () {
+    @Override public String toString () {
 	if (myAtomicName != null)
 	    return myAtomicName;
 	return "ROOT CONTEXT";
@@ -459,68 +462,77 @@ public class HierContext implements Context {
 	// empty
     }
 
-    // Class for enumerating name/class pairs
-    class ListOfNames implements NamingEnumeration {
-        protected Iterator<String> names;
+    abstract class ListOf<T extends NameClassPair>
+	implements NamingEnumeration<T> {
+	protected Iterator<String> names;
 
-        ListOfNames (Collection<String> names) {
-            this.names = names.iterator ();
-        }
+	ListOf (Collection<String> names) {
+	    this.names = names.iterator ();
+	}
 
-        public boolean hasMoreElements () {
+	public boolean hasMoreElements () {
 	    try {
 		return hasMore ();
 	    } catch (NamingException e) {
 		return false;
 	    }
-        }
+	}
 
-        public boolean hasMore () throws NamingException {
-            return names.hasNext ();
-        }
+	public boolean hasMore () throws NamingException {
+	    return names.hasNext ();
+	}
 
-        public Object next () throws NamingException {
-            String name = names.next ();
-            String className = bindings.get (name).getClass ().getName ();
-            return new NameClassPair (name, className);
-        }
+	public abstract T next () throws NamingException;
 
-        public Object nextElement () {
+	public T nextElement () {
 	    try {
 		return next ();
 	    } catch (NamingException e) {
 		throw new NoSuchElementException (e.toString ());
 	    }
-        }
+	}
 
-        public void close () {
+	public void close () {
 	    // empty
-        }
+	}
+    }
+
+
+    // Class for enumerating name/class pairs
+    class ListOfNames extends ListOf<NameClassPair> {
+	ListOfNames (Collection<String> names) {
+	    super (names);
+	}
+
+	@Override public NameClassPair next () throws NamingException {
+	    String name = names.next ();
+	    String className = bindings.get (name).getClass ().getName ();
+	    return new NameClassPair (name, className);
+	}
     }
 
     // Class for enumerating bindings
-    class ListOfBindings extends ListOfNames {
+    class ListOfBindings extends ListOf<Binding> {
 
-        ListOfBindings (Collection<String> names) {
+	ListOfBindings (Collection<String> names) {
 	    super (names);
-        }
+	}
 
-        @Override public Object next () throws NamingException {
-            String name = names.next ();
+	@Override public Binding next () throws NamingException {
+	    String name = names.next ();
 	    Object obj = bindings.get (name);
 
 	    try {
-		obj = NamingManager.getObjectInstance (obj, 
-		    new CompositeName ().add (name), HierContext.this, 
+		obj = NamingManager.getObjectInstance (obj,
+		    new CompositeName ().add (name), HierContext.this,
 		    HierContext.this.myEnv);
 	    } catch (Exception e) {
-		NamingException ne = 
+		NamingException ne =
 		    new NamingException ("getObjectInstance failed");
 		ne.setRootCause (e);
 		throw ne;
 	    }
-
-            return new Binding (name, obj);
-        }
+	    return new Binding (name, obj);
+	}
     }
 };
