@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
 import org.khelekore.rnio.impl.Acceptor;
@@ -51,7 +52,7 @@ import rabbit.util.SProperties;
 public class HttpProxy {
 
     /** Current version */
-    public static final String VERSION = "RabbIT proxy version 4.8";
+    public static final String VERSION = "RabbIT proxy version 4.9";
 
     /** The current config of this proxy. */
     private Config config;
@@ -259,6 +260,22 @@ public class HttpProxy {
 	    proxyChain = new SimpleProxyChain (nioHandler, dnsHandler);
     }
 
+    private void setupResources () {
+	SProperties props = config.getProperties ("data_sources");
+	if (props == null)
+	    return;
+	String resources = props.getProperty ("resources", "");
+	try {
+	    ResourceLoader rl = new ResourceLoader ();
+	    for (String r : resources.split (","))
+		rl.setupResource (r, config.getProperties (r));
+	} catch (NamingException e) {
+	    logger.log (Level.WARNING,
+			"Failed to setup initial context",
+			e);
+	}
+    }
+
     private void setupCache () {
 	SProperties props =
 	    config.getProperties (NCache.class.getName ());
@@ -369,8 +386,9 @@ public class HttpProxy {
 	String strictHttp = config.getProperty (cn, "StrictHTTP", "true");
 	setStrictHttp (strictHttp.equals ("true"));
 	setupMaxConnections ();
+	setupResources ();
 	setupCache ();
-	setupSSLSupport ();
+	setupSSLSupport ();	
 	loadClasses ();
 	openSocket ();
 	setupConnectionHandler ();
