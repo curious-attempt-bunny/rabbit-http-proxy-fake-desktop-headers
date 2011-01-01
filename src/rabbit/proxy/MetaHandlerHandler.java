@@ -61,7 +61,7 @@ class MetaHandlerHandler {
 		file = "rabbit.meta." + file;
 
 	    Class<? extends MetaHandler> cls =
-		Class.forName (file).asSubclass (MetaHandler.class);
+		con.getProxy ().load3rdPartyClass (file, MetaHandler.class);
 	    MetaHandler mh;
 	    mh = cls.newInstance ();
 	    mh.handle (header, htab, con, tlProxy, tlClient);

@@ -478,7 +478,7 @@ public class HttpBaseFilter implements HttpFilter {
 	return null;
     }    
 
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	removes.clear ();
 	String rs = properties.getProperty ("remove", "");
 	String[] sts = rs.split (",");

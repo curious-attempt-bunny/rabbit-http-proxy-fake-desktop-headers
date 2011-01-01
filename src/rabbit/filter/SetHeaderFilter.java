@@ -1,10 +1,11 @@
 package rabbit.filter;
 
+import java.nio.channels.SocketChannel;
+import java.util.Map;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
-import java.util.Map;
-import java.nio.channels.SocketChannel;
 
 /** This is a class that sets headers in the request and/or response.
  *  Mostly an example of how to set headers.
@@ -46,7 +47,7 @@ public class SetHeaderFilter implements HttpFilter {
 	return null;
     }
 
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	this.props = properties;
     }
 }

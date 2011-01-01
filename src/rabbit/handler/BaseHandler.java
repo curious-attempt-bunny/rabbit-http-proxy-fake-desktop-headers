@@ -29,6 +29,7 @@ import rabbit.httpio.TransferListener;
 import rabbit.io.BufferHandle;
 import rabbit.io.FileHelper;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.proxy.PartialCacher;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
@@ -594,7 +595,7 @@ public class BaseHandler
 	finish (false);
     }
 
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	// nothing to do.
     }
 }

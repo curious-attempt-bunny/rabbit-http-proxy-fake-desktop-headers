@@ -20,15 +20,15 @@ class HttpHeaderFilterer {
     private final List<HttpFilter> connectFilters;
 
     public HttpHeaderFilterer (String in, String out, String connect,
-			       Config config) {
+			       Config config, HttpProxy proxy) {
 	httpInFilters = new ArrayList<HttpFilter> ();
-	loadHttpFilters (in, httpInFilters, config);
+	loadHttpFilters (in, httpInFilters, config, proxy);
 
 	httpOutFilters = new ArrayList<HttpFilter> ();
-	loadHttpFilters (out, httpOutFilters, config);
+	loadHttpFilters (out, httpOutFilters, config, proxy);
 
 	connectFilters = new ArrayList<HttpFilter> ();
-	loadHttpFilters (connect, connectFilters, config);
+	loadHttpFilters (connect, connectFilters, config, proxy);
     }
 
     private static interface FilterHandler {
@@ -104,7 +104,7 @@ class HttpHeaderFilterer {
     }
 
     private void loadHttpFilters (String filters, List<HttpFilter> ls,
-				  Config config) {
+				  Config config, HttpProxy proxy) {
 	Logger log = Logger.getLogger(getClass().getName());
 	String[] filterArray = filters.split (",");
 	for (String className : filterArray) {
@@ -114,9 +114,9 @@ class HttpHeaderFilterer {
 	    try {
 		className = className.trim();
 		Class<? extends HttpFilter> cls =
-		    Class.forName(className).asSubclass(HttpFilter.class);
+		    proxy.load3rdPartyClass (className, HttpFilter.class);
 		HttpFilter hf = cls.newInstance();
-		hf.setup(config.getProperties(className));
+		hf.setup(config.getProperties(className), proxy);
 		ls.add(hf);
 	    } catch (ClassNotFoundException ex) {
 		log.log(Level.WARNING,

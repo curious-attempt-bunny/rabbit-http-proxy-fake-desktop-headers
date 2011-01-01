@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 import rabbit.util.PatternHelper;
 
@@ -107,7 +108,7 @@ public class DontCacheFilter implements HttpFilter {
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.
      */
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	PatternHelper ph = new PatternHelper ();
 	dontCacheUrls = 
 	    ph.getPattern (properties, "dontCacheURLmatching", 

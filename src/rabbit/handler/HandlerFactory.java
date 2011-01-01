@@ -3,6 +3,7 @@ package rabbit.handler;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.ResourceSource;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 
@@ -34,6 +35,7 @@ public interface HandlerFactory {
     
     /** setup the handler factory. 
      * @param properties the properties for this factory
+     * @param proxy the HttpProxy using this HandlerFactory
      */
-    void setup (SProperties properties);
+    void setup (SProperties properties, HttpProxy proxy);
 }

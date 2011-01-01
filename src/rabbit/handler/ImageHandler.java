@@ -465,8 +465,8 @@ public class ImageHandler extends BaseHandler {
 	return minSizeToConvert;
     }
 
-    @Override public void setup (SProperties prop) {
-	super.setup (prop);
+    @Override public void setup (SProperties prop, HttpProxy proxy) {
+	super.setup (prop, proxy);
 	if (prop == null)
 	    return;
 	config = prop;

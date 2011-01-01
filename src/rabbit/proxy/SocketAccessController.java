@@ -24,22 +24,25 @@ public class SocketAccessController {
      *  filters.
      * @param filters a comma separated list of filters to use
      * @param config the Config to get the internal filters properties from
+     * @param proxy the HttpProxy using this access controller
      */
-    public SocketAccessController (String filters, Config config) {
+    public SocketAccessController (String filters, Config config,
+				   HttpProxy proxy) {
 	accessfilters = new ArrayList<IPAccessFilter> ();
-	loadAccessFilters (filters, accessfilters, config);
+	loadAccessFilters (filters, accessfilters, config, proxy);
     }
 
     private void loadAccessFilters (String filters, 
 				    List<IPAccessFilter> accessfilters, 
-				    Config config) {
+				    Config config,
+				    HttpProxy proxy) {
 	StringTokenizer st = new StringTokenizer (filters, ",");
 	String classname = "";
 	while (st.hasMoreElements ()) {
 	    try {
 		classname = st.nextToken ().trim ();
 		Class<? extends IPAccessFilter> cls = 
-		    Class.forName (classname).asSubclass (IPAccessFilter.class);
+		    proxy.load3rdPartyClass (classname, IPAccessFilter.class);
 		IPAccessFilter ipf = cls.newInstance ();
 		ipf.setup (config.getProperties (classname));
 		accessfilters.add (ipf);

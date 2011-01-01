@@ -70,7 +70,9 @@ public class HtmlParser {
     /** Unknown token. */
     public final static int UNKNOWN      = 1000;
 
-    /** Create a new HTMLParser */
+    /** Create a new HTMLParser
+     * @param cs the Charset to use when converting bytes to text
+     */
     public HtmlParser (Charset cs) {
 	this.cs = cs;
 	pagepart = null;
@@ -100,6 +102,7 @@ public class HtmlParser {
 
     /** Set the data block to parse.
      * @param page the block to parse.
+     * @param startIndex where to start in the page
      * @param length the length of the data.
      */
     public void setText (byte[] page, int startIndex, int length) {
@@ -244,6 +247,7 @@ public class HtmlParser {
     /** Scan a comment from the block, that is the string up to and
      *	including &quot;-->&quot;.
      * @return COMMENT or END.
+     * @throws HtmlParseException if the html can not be parsed
      */
     private int scanComment () throws HtmlParseException {
 	int startvalue = index - 1;
@@ -272,6 +276,7 @@ public class HtmlParser {
     /** Match the token with next token and scan the (new)next token.
      * @param token the token to match.
      * @return the next token.
+     * @throws HtmlParseException if the match fails
      */
     private int match (int token) throws HtmlParseException {
 	int ts;
@@ -328,6 +333,7 @@ public class HtmlParser {
 
     /** Scan a value from the block.
      * @return the value or null.
+     * @throws HtmlParseException if the parsing fails
      */
     private String value () throws HtmlParseException {
 	if (nextToken == EQUALS) {
@@ -353,6 +359,7 @@ public class HtmlParser {
 
     /** Scan an argument list from the block.
      * @param tag the Tag that have the arguments.
+     * @throws HtmlParseException if the argument list can not be parsed
      */
     private void arglist (Tag tag) throws HtmlParseException {
 	String key;
@@ -435,7 +442,11 @@ public class HtmlParser {
 	    }
 	}
     }
-    /** Is this tag at the scan position? */
+    /** Is this tag at the scan position?
+     * @param tag the tag to check for
+     * @param j the position in the page
+     * @return true if the pagepart at j holds the given tag
+     */
     private boolean sameTag (String tag, int j) {
 	int i;
 	for (i = 0; i < tag.length () && i < length; i++) {
@@ -473,6 +484,7 @@ public class HtmlParser {
 
     /** Scan a tag from the block.
      * @param ltagStart the index of the last tag started.
+     * @throws HtmlParseException if the tag can not be parsed
      */
     private void tag (int ltagStart) throws HtmlParseException {
 	Tag tag = new Tag ();
@@ -509,6 +521,7 @@ public class HtmlParser {
     }
 
     /** Scan a page from the block.
+     * @throws HtmlParseException if the page can not be parsed
      */
     private void page () throws HtmlParseException {
 	while (!block.hasRests ()) {
@@ -538,6 +551,8 @@ public class HtmlParser {
     }
 
     /** Get a HtmlBlock from the pagepart given.
+     * @return the parsed block
+     * @throws HtmlParseException if a block can not be parsed
      */
     public HtmlBlock parse () throws HtmlParseException {
 	block = new HtmlBlock (pagepart, length, cs, decodeRest);

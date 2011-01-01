@@ -3,6 +3,7 @@ package rabbit.filter;
 import java.nio.channels.SocketChannel;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 
 /** A filter for http headers.
@@ -47,6 +48,7 @@ public interface HttpFilter {
 
     /** Setup this filter.
      * @param properties the SProperties to get the settings from.
+     * @param proxy the HttpProxy that is using this filter
      */
-    void setup (SProperties properties);
+    void setup (SProperties properties, HttpProxy proxy);
 }

@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 
 /** This is a class that makes all requests (matching a few criterias) use revalidation
@@ -42,7 +43,7 @@ public class RevalidateFilter implements HttpFilter {
 	return null;
     }    
 
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	String always = properties.getProperty ("alwaysrevalidate", "false");
 	alwaysRevalidate = Boolean.parseBoolean (always);
 	if (!alwaysRevalidate) {

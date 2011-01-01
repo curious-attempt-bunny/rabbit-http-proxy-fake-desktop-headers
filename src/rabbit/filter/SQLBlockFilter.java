@@ -1,7 +1,7 @@
 package rabbit.filter;
 
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.channels.SocketChannel;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.naming.NamingException;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 
 /** A blocker that checks hosts against a sql database
@@ -72,7 +73,7 @@ public class SQLBlockFilter implements HttpFilter {
     /** Setup this class with the given properties.
      * @param props the new configuration of this class.
      */
-    public void setup (SProperties props) {
+    public void setup (SProperties props, HttpProxy proxy) {
 	try {
 	    dsh = new DataSourceHelper (props, DEFAULT_SQL);
 	} catch (NamingException e) {

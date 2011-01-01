@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-/** A class that starts up proxies. 
- * 
+/** A class that starts up proxies.
+ *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
 public class ProxyStarter {
-    
+
     private static final String DEFAULT_CONFIG = "conf/rabbit.conf";
 
+    /** Create the ProxyStarter and let it parse the command line arguments.
+     * @param args the command line arguments
+     */
     public static void main (String[] args) {
 	ProxyStarter ps = new ProxyStarter ();
 	ps.start (args);
@@ -24,10 +27,10 @@ public class ProxyStarter {
 	try {
 	    byte[] b = new byte[4096];
 	    int i;
-	    InputStream f = 
+	    InputStream f =
 		ProxyStarter.class.getResourceAsStream ("/Help.txt");
 	    try {
-		while ((i = f.read(b)) > 0) 
+		while ((i = f.read(b)) > 0)
 		    System.out.write (b, 0, i);
 	    } finally {
 		f.close ();
@@ -40,7 +43,7 @@ public class ProxyStarter {
     private void start (String[] args) {
 	List<String> configs = new ArrayList<String> ();
 	for (int i = 0; i < args.length; i++) {
-	    if (args[i].equals ("-?") || args[i].equals ("-h") || 
+	    if (args[i].equals ("-?") || args[i].equals ("-h") ||
 		args[i].equals ("--help")) {
 		printHelp ();
 		return;
@@ -60,11 +63,11 @@ public class ProxyStarter {
 	if (configs.size () == 0)
 	    configs.add (DEFAULT_CONFIG);
 	for (String conf : configs)
-	    startProxy (conf);	
+	    startProxy (conf);
     }
 
     private void startProxy (String conf) {
-	try {
+ 	try {
 	    HttpProxy p = new HttpProxy ();
 	    p.setConfig (conf);
 	    p.start ();

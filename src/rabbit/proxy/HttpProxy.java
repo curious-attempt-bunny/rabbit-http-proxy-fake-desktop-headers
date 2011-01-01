@@ -127,7 +127,11 @@ public class HttpProxy {
     /** The total traffic in and out of this proxy. */
     private final TrafficLoggerHandler tlh = new TrafficLoggerHandler ();
 
+    /** The factory for http header generator */
     private HttpGeneratorFactory hgf;
+
+    /** The ClassLoader to use when loading handlers*/
+    private ClassLoader libLoader;
 
     /** Create a new HttpProxy.
      * @throws UnknownHostException if the local host address can not
@@ -160,6 +164,13 @@ public class HttpProxy {
 	HttpDateParser.setOffset (getOffset ());
     }
 
+    private void setup3rdPartyClassLoader () {
+	ProxyClassLoaderHelper clh = new ProxyClassLoaderHelper ();
+	String libDirs = 
+	    config.getProperty (getClass ().getName (), "libs", "libs");
+	libLoader = clh.get3rdPartyClassLoader (libDirs);
+    }
+
     private void setupDNSHandler () {
 	/* DNSJava have problems with international versions of windows.
 	 * so we default to the default dns handler.
@@ -175,7 +186,7 @@ public class HttpProxy {
 				    DNSJavaHandler.class.getName ());
 	    try {
 		Class<? extends DNSHandler> clz =
-		    Class.forName (dnsHandlerClass).asSubclass (DNSHandler.class);
+		    load3rdPartyClass (dnsHandlerClass, DNSHandler.class);
 		dnsHandler = clz.newInstance ();
 		dnsHandler.setup (config.getProperties ("dns"));
 	    } catch (Exception e) {
@@ -208,7 +219,7 @@ public class HttpProxy {
     private ProxyChain setupProxyChainFromFactory (String pcf) {
 	try {
 	    Class<? extends ProxyChainFactory> clz =
-		Class.forName (pcf).asSubclass (ProxyChainFactory.class);
+		load3rdPartyClass (pcf, ProxyChainFactory.class);
 	    ProxyChainFactory factory = clz.newInstance ();
 	    SProperties props = config.getProperties (pcf);
 	    return 
@@ -270,7 +281,7 @@ public class HttpProxy {
 	try {
 	    ResourceLoader rl = new ResourceLoader ();
 	    for (String r : resources.split (","))
-		rl.setupResource (r, config.getProperties (r));
+		rl.setupResource (r, config.getProperties (r), this);
 	} catch (NamingException e) {
 	    logger.log (Level.WARNING,
 			"Failed to setup initial context",
@@ -363,7 +374,7 @@ public class HttpProxy {
 					      "http_generator_factory", def);
 	try {
 	    Class<? extends HttpGeneratorFactory> clz =
-		Class.forName (hgfClass).asSubclass (HttpGeneratorFactory.class);
+		load3rdPartyClass (hgfClass, HttpGeneratorFactory.class);
 	    hgf = clz.newInstance ();
 	} catch (Exception e) {
 	    logger.log (Level.WARNING,
@@ -380,6 +391,7 @@ public class HttpProxy {
 	this.config = config;
 	setupLogging ();
 	setupDateParsing ();
+	setup3rdPartyClassLoader ();
 	setupDNSHandler ();
 	setupNioHandler ();
 	setupProxyConnection ();
@@ -467,16 +479,17 @@ public class HttpProxy {
 	SProperties hProps = config.getProperties ("Handlers");
 	SProperties chProps = config.getProperties ("CacheHandlers");
 	handlerFactoryHandler =
-	    new HandlerFactoryHandler (hProps, chProps, config);
+	    new HandlerFactoryHandler (hProps, chProps, config, this);
 
 	String filters = config.getProperty ("Filters", "accessfilters","");
 	socketAccessController =
-	    new SocketAccessController (filters, config);
+	    new SocketAccessController (filters, config, this);
 
 	String in = config.getProperty ("Filters", "httpinfilters","");
 	String out = config.getProperty ("Filters", "httpoutfilters","");
 	String connect = config.getProperty ("Filters", "conectfilters","");
-	httpHeaderFilterer = new HttpHeaderFilterer (in, out, connect, config);
+	httpHeaderFilterer =
+	    new HttpHeaderFilterer (in, out, connect, config, this);
     }
 
 
@@ -716,5 +729,18 @@ public class HttpProxy {
      */
     public HttpGeneratorFactory getHttpGeneratorFactory () {
 	return hgf;
+    }
+
+    /** Load a 3:rd party class.
+     * @param name the fully qualified name of the class to load
+     * @param type the super type of the class
+     * @param <T> the type of the clas
+     * @return the loaded class
+     * @throws ClassNotFoundException if the class can not be found
+     */
+    public <T> Class<? extends T> load3rdPartyClass (String name,
+						     Class<T> type)
+	throws ClassNotFoundException {
+	return Class.forName (name, true, libLoader).asSubclass (type);
     }
 }

@@ -1,8 +1,8 @@
 package rabbit.filter;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.InetAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +16,7 @@ import rabbit.filter.authenticate.SQLAuthenticator;
 import rabbit.http.HttpHeader;
 import rabbit.proxy.Connection;
 import rabbit.proxy.HttpGenerator;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 
 /** This is a filter that requires users to use proxy-authentication.
@@ -112,7 +113,7 @@ public class ProxyAuth implements HttpFilter {
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.
      */
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	String ct = properties.getProperty ("cachetime", "0");
 	cacheTime = Integer.parseInt (ct);
 	String ra = properties.getProperty ("one_ip_only", "true");
@@ -128,7 +129,7 @@ public class ProxyAuth implements HttpFilter {
 	} else {
 	    try {
 		Class<? extends Authenticator> clz =
-		    Class.forName (authType).asSubclass (Authenticator.class);
+		    proxy.load3rdPartyClass (authType, Authenticator.class);
 		authenticator = clz.newInstance ();
 	    } catch (ClassNotFoundException e) {
 		logger.warning ("Failed to find class: '" + authType + "'");

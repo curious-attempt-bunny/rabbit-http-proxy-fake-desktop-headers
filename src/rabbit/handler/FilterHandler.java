@@ -18,6 +18,7 @@ import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.SimpleBufferHandle;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 import rabbit.zip.GZipUnpackListener;
@@ -332,8 +333,8 @@ public class FilterHandler extends GZipHandler {
     /** Setup this class.
      * @param prop the properties of this class.
      */
-    @Override public void setup (SProperties prop) {
-	super.setup (prop);
+    @Override public void setup (SProperties prop, HttpProxy proxy) {
+	super.setup (prop, proxy);
 	defaultCharSet = prop.getProperty ("defaultCharSet", "ISO-8859-1");
 	overrideCharSet = prop.getProperty ("overrideCharSet");
 	String rp = prop.getProperty ("repack", "false");
@@ -345,8 +346,8 @@ public class FilterHandler extends GZipHandler {
 	for (String classname : names) {
 	    try {
 		Class<? extends HtmlFilterFactory> cls =
-		    Class.forName (classname).
-		    asSubclass (HtmlFilterFactory.class);
+		    proxy.load3rdPartyClass (classname,
+					     HtmlFilterFactory.class);
 		filterClasses.add (cls.newInstance ());
 	    } catch (ClassNotFoundException e) {
 		getLogger ().warning ("Could not find filter: '" +

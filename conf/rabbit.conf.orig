@@ -20,6 +20,11 @@ port=9666
 # If not specified will use the same as the number of processors
 #num_selector_threads=4
 
+# This specifies the directory that rabbit will look in for
+# 3:rd party libraries. Specify a directory and rabbit will
+# add all jar files found there. Default is the libs-dir
+#libs=libs
+
 # This is the proxy that RabbIT should use when getting its files.
 # Leave it blank to don't have a proxy.
 # Both of these need to be set, or they will be ignored.

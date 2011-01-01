@@ -8,6 +8,7 @@ import rabbit.io.BufferHandle;
 import rabbit.proxy.ClientResourceHandler;
 import rabbit.proxy.ClientResourceListener;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.util.SProperties;
 
 /** This is a class that prints the Http headers on the standard out stream.
@@ -80,7 +81,7 @@ public class HttpSnoop implements HttpFilter {
     /** Setup this class with the given properties.
      * @param properties the new configuration of this class.
      */
-    public void setup (SProperties properties) {
+    public void setup (SProperties properties, HttpProxy proxy) {
 	String smo = properties.getProperty ("mode", "NORMAL");
 	smo = smo.toUpperCase ();
 	mode = SnoopMode.valueOf (smo);

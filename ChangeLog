@@ -1,4 +1,6 @@
-version 4.9 (201x-yy-zz) Added a jndi context for database resources.
+version 4.9 (201x-yy-zz) Added a jndi context for database resources. Made
+	it easier to use external classes for databases by adding custom
+	class loading.
 
 version 4.8 (2010-10-27) Big javadoc update. Add support for filtering
 	of connect requests. Fixed the problem where the log file got

@@ -34,8 +34,10 @@ public class ResourceLoader {
      *  properties.
      * @param name the name of the resource
      * @param props the properties for the resource
+     * @param proxy the HttpProxy loading the classes
      */
-    public void setupResource (String name, SProperties props) {
+    public void setupResource (String name, SProperties props,
+			       HttpProxy proxy) {
 	if (props == null) {
 	    logger.warning ("No properties for: " + name + 
 			    ", not registering resource");
@@ -43,7 +45,7 @@ public class ResourceLoader {
 	}
 	String clz = props.get ("class");
 	try {
-	    Class<?> c = Class.forName (clz);
+	    Class<?> c = proxy.load3rdPartyClass (clz, Object.class);
 	    Object dataSource = c.newInstance ();
 	    Set<String> ignore = 
 		new HashSet<String> (Arrays.asList ("class", "bind_name"));

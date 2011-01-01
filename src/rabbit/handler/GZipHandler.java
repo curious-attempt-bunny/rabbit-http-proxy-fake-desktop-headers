@@ -6,6 +6,7 @@ import rabbit.httpio.ResourceSource;
 import rabbit.io.BufferHandle;
 import rabbit.io.SimpleBufferHandle;
 import rabbit.proxy.Connection;
+import rabbit.proxy.HttpProxy;
 import rabbit.proxy.TrafficLoggerHandler;
 import rabbit.util.SProperties;
 import rabbit.zip.GZipPackListener;
@@ -245,8 +246,8 @@ public class GZipHandler extends BaseHandler {
     }
 
     @Override
-    public void setup (SProperties prop) {
-	super.setup (prop);
+    public void setup (SProperties prop, HttpProxy proxy) {
+	super.setup (prop, proxy);
 	if (prop != null) {
 	    String comp = prop.getProperty ("compress", "true");
 	    compress = !comp.equalsIgnoreCase ("false");
