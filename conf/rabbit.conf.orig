@@ -21,8 +21,9 @@ port=9666
 #num_selector_threads=4
 
 # This specifies the directory that rabbit will look in for
-# 3:rd party libraries. Specify a directory and rabbit will
-# add all jar files found there. Default is the libs-dir
+# 3:rd party libraries. Specify the directories and rabbit will
+# add all jar files found in them. Default is the libs-dir.
+# Separate entries with the path separator ":" (linux/unix) or ";" (windows)
 #libs=libs
 
 # This is the proxy that RabbIT should use when getting its files.
@@ -578,6 +579,9 @@ adreplacer=http://$proxy/FileSender/public/NoAd.gif
 
 [user_database]
 # Configure the resource for the user database
+# Please drop the needed jar-files in one of the directories given by
+# the libs-entry in the rabbit.proxy.HttpProxy-section.
+#
 #class=com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
 #DataSource=oracle.jdbc.OracleDataSource
 class=org.apache.derby.jdbc.ClientConnectionPoolDataSource40
