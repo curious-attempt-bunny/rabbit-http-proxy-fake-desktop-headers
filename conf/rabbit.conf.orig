@@ -383,6 +383,7 @@ blockURLmatching=(\.sex\.|[-.]ad([sx]?)\.|/ad\.|adserving\.|ad101com-|pagead/img
 [rabbit.filter.SQLBlockFilter]
 # return a 403 forbidden for the requests that have a host found in 
 # a database
+# The resource must match a loaded resource
 resource=jdbc/host_blocker
 user=
 password=
@@ -418,7 +419,7 @@ authenticator=plain
 # For plain text file authentication:
 userfile=conf/allowed
 
-# The database resource to use, 
+# The database resource to use, must match a loaded resource
 #resource=jdbc/host_blocker_database
 resource=
 # The database user, may be blank
@@ -583,6 +584,10 @@ class=org.apache.derby.jdbc.ClientConnectionPoolDataSource40
 # The name to bind to
 bind_name=java:comp/env/jdbc/user_database
 # The set-methods to call, if any, check the documentation for your DataSource
+# Here you can also call setup methods on the DataSource
+# check the manual for your DataSource and then add a <method>=<value> to
+# call that method. Currently the values can only be strings, but that
+# may be changed in the future.
 setServerName=userDatabase
 setDatabaseName=database
 #setUser=
