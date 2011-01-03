@@ -140,7 +140,6 @@ public class HttpHeaderReader extends BaseSocketHandler
 		releaseBuffer ();
 		// ok, we did no progress, abort, client is sending
 		// too long lines.
-		// TODO: perhaps grow buffer...
 		throw new RequestLineTooLongException ();
 	    }
 	    waitForRead (this);
