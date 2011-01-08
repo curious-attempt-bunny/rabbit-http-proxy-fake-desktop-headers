@@ -125,7 +125,6 @@ public class Connection {
     public void readRequest () {
 	clearStatuses ();
 	try {
-	    channel.socket ().setTcpNoDelay (true);
 	    HttpHeaderListener clientListener = new RequestListener ();
 	    HttpHeaderReader hr =
 		new HttpHeaderReader (channel, requestHandle, getNioHandler (),

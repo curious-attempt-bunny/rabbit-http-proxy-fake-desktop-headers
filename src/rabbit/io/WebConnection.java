@@ -93,7 +93,6 @@ public class WebConnection implements Closeable {
 				       address.getPort ());
 	    boolean connected = channel.connect (addr);
 	    if (connected) {
-		channel.socket ().setTcpNoDelay (true);
 		wcl.connectionEstablished (this);
 	    } else {
 		new ConnectListener (wcl).waitForConnection (nioHandler);
@@ -140,7 +139,6 @@ public class WebConnection implements Closeable {
 	public void connect () {
 	    try {
 		channel.finishConnect ();
-		channel.socket ().setTcpNoDelay (true);
 		wcl.connectionEstablished (WebConnection.this);
 	    } catch (IOException e) {
 		closeDown ();
