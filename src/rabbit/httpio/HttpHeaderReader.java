@@ -132,15 +132,22 @@ public class HttpHeaderReader extends BaseSocketHandler
 		// ok, some data handled, make space for more.
 		buffer.compact ();
 		startParseAt = 0;
-	    } else if (isUsingSmallBuffer (buffer)) {
-		buffer = getLargeBuffer ();
-		buffer.position (pos);
-		startParseAt = 0;
 	    } else {
-		releaseBuffer ();
-		// ok, we did no progress, abort, client is sending
-		// too long lines.
-		throw new RequestLineTooLongException ();
+		// ok, we did not make any progress, did we only read
+		// a partial long line (cookie or whatever).
+		if (buffer.limit () < buffer.capacity ()) {
+		    // try to read some more
+		} else  if (isUsingSmallBuffer (buffer)) {
+		    // try to expand buffer
+		    buffer = getLargeBuffer ();
+		    buffer.position (pos);
+		    startParseAt = 0;
+		} else {
+		    releaseBuffer ();
+		    // ok, we did no progress, abort, client is sending
+		    // too long lines.
+		    throw new RequestLineTooLongException ();
+		}
 	    }
 	    waitForRead (this);
 	} else {
