@@ -1,6 +1,10 @@
 version 4.9 (201x-yy-zz) Added a jndi context for database resources. Made
 	it easier to use external classes for databases by adding custom
-	class loading.
+	class loading. Stopped using TCP_NO_DELAY. Fixed a problem that
+	caused RequestLineTooLongException to be thrown in some rare
+	cases. Much updates of the javadoc. Added a filter that blocks
+	sites using a sql database table of hosts. Update the rnio
+	library.
 
 version 4.8 (2010-10-27) Big javadoc update. Add support for filtering
 	of connect requests. Fixed the problem where the log file got
