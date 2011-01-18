@@ -1,3 +1,5 @@
+version 4.10 (201x-yy-zz)
+
 version 4.9 (2011-01-18) Added a jndi context for database resources. Made
 	it easier to use external classes for databases by adding custom
 	class loading. Stopped using TCP_NO_DELAY. Fixed a problem that
