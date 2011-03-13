@@ -25,8 +25,17 @@ public class FileSaver implements BlockListener {
     private final ResourceSource rs;
     private final FileChannel fc;
 
-    public FileSaver (HttpHeader request, ClientBase clientBase, 
-		      ClientListener listener, ResourceSource rs, File f) 
+    /** Create a new FileSaver that will write a resource to the given file.
+     * @param request the actual request
+     * @param clientBase the client
+     * @param listener the ClientListener to tell when the resource has been
+     *        fully handled
+     * @param rs the resource to save
+     * @param f where to store the resource
+     * @throws IOException if the file can not be written
+     */
+    public FileSaver (HttpHeader request, ClientBase clientBase,
+		      ClientListener listener, ResourceSource rs, File f)
 	throws IOException {
 	this.request = request;
 	this.clientBase = clientBase;
@@ -37,7 +46,7 @@ public class FileSaver implements BlockListener {
     }
 
     public void bufferRead (final BufferHandle bufHandle) {
-	TaskIdentifier ti = 
+	TaskIdentifier ti =
 	    new DefaultTaskIdentifier (getClass ().getSimpleName (),
 				      request.getRequestURI ());
 	clientBase.getNioHandler ().runThreadTask (new Runnable () {
@@ -49,7 +58,7 @@ public class FileSaver implements BlockListener {
 			readMore ();
 		    } catch (IOException e) {
 			failed (e);
-		    }			
+		    }
 		}
 	    }, ti);
     }
@@ -67,17 +76,17 @@ public class FileSaver implements BlockListener {
 	    listener.handleFailure (request, e);
 	}
     }
-	
+
     public void failed (Exception cause) {
 	downloadFailed ();
 	listener.handleFailure (request, cause);
     }
-	
+
     public void timeout () {
 	downloadFailed ();
 	listener.handleTimeout (request);
     }
-	
+
     private void downloadFailed () {
 	rs.release ();
 	Closer.close (fc, clientBase.getLogger ());

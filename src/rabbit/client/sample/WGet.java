@@ -22,6 +22,7 @@ public class WGet {
     private final CountingClientBaseStopper ccbs;
 
     /** Download all urls given in the args arrays.
+     * @param args the command line arguments
      */ 
     public static void main (String[] args) {
 	try {
@@ -36,6 +37,7 @@ public class WGet {
     }
     
     /** Create a new WGet that can be used to download resources.
+     * @throws IOException if starting the NioHandler fails
      */ 
     public WGet () throws IOException {
 	clientBase = new ClientBase ();
@@ -43,6 +45,8 @@ public class WGet {
     }
 
     /** Add a set of urls to download.
+     * @param urls the URL:s to download
+     * @throws IOException if the get fails at startup
      */
     public void get (String[] urls) throws IOException {
 	for (String url : urls)
@@ -50,6 +54,8 @@ public class WGet {
     }
 
     /** Add an url to the set of urls to be downloaded
+     * @param url the URL to download
+     * @throws IOException if the get fail at startup
      */ 
     public void get (String url) throws IOException {
 	ccbs.sendRequest (clientBase.getRequest ("GET", url),

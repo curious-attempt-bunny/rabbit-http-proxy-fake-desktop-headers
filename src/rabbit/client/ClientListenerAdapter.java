@@ -29,6 +29,8 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     /** This method does nothing, override to perform actual request. 
+     * @param url the new URL that the redirect header contained
+     * @throws IOException if redirecting fails
      */
     public void redirectedTo (String url) throws IOException {
 	// nothing
@@ -39,6 +41,7 @@ public class ClientListenerAdapter implements ClientListener {
     @Override public void handleResponse (HttpHeader request, 
 					  HttpHeader response, 
 					  WebConnectionResourceSource wc) {
+	// empty
     }
 
     /** This method returns true, override if you want different behaviour.

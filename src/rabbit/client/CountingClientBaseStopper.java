@@ -1,6 +1,5 @@
 package rabbit.client;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import rabbit.http.HttpHeader;
 
@@ -12,16 +11,25 @@ public class CountingClientBaseStopper {
     private final AtomicInteger outstandingRequests = new AtomicInteger ();
     private final ClientBase clientBase;
 
+    /** Create a new CountingClientBaseStopper that will shutdown the
+     *  given client once all outstanding requests have been fully handled.
+     * @param clientBase the actual client
+     */
     public CountingClientBaseStopper (ClientBase clientBase) {
 	this.clientBase = clientBase;
     }
 
-    public void sendRequest (HttpHeader request, ClientListener listener) 
-	throws IOException {
+    /** Send a request
+     * @param request the http header to send
+     * @param listener the client handling the resource
+     */
+    public void sendRequest (HttpHeader request, ClientListener listener) {
 	outstandingRequests.incrementAndGet ();
 	clientBase.sendRequest (request, listener);
     }
 
+    /** Called when one request has finished
+     */
     public void requestDone () {
 	int outstanding = outstandingRequests.decrementAndGet ();
 	if (outstanding == 0)
