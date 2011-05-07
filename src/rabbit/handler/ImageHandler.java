@@ -233,11 +233,13 @@ public class ImageHandler extends BaseHandler {
 	    if (buf.hasArray ()) {
 		arr = buf.array ();
 		off = buf.position ();
+		buf.position (buf.limit ());
 	    } else {
 		arr = new byte[len];
 		buf.get (arr);
 	    }
 	    gzu.setInput (arr, off, len);
+	    bufHandle.possiblyFlush ();
 	}
 
 	public void unpacked (byte[] arr, int off, int len) {

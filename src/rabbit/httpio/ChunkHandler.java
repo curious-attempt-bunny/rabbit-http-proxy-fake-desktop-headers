@@ -54,39 +54,8 @@ public class ChunkHandler {
      */
     public void handleData (BufferHandle bufHandle) {
 	try {
-	    ByteBuffer buffer = bufHandle.getBuffer ();
 	    if (needChunkSize ()) {
-		buffer.mark ();
-		if (!readTrailingCRLF && totalRead > 0) {
-		    if (buffer.remaining () < 2) {
-			feeder.readMore ();
-			return;
-		    }
-		    readOffCRLF (buffer);
-		    buffer.mark ();
-		}
-		LineReader lr = new LineReader (strictHttp);
-		lr.readLine (buffer, new ChunkSizeHandler ());
-		if (currentChunkSize == 0) {
-		    readFooter (bufHandle);
-		} else if (currentChunkSize > 0) {
-		    readFromChunk = 0;
-		    handleChunkData (bufHandle);
-		} else {
-		    buffer.reset ();
-		    if (buffer.position () > 0) {
-			feeder.readMore ();
-		    } else {
-			if (checkChunkSizeAndExtension (buffer)) {
-			    // rest of buffer is a huge extension that we
-			    // do not recognize, so we ignore it...
-			    feeder.readMore ();
-			} else {
-			    String err = "failed to read chunk size";
-			    listener.failed (new IOException (err));
-			}
-		    }
-		}
+		tryToReadChunkSize (bufHandle);
 	    } else if (readExtension) {
 		tryToReadExtension (bufHandle);
 	    } else {
@@ -97,6 +66,42 @@ public class ChunkHandler {
 	    }
 	} catch (BadChunkException e) {
 	    listener.failed (e);
+	}
+    }
+
+    private void tryToReadChunkSize (BufferHandle bufHandle) {
+	ByteBuffer buffer = bufHandle.getBuffer ();
+	buffer.mark ();
+	if (!readTrailingCRLF && totalRead > 0) {
+	    if (buffer.remaining () < 2) {
+		bufHandle.possiblyFlush ();
+		feeder.readMore ();
+		return;
+	    }
+	    readOffCRLF (buffer);
+	    buffer.mark ();
+	}
+	LineReader lr = new LineReader (strictHttp);
+	lr.readLine (buffer, new ChunkSizeHandler ());
+	if (currentChunkSize == 0) {
+	    readFooter (bufHandle);
+	} else if (currentChunkSize > 0) {
+	    readFromChunk = 0;
+	    handleChunkData (bufHandle);
+	} else {
+	    buffer.reset ();
+	    if (buffer.position () > 0) {
+		feeder.readMore ();
+	    } else {
+		if (checkChunkSizeAndExtension (buffer)) {
+		    // rest of buffer is a huge extension that we
+		    // do not recognize, so we ignore it...
+		    feeder.readMore ();
+		} else {
+		    String err = "failed to read chunk size";
+		    listener.failed (new IOException (err));
+		}
+	    }
 	}
     }
 
@@ -147,6 +152,7 @@ public class ChunkHandler {
 	int leftInChunk = currentChunkSize - readFromChunk;
 	int thisChunk = Math.min (remaining, leftInChunk);
 	if (thisChunk == 0) {
+	    bufHandle.possiblyFlush ();
 	    feeder.readMore ();
 	    return;
 	}
@@ -190,10 +196,12 @@ public class ChunkHandler {
 	    elh = new EmptyLineHandler ();
 	    lr.readLine (buffer, elh);
 	    if (!elh.lineRead ()) {
+		bufHandle.possiblyFlush ();
 		feeder.readMore ();
 		return;
 	    }
 	} while (!elh.ok ());
+	bufHandle.possiblyFlush ();
 	listener.finishedRead ();
     }
 
