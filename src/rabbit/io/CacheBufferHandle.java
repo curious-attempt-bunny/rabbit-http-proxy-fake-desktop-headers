@@ -30,6 +30,8 @@ public class CacheBufferHandle implements BufferHandle {
     }
     
     public synchronized ByteBuffer getLargeBuffer () {
+	if (buffer != null && isLarge (buffer))
+	    return buffer;
 	buffer = bh.growBuffer (buffer);
 	return buffer;
     }
