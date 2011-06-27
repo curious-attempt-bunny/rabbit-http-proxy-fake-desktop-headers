@@ -130,6 +130,9 @@ public class WebConnectionResourceSource
 	    ByteBuffer buffer = bufHandle.getBuffer ();
 	    buffer.compact ();
 	    currentMark = buffer.position ();
+	    // we need to flip here so that any buffer growning
+	    // sees the correct buffer handling
+	    buffer.flip ();
 	}
 	register ();
     }
