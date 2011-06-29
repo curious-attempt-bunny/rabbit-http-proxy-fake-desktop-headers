@@ -1,4 +1,10 @@
-version 4.10 (201x-yy-zz)
+version 4.10 (2011-06-29) Fixed a problem with StackOverflow for chunked
+	resources with many small chunks. Updated rnio to version
+	1.2. Fixed a problem with enlarging an already large data buffer
+	data buffer. Fixed a problem that caused some bytes to get lost
+	when a data buffer were enlarged. Updated the cache_only config so
+	that rabbit starts without warnings. Try to return the data buffer
+	in a few more cases. Updated javadocs.
 
 version 4.9 (2011-01-18) Added a jndi context for database resources. Made
 	it easier to use external classes for databases by adding custom
