@@ -4,7 +4,7 @@
     </description>
 
     <property name="major_version" value="4"/>
-    <property name="minor_version" value="10"/>
+    <property name="minor_version" value="11"/>
 
     <!-- paths -->
     <property name="src" location="src"/>
