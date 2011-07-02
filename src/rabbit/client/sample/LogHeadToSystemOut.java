@@ -2,7 +2,7 @@ package rabbit.client.sample;
 
 import rabbit.http.HttpHeader;
 
-/** A http HEAD response handler that just lots the response to System.out.
+/** A http HEAD response handler that just logs the response to System.out.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */ 

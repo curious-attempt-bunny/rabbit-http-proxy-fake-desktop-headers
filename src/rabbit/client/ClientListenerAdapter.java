@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import rabbit.http.HttpHeader;
 import rabbit.httpio.WebConnectionResourceSource;
 
-
 /** A basic ClientListener.
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>

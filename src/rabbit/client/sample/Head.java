@@ -19,6 +19,7 @@ public class Head {
 
     /** Run a HEAD request for any url passed in args and then 
      *  prints the results on System.out.
+     * @param args the command line arguments
      */
     public static void main (String[] args) {
 	try {
@@ -31,6 +32,9 @@ public class Head {
     }
 
     /** Create a new HEAD requestor.
+     * @param listener the HeadResponseListener to notify when a request
+     *        has completed
+     * @throws IOException if the client can not be created
      */
     public Head (HeadResponseListener listener) throws IOException {
 	this.listener = listener;
@@ -40,6 +44,7 @@ public class Head {
 
     /** Run HEAD requests to all the urls given.
      * @param urls a number of urls.
+     * @throws IOException if sending the requests fails
      */
     public void head (String[] urls) throws IOException {
 	for (String url : urls) 
@@ -48,6 +53,7 @@ public class Head {
 
     /** Run HEAD requests to the given url
      * @param url the url to run a HEAD reqeusts against.
+     * @throws IOException if sending the request fails
      */
     public void head (String url) throws IOException {
 	ccbs.sendRequest (clientBase.getRequest ("HEAD", url),
