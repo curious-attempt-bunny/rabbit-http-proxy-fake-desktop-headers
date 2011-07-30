@@ -280,7 +280,7 @@ public class Connection {
 	try {
 	    mhh.handleMeta (this, request, tlh.getProxy (), tlh.getClient ());
 	} catch (IOException ex) {
-	    logAndClose (null);
+	    logAndClose ();
 	}
     }
 
@@ -417,7 +417,7 @@ public class Connection {
 
     /** Fired when a web connection has been established.
      *  The web connection may be to the origin server or to an upstream proxy.
-     * @param rh the RequestHandler for the current request 
+     * @param rh the RequestHandler for the current request
      */
     public void webConnectionEstablished (RequestHandler rh) {
 	getProxy ().markForPipelining (rh.getWebConnection ());
@@ -519,7 +519,7 @@ public class Connection {
 		// HTTP/0.9 does not support HEAD, so webheader should be valid.
 		if (request.isHeadOnlyRequest ()) {
 		    rh.getContent ().release ();
-		    sendAndRestart (rh.getWebHeader ());
+		    sendAndTryRestart (rh.getWebHeader ());
 		} else {
 		    handler.handle ();
 		}
@@ -627,7 +627,10 @@ public class Connection {
 	}
 
 	public void tunnelClosed () {
-	    logAndClose (rh);
+	    if (rh != null && rh.getWebConnection () != null) {
+		proxy.releaseWebConnection (rh.getWebConnection ());
+	    }
+	    logAndClose ();
 	}
     }
 
@@ -923,7 +926,7 @@ public class Connection {
 	return requestVersion;
     }
 
-    /** Get the current status of this request 
+    /** Get the current status of this request
      * @return the current status
      */
     public String getStatus () {
@@ -964,7 +967,7 @@ public class Connection {
 	this.extraInfo = info;
     }
 
-    /** Get the time the current request was started. 
+    /** Get the time the current request was started.
      * @return the start time for the current request
      */
     public long getStarted () {
@@ -992,7 +995,7 @@ public class Connection {
 	return meta;
     }
 
-    /** Flag this request as a meta-request, that is a request that the 
+    /** Flag this request as a meta-request, that is a request that the
      *  proxy should to handle.
      */
     public void setMeta () {
@@ -1079,46 +1082,22 @@ public class Connection {
 	    contentLength  = cl;
     }
 
-    void sendAndRestart (HttpHeader header) {
-	status = "Sending response.";
+    void sendAndTryRestart (HttpHeader header) {
+	status = keepalive ?
+	    "Sending response and restarting" :
+	    "Sending response and closing" ;
 	setStatusesFromHeader (header);
-	if (!keepalive) {
-	    sendAndClose (header);
-	} else {
-	    HttpHeaderSentListener sar = new SendAndRestartListener ();
-	    try {
-		HttpHeaderSender hhs =
-		    new HttpHeaderSender (channel, getNioHandler (),
-					  tlh.getClient (),
-					  header, false, sar);
-		hhs.sendHeader ();
-	    } catch (IOException e) {
-		logger.log (Level.WARNING,
-			    "IOException when sending header", e);
-		closeDown ();
-	    }
-	}
-    }
 
-    private abstract class SendAndDoListener implements HttpHeaderSentListener {
-	public void timeout () {
-	    status = "Response sending timed out, logging and closing.";
-	    logger.info ("Timeout when sending http header");
-	    logAndClose (null);
-	}
-
-	public void failed (Exception e) {
-	    status =
-		"Response sending failed: " + e + ", logging and closing.";
-	    logger.log (Level.INFO, "Exception when sending http header", e);
-	    logAndClose (null);
-	}
-    }
-
-    private class SendAndRestartListener extends SendAndDoListener {
-	public void httpHeaderSent () {
-	    logConnection ();
-	    readRequest ();
+	HttpHeaderSentListener sar = new SendAndRestartListener ();
+	try {
+	    HttpHeaderSender hhs =
+		new HttpHeaderSender (channel, getNioHandler (),
+				      tlh.getClient (), header, false, sar);
+	    hhs.sendHeader ();
+	} catch (IOException e) {
+	    logger.log (Level.WARNING,
+			"IOException when sending header", e);
+	    closeDown ();
 	}
     }
 
@@ -1126,48 +1105,44 @@ public class Connection {
      * @param header the HttpHeader to send before closing down.
      */
     public void sendAndClose (HttpHeader header) {
-	status = "Sending response and closing.";
-	// Set status and content length
-	setStatusesFromHeader (header);
 	keepalive = false;
-	HttpHeaderSentListener scl = new SendAndCloseListener ();
-	try {
-	    HttpHeaderSender hhs =
-		new HttpHeaderSender (channel, getNioHandler (),
-				      tlh.getClient (), header, false, scl);
-	    hhs.sendHeader ();
-	} catch (IOException e) {
-	    logger.log (Level.WARNING, "IOException when sending header", e);
-	    closeDown ();
+	sendAndTryRestart (header);
+    }
+
+    private class SendAndRestartListener implements HttpHeaderSentListener {
+	public void timeout () {
+	    status = "Response sending timed out, logging and closing.";
+	    logger.info ("Timeout when sending http header");
+	    logAndClose ();
+	}
+
+	public void failed (Exception e) {
+	    status =
+		"Response sending failed: " + e + ", logging and closing.";
+	    logger.log (Level.INFO, "Exception when sending http header", e);
+	    logAndClose ();
+	}
+
+	public void httpHeaderSent () {
+	    logAndTryRestart ();
 	}
     }
 
     /** Log the current request and close/end this connection
-     * @param rh the current RequestHandler
      */
-    public void logAndClose (RequestHandler rh) {
-	if (rh != null && rh.getWebConnection () != null) {
-	    proxy.releaseWebConnection (rh.getWebConnection ());
-	}
-	logConnection ();
-	closeDown ();
+    public void logAndClose () {
+	keepalive = false;
+	logAndTryRestart ();
     }
 
-    /** Log the current request and start to listen for a new request.
+    /** Log the current request and start to listen for a new request if possible.
      */
-    public void logAndRestart () {
+    public void logAndTryRestart () {
 	logConnection ();
 	if (getKeepalive ())
 	    readRequest ();
 	else
 	    closeDown ();
-    }
-
-    private class SendAndCloseListener extends SendAndDoListener {
-	public void httpHeaderSent () {
-	    status = "Response sent, logging and closing.";
-	    logAndClose (null);
-	}
     }
 
     /** Get the HttpGenerator that this connection uses when it needs to

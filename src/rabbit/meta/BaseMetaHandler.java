@@ -79,7 +79,7 @@ public abstract class BaseMetaHandler
     }
 
     protected void cleanup () {
-	con.logAndRestart ();
+	con.logAndTryRestart ();
     }
 
     protected void endChunking () {
@@ -109,6 +109,7 @@ public abstract class BaseMetaHandler
     }
     
     /** Get the page header name
+     * @return the html for the page header
      */
     protected abstract String getPageHeader ();
   
@@ -120,11 +121,11 @@ public abstract class BaseMetaHandler
   
     public void failed (Exception e) {
 	logger.log (Level.WARNING, "Exception when handling meta", e);
-	con.logAndClose (null);
+	con.logAndClose ();
     }
     
     public void timeout () {
 	logger.warning ("Timeout when handling meta.");
-	con.logAndClose (null);	
+	con.logAndClose ();
     }
 }

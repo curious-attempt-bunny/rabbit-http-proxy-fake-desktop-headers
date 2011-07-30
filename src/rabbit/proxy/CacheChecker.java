@@ -87,7 +87,7 @@ class CacheChecker {
 	    resp = nmh.is304 (header, con.getHttpGenerator (), rh);
 	}
 	if (resp != null) {
-	    con.sendAndRestart (resp);
+	    con.sendAndTryRestart (resp);
 	    return true;
 	}
 	con.setMayCache (false);

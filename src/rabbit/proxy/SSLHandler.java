@@ -135,7 +135,7 @@ public class SSLHandler implements TunnelDoneListener {
 	    sbh.possiblyFlush ();
 	Closer.close (wc, logger);
 	wc = null;
-	con.logAndClose (null);
+	con.logAndClose ();
     }
 
     private void warn (String err, Exception e) {
@@ -239,7 +239,7 @@ public class SSLHandler implements TunnelDoneListener {
 
     public void tunnelClosed () {
 	if (wc != null) {
-	    con.logAndClose (null);
+	    con.logAndClose ();
 	    Closer.close (wc, logger);
 	}
 	wc = null;

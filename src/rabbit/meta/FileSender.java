@@ -134,7 +134,7 @@ public class FileSender implements MetaHandler, HttpHeaderSentListener {
     private class FileTransferListener implements TransferListener {
 	public void transferOk () {
 	    closeFile ();
-	    con.logAndRestart ();
+	    con.logAndTryRestart ();
 	}
 
 	public void failed (Exception cause) {
@@ -153,19 +153,19 @@ public class FileSender implements MetaHandler, HttpHeaderSentListener {
 	    fc = fis.getChannel ();
 	    channelTransfer (length);
 	} else {
-	    con.logAndRestart ();
+	    con.logAndTryRestart ();
 	}
     }
 
     public void failed (Exception e) {
 	closeFile ();
 	logger.log (Level.WARNING, "Exception when handling meta", e);
-	con.logAndClose (null);
+	con.logAndClose ();
     }
 
     public void timeout () {
 	closeFile ();
 	logger.warning ("Timeout when handling meta.");
-	con.logAndClose (null);
+	con.logAndClose ();
     }
 }

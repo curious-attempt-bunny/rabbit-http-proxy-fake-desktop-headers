@@ -244,9 +244,9 @@ public class BaseHandler
 	// Not sure why we need this, seems to call finish multiple times.
 	if (con != null) {
 	    if (good && ok)
-		con.logAndRestart ();
+		con.logAndTryRestart ();
 	    else
-		con.logAndClose (null);
+		con.logAndClose ();
 	}
 	tlh = null;
 	con = null;
