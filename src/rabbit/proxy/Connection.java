@@ -1138,6 +1138,21 @@ public class Connection {
     /** Log the current request and start to listen for a new request if possible.
      */
     public void logAndTryRestart () {
+	if (getNioHandler ().isSelectorThread ()) {
+	    TaskIdentifier ti =
+		new DefaultTaskIdentifier ("logConnection",
+					   request.getRequestURI ());
+	    getNioHandler ().runThreadTask (new Runnable () {
+		    public void run () {
+			internalLogAndTryRestart ();
+		    }
+		}, ti);
+	} else {
+	    internalLogAndTryRestart ();
+	}
+    }
+
+    private void internalLogAndTryRestart () {
 	logConnection ();
 	if (getKeepalive ())
 	    readRequest ();

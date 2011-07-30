@@ -1,4 +1,6 @@
-version 4.11 (201x-yy-zz)
+version 4.11 (201x-yy-zz) Cleanup of the request logging. Make sure that
+	logging is done off the selector threads so that we can call
+	external loggers.
 
 version 4.10 (2011-06-29) Fixed a problem with StackOverflow for chunked
 	resources with many small chunks. Updated rnio to version
