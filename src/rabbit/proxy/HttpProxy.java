@@ -69,6 +69,9 @@ public class HttpProxy {
     /** The access logger of the proxy */
     private final ProxyLogger accessLogger = new ProxyLogger ();
 
+    /** The traffic loggers of the proxy */
+    private ClientTrafficLoggerHandler clientTrafficLoggers;
+
     /** The id sequence for acceptors. */
     private static int acceptorId = 0;
 
@@ -490,6 +493,8 @@ public class HttpProxy {
 	String connect = config.getProperty ("Filters", "conectfilters","");
 	httpHeaderFilterer =
 	    new HttpHeaderFilterer (in, out, connect, config, this);
+
+	clientTrafficLoggers = new ClientTrafficLoggerHandler (config, this);	
     }
 
 
@@ -718,6 +723,13 @@ public class HttpProxy {
      */
     public TrafficLoggerHandler getTrafficLoggerHandler () {
 	return tlh;
+    }
+
+    /** Get the ClientTrafficLoggerHandler
+     * @return the current ClientTrafficLoggerHandler.
+     */
+    public ClientTrafficLoggerHandler getClientTrafficLoggerHandler () {
+	return clientTrafficLoggers;
     }
 
     protected BufferHandler getBufferHandler () {

@@ -1171,6 +1171,9 @@ public class Connection {
     private void logConnection () {
 	getConnectionLogger ().logConnection (Connection.this);
 	proxy.updateTrafficLog (tlh);
+	ClientTrafficLoggerHandler cth = proxy.getClientTrafficLoggerHandler ();
+	cth.logTraffic (userName, request, tlh.getClient (), tlh.getNetwork (),
+			tlh.getCache (), tlh.getProxy ());
 	tlh.clear ();
     }
 }
