@@ -28,7 +28,9 @@ class ClientTrafficLoggerHandler {
 	    try {
 		Class<? extends ClientTrafficLogger> cls =
 		    proxy.load3rdPartyClass (clz, ClientTrafficLogger.class);
-		loggers.add (cls.newInstance ());
+		ClientTrafficLogger ctl = cls.newInstance ();
+		ctl.setup (config.getProperties (clz), proxy);
+		loggers.add (ctl);
 	    } catch (ClassNotFoundException ex) {
 		log.log(Level.WARNING,
 			"Could not load traffic logger class: '" +

@@ -1,6 +1,8 @@
 package rabbit.proxy;
 
 import rabbit.http.HttpHeader;
+import rabbit.proxy.HttpProxy;
+import rabbit.util.SProperties;
 import rabbit.util.TrafficLogger;
 
 /** A simple ClientTrafficLogger that just writes simple network usage to
@@ -19,5 +21,9 @@ public class StandardOutTrafficLogger implements ClientTrafficLogger {
 			    ", client write: " + client.write () +
 			    ", network read: " + network.read () +
 			    ", network write: " + network.write ());
+    }
+
+    public void setup (SProperties properties, HttpProxy proxy) {
+	// empty
     }
 }

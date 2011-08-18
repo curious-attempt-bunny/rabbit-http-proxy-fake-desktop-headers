@@ -1,6 +1,8 @@
 package rabbit.proxy;
 
 import rabbit.http.HttpHeader;
+import rabbit.proxy.HttpProxy;
+import rabbit.util.SProperties;
 import rabbit.util.TrafficLogger;
 
 /** A logger that gets notified about client traffic usage.
@@ -19,4 +21,10 @@ public interface ClientTrafficLogger {
     void logTraffic (String user, HttpHeader request,
 		     TrafficLogger client, TrafficLogger network,
 		     TrafficLogger cache, TrafficLogger proxy);
+
+    /** Setup this logger
+     * @param properties the SProperties to get the settings from.
+     * @param proxy the HttpProxy that is using this logger
+     */
+    void setup (SProperties properties, HttpProxy proxy);
 }
