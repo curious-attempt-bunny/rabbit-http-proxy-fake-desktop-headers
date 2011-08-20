@@ -732,7 +732,10 @@ public class HttpProxy {
 	return clientTrafficLoggers;
     }
 
-    protected BufferHandler getBufferHandler () {
+    /** Get the BufferHandler this proxy is using
+     * @return a BufferHandler
+     */
+    public BufferHandler getBufferHandler () {
 	return bufferHandler;
     }
 

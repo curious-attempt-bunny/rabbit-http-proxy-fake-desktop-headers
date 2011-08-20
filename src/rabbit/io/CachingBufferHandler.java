@@ -17,13 +17,11 @@ public class CachingBufferHandler implements BufferHandler {
 	new ConcurrentLinkedQueue<BufferHolder> ();
     private final Queue<BufferHolder> largeCache =
 	new ConcurrentLinkedQueue<BufferHolder> ();
-    private int count = 0;
 
     private static final int SMALL_BUFFER_SIZE = 4096;
     private static final int LARGE_BUFFER_SIZE = 128 * 1024;
     
     private ByteBuffer getBuffer (Queue<BufferHolder> bufs, int size) {
-	count++;
 	BufferHolder r = bufs.poll ();
 	ByteBuffer b;
 	if (r != null) {
@@ -46,7 +44,6 @@ public class CachingBufferHandler implements BufferHandler {
     public void putBuffer (ByteBuffer buffer) {
 	if (buffer == null) 
 	    throw new IllegalArgumentException ("null buffer not allowed");
-	count--;	
 	BufferHolder bh = new BufferHolder (buffer);
 	if (buffer.capacity () == SMALL_BUFFER_SIZE)
 	    addCache (cache, bh);

@@ -26,7 +26,6 @@ import rabbit.httpio.HttpHeaderSender;
 import rabbit.httpio.HttpHeaderSentListener;
 import rabbit.httpio.RequestLineTooLongException;
 import rabbit.io.BufferHandle;
-import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 import rabbit.io.ProxyChain;
 import rabbit.io.Resolver;
@@ -53,9 +52,6 @@ public class Connection {
 
     /** The current request buffer handle */
     private BufferHandle requestHandle;
-
-    /** The buffer handler. */
-    private final BufferHandler bufHandler;
 
     /** The proxy we are serving */
     private final HttpProxy proxy;
@@ -99,15 +95,12 @@ public class Connection {
      * @param id the ConnectionId of this connection.
      * @param channel the SocketChannel to the client.
      * @param proxy the HttpProxy that this connection belongs to.
-     * @param bufHandler the BufferHandler to use for getting ByteBuffers.
      */
-    public Connection (ConnectionId id,	SocketChannel channel,
-		       HttpProxy proxy, BufferHandler bufHandler) {
+    public Connection (ConnectionId id, SocketChannel channel, HttpProxy proxy) {
 	this.id = id;
 	this.channel = channel;
 	this.proxy = proxy;
-	this.requestHandle = new CacheBufferHandle (bufHandler);
-	this.bufHandler = bufHandler;
+	this.requestHandle = new CacheBufferHandle (proxy.getBufferHandler ());
 	proxy.addCurrentConnection (this);
 	HttpGeneratorFactory hgf = proxy.getHttpGeneratorFactory ();
 	responseHandler = hgf.create (proxy.getServerIdentity (), this);
@@ -786,13 +779,6 @@ public class Connection {
      */
     public HttpProxy getProxy () {
 	return proxy;
-    }
-
-    /**
-     * @return the BufferHandler that this connection is using
-     */
-    public BufferHandler getBufferHandler () {
-	return bufHandler;
     }
 
     private void closeDown () {

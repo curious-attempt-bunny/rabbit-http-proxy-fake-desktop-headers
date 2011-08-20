@@ -39,8 +39,7 @@ public class ProxyConnectionAcceptor implements AcceptorListener {
 	    proxy.getCounter ().inc ("Rejected IP:s");
 	    sc.close ();
 	} else {
-	    BufferHandler bh = proxy.getBufferHandler ();
-	    Connection c = new Connection (getId (), sc, proxy, bh);
+	    Connection c = new Connection (getId (), sc, proxy);
 	    c.readRequest ();
 	}
     }

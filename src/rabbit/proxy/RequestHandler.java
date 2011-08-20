@@ -25,7 +25,7 @@ class RequestHandler {
     private boolean conditional;
     
     public RequestHandler (Connection con) {
-	webHandle = new CacheBufferHandle (con.getBufferHandler ());
+	webHandle = new CacheBufferHandle (con.getProxy ().getBufferHandler ());
 	cond = new ConditionalChecker ();
     }
 

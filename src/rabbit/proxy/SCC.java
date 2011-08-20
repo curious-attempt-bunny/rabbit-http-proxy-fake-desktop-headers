@@ -86,7 +86,7 @@ public class SCC {
 	    rh.setContent (new CacheResourceSource (proxy.getCache (), 
 						    rh.getEntry (), 
 						    con.getNioHandler (),
-						    con.getBufferHandler ()));
+						    proxy.getBufferHandler ()));
 	    rh.setSize (rh.getEntry ().getSize ());
 	    rh.getWebHeader ().setStatusCode ("200");
 	    rh.getWebHeader ().setReasonPhrase ("OK");
@@ -111,7 +111,7 @@ public class SCC {
 	HttpProxy proxy = con.getProxy ();
 	rh.setContent (new RandomCacheResourceSource (proxy.getCache (), rh, 
 						      con.getNioHandler (),
-						      con.getBufferHandler (),
+						      proxy.getBufferHandler (),
 						      ranges, totalSize));
 	con.setChunking (false);
 	rh.setWebHeader (con.getHttpGenerator ().get206 (ifRange, 

@@ -343,7 +343,7 @@ public class ImageHandler extends BaseHandler {
 			  sRatio);
 	content.release ();
 	content = new FileResourceSource (entryName, con.getNioHandler (),
-					  con.getBufferHandler ());
+					  con.getProxy ().getBufferHandler ());
     }
 
     private static class ImageConversionResult {

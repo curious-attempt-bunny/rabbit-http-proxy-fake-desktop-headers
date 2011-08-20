@@ -110,7 +110,7 @@ public class SSLHandler implements TunnelDoneListener {
 		request.setRequestURI (uri); // send correct connect to next proxy.
 		setupChain ();
 	    } else {
-		BufferHandle bh = new CacheBufferHandle (con.getBufferHandler ());
+		BufferHandle bh = new CacheBufferHandle (proxy.getBufferHandler ());
 		sendOkReplyAndTunnel (bh);
 	    }
 	}
@@ -149,7 +149,7 @@ public class SSLHandler implements TunnelDoneListener {
 		new HttpResponseReader (wc.getChannel (),
 					proxy.getNioHandler (),
 					tlh.getNetwork (),
-					con.getBufferHandler (), request,
+					proxy.getBufferHandler (), request,
 					proxy.getStrictHttp (),
 					resolver.isProxyConnected (), cr);
 	    hrr.sendRequestAndWaitForResponse ();
