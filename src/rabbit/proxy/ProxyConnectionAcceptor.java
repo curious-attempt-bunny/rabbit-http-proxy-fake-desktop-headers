@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.khelekore.rnio.impl.AcceptorListener;
-import rabbit.io.BufferHandler;
 
 /** An acceptor handler that creates proxy client connection
  *
