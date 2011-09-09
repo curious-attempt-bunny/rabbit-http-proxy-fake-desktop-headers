@@ -35,7 +35,15 @@ public abstract class BaseMetaHandler
     private static enum Mode { SEND_HEADER, SEND_DATA, CLEANUP }
     private Mode mode = Mode.SEND_HEADER;
 
-    public static enum PageCompletion { PAGE_NOT_DONE, PAGE_DONE }
+    /** The states of the generated page */
+    public static enum PageCompletion {
+	/** Used to signal that the page is not yet finished and that
+	 *  more content will be added.
+	 */
+	PAGE_NOT_DONE,
+	/** Used to signal that the page is finished */
+	PAGE_DONE;
+    }
     
     public void handle (HttpHeader request, 
 			SProperties htab, 
