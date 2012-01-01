@@ -30,12 +30,12 @@ class TrailerWriter implements GZipPackState {
     public void handleCurrentData (GZipPacker packer) {
 	finished = true;
 	byte[] packed = listener.getBuffer ();
-	    ByteBuffer bb = ByteBuffer.wrap (packed);
-	    bb.order (ByteOrder.LITTLE_ENDIAN);
-	    bb.putInt (crc);
-	    bb.putInt (totalIn);
-	    listener.packed (packed, 0, 8);
-	    listener.finished ();
+	ByteBuffer bb = ByteBuffer.wrap (packed);
+	bb.order (ByteOrder.LITTLE_ENDIAN);
+	bb.putInt (crc);
+	bb.putInt (totalIn);
+	listener.packed (packed, 0, 8);
+	listener.finished ();
     }
 
     public void finish () {
