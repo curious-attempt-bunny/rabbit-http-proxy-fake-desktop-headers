@@ -120,6 +120,7 @@ public class HttpHeaderReader extends BaseSocketHandler
     }
 
     private void parseBuffer (ByteBuffer buffer) throws IOException {
+	int startPos = buffer.position ();
 	buffer.mark ();
 	boolean done = headerParser.handleBuffer (buffer);
 	Logger logger = getLogger ();
@@ -140,7 +141,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 		} else if (isUsingSmallBuffer (buffer)) {
 		    // try to expand buffer
 		    buffer = getLargeBuffer ();
-		    buffer.position (pos);
+		    buffer.position (pos - startPos);
 		    startParseAt = 0;
 		} else {
 		    releaseBuffer ();
