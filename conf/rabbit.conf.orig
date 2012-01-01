@@ -569,7 +569,7 @@ link=unfiltered page
 # A filter to remove advertising from pages.
 
 # The list of evils. A regexp.
-adlinks=[/.]((c|net|ns|surf|page|imag)?ad([svq]|fu|srv|[sz]erver|log|bannercenter|_?click|verts|finity|force|click|tech)?\d*|banner|linkexchange|acc_clickthru|action|vertising)[/.]|gen_addframe|event.ng|/m=|/ad(num|vert|name)?=|/site_id=|support.net|/redir\.|\?assoc=
+adlinks=[/.]((c|net|ns|surf|page|imag)?ad([svq]|fu|srv|[sz]erver|log|bannercenter|_?click|verts|finity|force|click|tech)?\d*|banner|linkexchange|acc_clickthru|action|vertising)[/.]|gen_addframe|event.ng|/m=|/ad(num|vert|name)?=|/site_id=|support.net|/redir\.|\?assoc=|atdmt.com
 
 # The image to replace ads with.
 # Use $proxy to let the RabbIT serve the image.

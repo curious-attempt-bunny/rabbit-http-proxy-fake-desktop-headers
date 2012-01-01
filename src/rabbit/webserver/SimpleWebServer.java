@@ -7,15 +7,15 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.khelekore.rnio.BufferHandler;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.StatisticsHolder;
 import org.khelekore.rnio.impl.Acceptor;
 import org.khelekore.rnio.impl.AcceptorListener;
 import org.khelekore.rnio.impl.BasicStatisticsHolder;
+import org.khelekore.rnio.impl.CachingBufferHandler;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
 import org.khelekore.rnio.impl.SimpleThreadFactory;
-import rabbit.io.BufferHandler;
-import rabbit.io.CachingBufferHandler;
 import rabbit.util.SimpleTrafficLogger;
 import rabbit.util.TrafficLogger;
 

@@ -1,5 +1,6 @@
 package rabbit.io;
 
+import org.khelekore.rnio.BufferHandler;
 import java.nio.ByteBuffer;
 
 /** A handle to a ByteBuffer that uses a buffer handler

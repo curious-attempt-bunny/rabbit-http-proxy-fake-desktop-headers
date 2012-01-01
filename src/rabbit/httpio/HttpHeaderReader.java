@@ -137,7 +137,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 		// a partial long line (cookie or whatever).
 		if (buffer.limit () < buffer.capacity ()) {
 		    // try to read some more
-		} else  if (isUsingSmallBuffer (buffer)) {
+		} else if (isUsingSmallBuffer (buffer)) {
 		    // try to expand buffer
 		    buffer = getLargeBuffer ();
 		    buffer.position (pos);

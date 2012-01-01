@@ -8,12 +8,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.logging.Logger;
+import org.khelekore.rnio.BufferHandler;
 import org.khelekore.rnio.NioHandler;
 import org.khelekore.rnio.TaskIdentifier;
 import org.khelekore.rnio.impl.Closer;
 import org.khelekore.rnio.impl.DefaultTaskIdentifier;
 import rabbit.io.BufferHandle;
-import rabbit.io.BufferHandler;
 import rabbit.io.CacheBufferHandle;
 
 /** A resource that comes from a file.
