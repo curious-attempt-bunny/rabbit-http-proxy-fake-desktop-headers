@@ -41,12 +41,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private static final String TEMPDIR = "temp";
     private static final int FILES_PER_DIR = 256;             // reasonable?
 
+    private Configuration configuration = new Configuration ();
     private boolean changed = false;                  // have we changed?
     private Thread cleaner = null;                    // remover of old stuff.
     private int cleanLoopTime = 60 * 1000;      // sleeptime between cleanups.
 
-    private long maxSize = 0;
-    private long cacheTime = 0;
     private long fileNo = 0;
     private long currentSize = 0;
     private String dir = null;
@@ -91,96 +90,105 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	cleaner.start ();
     }
 
-    public URL getCacheDir () {
-	r.lock ();
-	try {
-	    if (dir == null)
+    public CacheConfiguration getCacheConfiguration () {
+	return configuration;
+    }
+
+    private class Configuration implements CacheConfiguration {
+	private long maxSize = 0;
+	private long cacheTime = 0;
+
+	public URL getCacheDir () {
+	    r.lock ();
+	    try {
+		if (dir == null)
+		    return null;
+		return new File (dir).toURI ().toURL ();
+	    } catch (MalformedURLException e) {
 		return null;
-	    return new File (dir).toURI ().toURL ();
-	} catch (MalformedURLException e) {
-	    return null;
-	} finally {
-	    r.unlock ();
+	    } finally {
+		r.unlock ();
+	    }
 	}
-    }
 
-    /** Sets the cachedir. This will flush the cache and make
-     *  it try to read in the cache from the new dir.
-     * @param newDir the name of the new directory to use.
-     * @throws IOException if the new cache file directory can not be configured
-     */
-    private void setCacheDir (String newDir) throws IOException {
-	w.lock ();
-	try {
-	    // save old cachedir.
-	    if (dir != null)
-		writeCacheIndex ();
+	/** Sets the cachedir. This will flush the cache and make
+	 *  it try to read in the cache from the new dir.
+	 * @param newDir the name of the new directory to use.
+	 * @throws IOException if the new cache file directory can not be configured
+	 */
+	private void setCacheDir (String newDir) throws IOException {
+	    w.lock ();
+	    try {
+		// save old cachedir.
+		if (dir != null)
+		    writeCacheIndex ();
 
-	    // does new dir exist?
-	    dir = newDir;
-	    File dirtest = new File (dir);
-	    boolean readCache = true;
-	    if (!dirtest.exists ()) {
-		FileHelper.mkdirs (dirtest);
+		// does new dir exist?
+		dir = newDir;
+		File dirtest = new File (dir);
+		boolean readCache = true;
 		if (!dirtest.exists ()) {
-		    logger.warning ("could not create cachedir: " + dirtest);
-		}
-		readCache = false;
-	    } else if (dirtest.isFile ()) {
-		logger.warning ("Cachedir: " + dirtest + " is a file");
-	    }
-
-	    synchronized (dirLock) {
-		tempdir = new File (dirtest, TEMPDIR);
-		if (!tempdir.exists ()) {
-		    FileHelper.mkdirs (tempdir);
-		    if (!tempdir.exists ()) {
-			logger.warning ("could not create cache tempdir: " +
-					tempdir);
+		    FileHelper.mkdirs (dirtest);
+		    if (!dirtest.exists ()) {
+			logger.warning ("could not create cachedir: " + dirtest);
 		    }
-		} else if (tempdir.isFile ()) {
-		    logger.warning ("Cache temp dir is a file: " + tempdir);
+		    readCache = false;
+		} else if (dirtest.isFile ()) {
+		    logger.warning ("Cachedir: " + dirtest + " is a file");
 		}
+
+		synchronized (dirLock) {
+		    tempdir = new File (dirtest, TEMPDIR);
+		    if (!tempdir.exists ()) {
+			FileHelper.mkdirs (tempdir);
+			if (!tempdir.exists ()) {
+			    logger.warning ("could not create cache tempdir: " +
+					    tempdir);
+			}
+		    } else if (tempdir.isFile ()) {
+			logger.warning ("Cache temp dir is a file: " + tempdir);
+		    }
+		}
+		if (readCache)
+		    // move to new dir.
+		    readCacheIndex ();
+	    } finally {
+		w.unlock ();
 	    }
-	    if (readCache)
-		// move to new dir.
-		readCacheIndex ();
-	} finally {
-	    w.unlock ();
 	}
-    }
 
-    /** Get the maximum size for this cache.
-     * @return the maximum size in bytes this cache.
-     */
-    public long getMaxSize () {
-	return maxSize;
-    }
+	/** Get the maximum size for this cache.
+	 * @return the maximum size in bytes this cache.
+	 */
+	public synchronized long getMaxSize () {
+	    return maxSize;
+	}
 
-    /** Set the maximum size for this cache.
-     * @param newMaxSize the new maximum size for the cache.
-     */
-    public void setMaxSize (long newMaxSize) {
-	maxSize = newMaxSize;
-    }
+	/** Set the maximum size for this cache.
+	 * @param newMaxSize the new maximum size for the cache.
+	 */
+	public synchronized void setMaxSize (long newMaxSize) {
+	    maxSize = newMaxSize;
+	}
 
-    /** Get the number of miliseconds the cache stores things usually.
-     *  This is the standard expiretime for objects, but you can set it for
-     *  CacheEntries individially if you want to.
-     *  NOTE 1: dont trust that an object will be in the cache this long.
-     *  NOTE 2: dont trust that an object will be removed from the cache
-     *          when it expires.
-     * @return the number of miliseconds objects are stored normally.
-     */
-    public long getCacheTime () {
-	return cacheTime;
-    }
+	/** Get the number of miliseconds the cache stores things usually.
+	 *  This is the standard expiretime for objects, but you can set it for
+	 *  CacheEntries individially if you want to.
+	 *  NOTE 1: dont trust that an object will be in the cache this long.
+	 *  NOTE 2: dont trust that an object will be removed from the cache
+	 *          when it expires.
+	 * @return the number of miliseconds objects are stored normally.
+	 */
+	public synchronized long getCacheTime () {
+	    return cacheTime;
+	}
 
-    /** Set the standard expiry-time for CacheEntries
-     * @param newCacheTime the number of miliseconds to keep objects normally.
-     */
-    public void setCacheTime (long newCacheTime) {
-	cacheTime = newCacheTime;
+	/** Set the standard expiry-time for CacheEntries
+	 * @param newCacheTime the number of miliseconds to keep objects normally.
+	 */
+	public synchronized void setCacheTime (long newCacheTime) {
+	    cacheTime = newCacheTime;
+	}
     }
 
     /** Get how long time the cleaner sleeps between cleanups.
@@ -299,7 +307,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	}
 	// allocate the entry.
 	NCacheEntry<K, V> entry = new NCacheEntry<K, V> (k, newId);
-	entry.setExpires (System.currentTimeMillis () + getCacheTime ());
+	entry.setExpires (System.currentTimeMillis () +
+			  configuration.getCacheTime ());
 	return entry;
     }
 
@@ -627,9 +636,10 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    // elements two times in a row, this method remove the "oldest" in
 	    // a sense.
 
-	    if (getCurrentSize () > getMaxSize ())
+	    long maxSize = configuration.getMaxSize ();
+	    if (getCurrentSize () > maxSize)
 		changed = true;
-	    while (getCurrentSize () > getMaxSize ()) {
+	    while (getCurrentSize () > maxSize) {
 		w.lock ();
 		try {
 		    remove (vec.get (0).getKey ());
@@ -669,18 +679,20 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    config = new SProperties ();
 	String cachedir =
 	    config.getProperty ("directory", DIR);
-	setCacheDir (cachedir);
+	configuration.setCacheDir (cachedir);
 
 	String cmsize = config.getProperty ("maxsize", DEFAULT_SIZE);
 	try {
-	    setMaxSize (Long.parseLong (cmsize) * 1024 * 1024);     // in MB
+	    // size is in MB
+	    configuration.setMaxSize (Long.parseLong (cmsize) * 1024 * 1024);
 	} catch (NumberFormatException e) {
 	    logger.warning ("Bad number for cache maxsize: '" + cmsize + "'");
 	}
 
 	String ctime = config.getProperty ("cachetime", DEFAULT_CACHE_TIME);
 	try {
-	    setCacheTime (Long.parseLong (ctime) * 1000 * 60 * 60); // in hours.o
+	    // time is given in hours
+	    configuration.setCacheTime (Long.parseLong (ctime) * 1000 * 60 * 60);
 	} catch (NumberFormatException e) {
 	    logger.warning ("Bad number for cache cachetime: '" + ctime + "'");
 	}

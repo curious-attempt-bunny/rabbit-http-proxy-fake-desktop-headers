@@ -1,6 +1,5 @@
 package rabbit.cache;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -15,29 +14,10 @@ import java.util.logging.Logger;
  */
 public interface Cache<K, V> {
 
-    /** Get the maximum size for this cache.
-     * @return the maximum size in bytes this cache.
+    /** Get the cache configuration for this cache.
+     * @return the current configuration of the cache 
      */
-    long getMaxSize ();
-
-    /** Set the maximum size for this cache.
-     * @param newMaxSize the new maximum size for the cache.
-     */
-    void setMaxSize (long newMaxSize);
-    
-    /** Get the number of miliseconds the cache stores things usually.
-     *  This is the standard expiretime for objects, but you can set it for 
-     *  CacheEntries individially if you want to.
-     *  NOTE 1: dont trust that an object will be in the cache this long.
-     *  NOTE 2: dont trust that an object will be removed from the cache when it expires.
-     * @return the number of miliseconds objects are stored normally.
-     */
-    long getCacheTime ();
-
-    /** Set the standard expiry-time for CacheEntries
-     * @param newCacheTime the number of miliseconds to keep objects normally.
-     */
-    void setCacheTime (long newCacheTime);
+    public CacheConfiguration getCacheConfiguration ();
 
     /** Get the current size of the cache
      * @return the current size of the cache in bytes.
@@ -48,11 +28,6 @@ public interface Cache<K, V> {
      * @return the current number of entries in the cache.
      */
     long getNumberOfEntries ();
-
-    /** Get the location where this cache stores its files.
-     * @return the location, null if no physical location is used.
-     */
-    URL getCacheDir ();
 
     /** Get the CacheEntry assosiated with given object.
      * @param k the key.

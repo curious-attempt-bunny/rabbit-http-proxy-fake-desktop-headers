@@ -282,10 +282,10 @@ public class BaseHandler
      * @return true if the current resource may be cached, false otherwise
      */
     protected boolean mayCacheFromSize () {
-	Cache<HttpHeader, HttpHeader>  cache = con.getProxy ().getCache ();
-        return !((size > 0 && size > cache.getMaxSize ()) ||
-		 (cache.getMaxSize () == 0));
-	}
+	Cache<HttpHeader, HttpHeader> cache = con.getProxy ().getCache ();
+	long maxSize = cache.getCacheConfiguration ().getMaxSize ();
+        return !(maxSize == 0 || (size > 0 && size > maxSize));
+    }
 
     /** Check if this handler may force the cached resource to be
      *  less than the cache max size.

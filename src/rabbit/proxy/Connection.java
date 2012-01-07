@@ -303,7 +303,7 @@ public class Connection {
     private void handleRequest () {
 	status = "Handling request";
 	final RequestHandler rh = new RequestHandler (this);
-	if (proxy.getCache ().getMaxSize () > 0) {
+	if (proxy.getCache ().getCacheConfiguration ().getMaxSize () > 0) {
 	    fillInCacheEntries (rh);
 	} else {
 	    handleRequestBottom (rh);
