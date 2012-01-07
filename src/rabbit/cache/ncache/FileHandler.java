@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.io.IOException;
 import java.io.InputStream;

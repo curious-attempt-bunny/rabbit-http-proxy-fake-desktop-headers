@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.util.logging.Logger;
 
@@ -19,7 +19,8 @@ class MemoryHook<V> extends FiledHook<V> {
 	this.data = data;
     }
 
-    @Override public <K> V getData (Cache<K, V> cache, CacheEntry<K, V> entry,
+    @Override public <K> V getData (NCache<K, V> cache,
+				    NCacheEntry<K, V> entry,
 				    Logger logger) {
 	return data;
     }

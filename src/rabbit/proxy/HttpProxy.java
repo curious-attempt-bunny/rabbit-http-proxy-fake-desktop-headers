@@ -27,7 +27,7 @@ import org.khelekore.rnio.impl.CachingBufferHandler;
 import org.khelekore.rnio.impl.MultiSelectorNioHandler;
 import org.khelekore.rnio.impl.SimpleThreadFactory;
 import rabbit.cache.Cache;
-import rabbit.cache.NCache;
+import rabbit.cache.ncache.NCache;
 import rabbit.dns.DNSHandler;
 import rabbit.dns.DNSJavaHandler;
 import rabbit.dns.DNSSunHandler;
@@ -298,7 +298,7 @@ public class HttpProxy {
 	HttpHeaderFileHandler hhfh = new HttpHeaderFileHandler ();
 	try {
 	    cache = new NCache<HttpHeader, HttpHeader> (props, hhfh, hhfh);
-	    cache.startCleaner ();
+	    cache.start ();
 	} catch (IOException e) {
 	    logger.log (Level.SEVERE,
 			"Failed to setup cache",

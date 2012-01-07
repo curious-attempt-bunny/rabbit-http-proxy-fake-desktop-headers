@@ -211,7 +211,7 @@ text/css(;(charset\=.*)?)?=rabbit.handler.GZipHandler
 # Compress these streams.
 #text/plain(;(charset\=.*)?)?=rabbit.handler.GZipHandler
 
-[rabbit.cache.NCache]
+[rabbit.cache.ncache.NCache]
 # This section sets up the cache.
 
 # The base directory for the cache.

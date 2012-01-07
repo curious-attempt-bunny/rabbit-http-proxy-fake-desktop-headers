@@ -1,9 +1,12 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import rabbit.cache.Cache;
+import rabbit.cache.CacheEntry;
+import rabbit.cache.CacheException;
 
 /** A cached object.
  *
@@ -131,10 +134,11 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
     /** Get the hooked data.
      * @param cache the NCache this entry lives in.
      * @return the the hooked data.
+     * @throws CacheException if the data hook could not be read
      */
     public V getDataHook (Cache<K, V> cache) throws CacheException {
 	try {
-	    return datahook.getData (cache, this, cache.getLogger ());
+	    return datahook.getData ((NCache<K, V>)cache, this, cache.getLogger ());
 	} catch (IOException e) {
 	    throw new CacheException ("Failed to get data hook", e);
 	}

@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 /** A key to use when searching the cache.
  *

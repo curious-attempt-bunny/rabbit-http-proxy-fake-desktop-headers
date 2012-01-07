@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -14,18 +14,18 @@ class FiledKey<K> extends FileData<K> {
 
     protected int hashCode; // the hashCode for the contained object.
     private long id;
-    protected transient Cache<K, ?> cache;
+    protected transient NCache<K, ?> cache;
 
     protected String getExtension () {
 	return "key";
     }
 
-    protected <V> void setCache (Cache<K, V> cache) {
+    protected <V> void setCache (NCache<K, V> cache) {
 	this.cache = cache;
     }
 
-    protected <V> long storeKey (Cache<K, V> cache,
-				 CacheEntry<K, V> entry, K key, 
+    protected <V> long storeKey (NCache<K, V> cache,
+				 NCacheEntry<K, V> entry, K key, 
 				 Logger logger) 
 	throws IOException {
 	setCache (cache);

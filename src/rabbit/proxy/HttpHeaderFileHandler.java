@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import rabbit.cache.FileHandler;
+import rabbit.cache.ncache.FileHandler;
 import rabbit.http.HttpHeader;
 
 /** A FileHandler for HttpHeader

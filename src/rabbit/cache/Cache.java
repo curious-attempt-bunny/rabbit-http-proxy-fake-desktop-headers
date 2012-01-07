@@ -14,6 +14,17 @@ import java.util.logging.Logger;
  */
 public interface Cache<K, V> {
 
+    /** Start this cache. This must be called to ensure that cleaner threads
+     *  or similar are up and running.
+     */
+    void start ();
+
+    /** Stop this cache. 
+     *  If this cache is using any cleaner threads they have 
+     *  to be stopped when this method is called.
+     */
+    void stop ();
+
     /** Get the cache configuration for this cache.
      * @return the current configuration of the cache 
      */
@@ -45,16 +56,6 @@ public interface Cache<K, V> {
      */
     String getEntryName (long id, boolean real, String extension);
 
-    /** Get the file handler for the keys.
-     * @return the FileHandler for the key objects
-     */
-    FileHandler<K> getKeyFileHandler ();
-
-    /** Get the file handler for the values.
-     * @return the FileHandler for the values
-     */
-    FileHandler<V> getHookFileHandler ();
-    
     /** Reserve space for a CacheEntry with key o.
      * @param k the key for the CacheEntry.
      * @return a new CacheEntry initialized for the cache.
@@ -96,12 +97,6 @@ public interface Cache<K, V> {
      */
     void flush ();
     
-    /** Stop this cache. 
-     *  If this cache is using any cleaner threads they have 
-     *  to be stopped when this method is called.
-     */
-    void stop ();
-
     /** Get the logger of this cache 
      * @return the Logger used by the cache
      */

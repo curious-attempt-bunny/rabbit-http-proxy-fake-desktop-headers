@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.io.Serializable;
 import java.io.File;

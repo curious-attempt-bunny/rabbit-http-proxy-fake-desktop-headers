@@ -1,4 +1,4 @@
-package rabbit.cache;
+package rabbit.cache.ncache;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +19,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import rabbit.cache.Cache;
+import rabbit.cache.CacheConfiguration;
+import rabbit.cache.CacheEntry;
+import rabbit.cache.CacheException;
 import rabbit.io.FileHelper;
 import rabbit.util.SProperties;
 
@@ -64,10 +68,10 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private final FileHandler<K> fhk;
     private final FileHandler<V> fhv;
 
-    private boolean running = true;
+    private volatile boolean running = true;
 
     /** Create a cache that uses default values.
-     *  Note that you must call startCleaner to have the cache fully up.
+     *  Note that you must call start to have the cache fully up.
      * @param props the configuration of the cache
      * @param fhk the FileHandler for the cache keys
      * @param fhv the FileHandler for the cache values
@@ -84,7 +88,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     /** Start the thread that cleans the cache.
      */
-    public void startCleaner () {
+    public void start () {
 	cleaner = new Thread (this, getClass ().getName () + ".cleaner");
 	cleaner.setDaemon (true);
 	cleaner.start ();
@@ -312,11 +316,17 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	return entry;
     }
 
-    public FileHandler<K> getKeyFileHandler () {
+    /** Get the file handler for the keys.
+     * @return the FileHandler for the key objects
+     */
+    FileHandler<K> getKeyFileHandler () {
 	return fhk;
     }
 
-    public FileHandler<V> getHookFileHandler () {
+    /** Get the file handler for the values.
+     * @return the FileHandler for the values
+     */
+    FileHandler<V> getHookFileHandler () {
 	return fhv;
     }
 
