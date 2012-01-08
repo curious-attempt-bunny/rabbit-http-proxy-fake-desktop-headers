@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
+import rabbit.http.HttpHeaderWithContent;
 import rabbit.io.ProxyChain;
 import rabbit.io.Resolver;
 import rabbit.proxy.Connection;
@@ -235,7 +236,8 @@ public class HttpBaseFilter implements HttpFilter {
 	    BigInteger bi = new BigInteger (val);
 	    if (bi.equals (ZERO)) {
 		if (header.getMethod ().equals ("TRACE")) {
-		    HttpHeader ret = con.getHttpGenerator ().get200 ();
+		    HttpHeaderWithContent ret =
+			con.getHttpGenerator ().get200 ();
 		    ret.setContent (header.toString (), "UTF-8");
 		    return ret;
 		}

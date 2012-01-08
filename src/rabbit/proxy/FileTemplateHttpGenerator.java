@@ -18,6 +18,7 @@ import rabbit.html.TagType;
 import rabbit.html.Token;
 import rabbit.html.TokenType;
 import rabbit.http.HttpHeader;
+import rabbit.http.HttpHeaderWithContent;
 import rabbit.http.StatusCode;
 import rabbit.util.StackTraceUtil;
 
@@ -116,8 +117,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 	    replaceTemplate (block, tag, HtmlEscapeUtils.escapeHtml (value));
     }
 
-    private void replaceTemplates (StatusCode sc,
-				   HtmlBlock block,
+    private void replaceTemplates (HtmlBlock block,
 				   TemplateData td)
 	throws IOException{
 	replace (block, "%url%", td.url);
@@ -188,7 +188,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 
     private HttpHeader getTemplated (StatusCode sc,
 				     TemplateData td) {
-	HttpHeader ret = getHeader (sc);
+	HttpHeaderWithContent ret = getHeader (sc);
 	if (td.realm != null)
 	    ret.setHeader (td.realmType + "-Authenticate",
 			   "Basic realm=\"" + td.realm + "\"");
@@ -204,7 +204,7 @@ class FileTemplateHttpGenerator extends StandardResponseHeaders {
 		    HtmlParser parser = new HtmlParser (utf8);
 		    parser.setText (buf);
 		    HtmlBlock block = parser.parse ();
-		    replaceTemplates (sc, block, td);
+		    replaceTemplates (block, td);
 		    ret.setContent (block.toString (), "UTF-8");
 		} finally {
 		    Closer.close (dis, logger);

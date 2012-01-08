@@ -17,8 +17,6 @@ public class HttpHeader extends GeneralHeader {
     private String httpVersion = null;
     private int hashCodeValue;
 
-    private transient byte[] content;
-
     /** Create a new HTTPHeader from scratch
      */
     public HttpHeader () {
@@ -37,8 +35,6 @@ public class HttpHeader extends GeneralHeader {
 	sb.append (getRequestLine ());
 	sb.append (Header.CRLF);
 	super.fillBuffer (sb);
-	if (content != null)
-	    sb.append (content);
     }
 
     /** Convert this header to a byte[].
@@ -52,13 +48,7 @@ public class HttpHeader extends GeneralHeader {
 	sb.append (Header.CRLF);
 	super.fillBuffer (sb);
 	try {
-	    byte[] header = sb.toString ().getBytes ("US-ASCII");
-	    if (content == null)
-		return header;
-	    byte[] res = new byte[header.length + content.length];
-	    System.arraycopy (header, 0, res, 0, header.length);
-	    System.arraycopy (content, 0, res, header.length, content.length);
-	    return res;
+	    return sb.toString ().getBytes ("US-ASCII");
 	} catch (UnsupportedEncodingException e) {
 	    throw new RuntimeException ("Failed to find ascii", e);
 	}
@@ -264,38 +254,11 @@ public class HttpHeader extends GeneralHeader {
 		getMethod ().equals ("CONNECT"));
     }
 
-    /** Set the Content for the request/response
-     *  Mostly not used for responses.
-     *  As a side effect the &quot;Content-Length&quot; header is also set.
-     * @param content the binary content.
-     */
-    public void setContent (byte[] content) {
-	this.content = content;
-	setHeader ("Content-Length", "" + content.length);
-    }
-
-    /** Set the Content for the request/response
-     *  Mostly not used for responses.
-     *  As a side effect the &quot;Content-Length&quot; header is also set.
-     * @param data the String to set
-     * @param charset the character encoding to use when converting the
-     *        string to bytes
-     * @throws IllegalArgumentException if the charset is unknown
-     */
-    public void setContent (String data, String charset) {
-	try {
-	    setContent (data.getBytes (charset));
-	} catch (UnsupportedEncodingException e) {
-	    throw new IllegalArgumentException ("Unknown encoding: " + charset,
-						e);
-	}
-    }
-
     /** Get the current content for this request/response.
      * @return the resource associated with this header, may be null
      */
     public byte[] getContent () {
-	return content;
+	return null;
     }
 
     @Override public void read (DataInput in) throws IOException {

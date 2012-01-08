@@ -11,6 +11,7 @@ import java.util.Set;
 import rabbit.html.HtmlEscapeUtils;
 import rabbit.http.HttpDateParser;
 import rabbit.http.HttpHeader;
+import rabbit.http.HttpHeaderWithContent;
 import rabbit.http.StatusCode;
 import rabbit.util.Config;
 import rabbit.util.StackTraceUtil;
@@ -48,7 +49,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * getHeader ("HTTP/1.0 200 OK");
      * @return a new HttpHeader.
      */
-    public HttpHeader getHeader () {
+    public HttpHeaderWithContent getHeader () {
 	return getHeader (_200);
     }
 
@@ -56,8 +57,8 @@ class StandardResponseHeaders implements HttpGenerator {
      * @param sc the StatusCode to get a header for
      * @return a new HttpHeader.
      */
-    public HttpHeader getHeader (StatusCode sc) {
-	HttpHeader ret = new HttpHeader ();
+    public HttpHeaderWithContent getHeader (StatusCode sc) {
+	HttpHeaderWithContent ret = new HttpHeaderWithContent ();
 	ret.setStatusLine (sc.getStatusLine ("HTTP/1.1"));
 	ret.setHeader ("Server", serverIdentity);
 	ret.setHeader ("Content-type", "text/html; charset=utf-8");
@@ -71,7 +72,7 @@ class StandardResponseHeaders implements HttpGenerator {
     /** Get a 200 Ok header
      * @return a 200 HttpHeader .
      */
-    public HttpHeader get200 () {
+    public HttpHeaderWithContent get200 () {
 	return getHeader (_200);
     }
 
@@ -133,7 +134,7 @@ class StandardResponseHeaders implements HttpGenerator {
      */
     public HttpHeader get400 (Exception exception) {
 	// in most cases we should have a header out already, but to be sure...
-	HttpHeader header = getHeader (_400);
+	HttpHeaderWithContent header = getHeader (_400);
 	String page = HtmlPage.getPageHeader (con, _400) +
 	    "Unable to handle request:<br><b><pre>\n" +
 	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
@@ -153,7 +154,7 @@ class StandardResponseHeaders implements HttpGenerator {
 
     private HttpHeader getAuthorizationHeader (String realm, URL url,
 					       StatusCode sc, String type) {
-	HttpHeader header = getHeader (sc);
+	HttpHeaderWithContent header = getHeader (sc);
 	header.setHeader (type + "-Authenticate",
 			  "Basic realm=\"" + realm + "\"");
 	String page = HtmlPage.getPageHeader (con, sc) +
@@ -168,7 +169,7 @@ class StandardResponseHeaders implements HttpGenerator {
      */
     public HttpHeader get403 () {
 	// in most cases we should have a header out already, but to be sure...
-	HttpHeader header = getHeader (_403);
+	HttpHeaderWithContent header = getHeader (_403);
 	String page = HtmlPage.getPageHeader (con, _403) +
 	    "That is forbidden</body></html>";
 	header.setContent (page, "UTF-8");
@@ -180,7 +181,7 @@ class StandardResponseHeaders implements HttpGenerator {
      */
     public HttpHeader get404 (String file) {
 	// in most cases we should have a header out already, but to be sure...
-	HttpHeader header = getHeader (_404);
+	HttpHeaderWithContent header = getHeader (_404);
 	String page = HtmlPage.getPageHeader (con, _404) +
 	    "File '" + HtmlEscapeUtils.escapeHtml (file) +
 	    "' not found.</body></html>";
@@ -201,7 +202,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a suitable HttpHeader.
      */
     public HttpHeader get412 () {
-	HttpHeader header = getHeader (_412);
+	HttpHeaderWithContent header = getHeader (_412);
 	String page = HtmlPage.getPageHeader (con, _412) + "</body></html>\n";
 	header.setContent (page, "UTF-8");
 	return header;
@@ -211,7 +212,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a suitable HttpHeader.
      */
     public HttpHeader get414 () {
-	HttpHeader header = getHeader (_414);
+	HttpHeaderWithContent header = getHeader (_414);
 	String page = HtmlPage.getPageHeader (con, _414) + "</body></html>\n";
 	header.setContent (page, "UTF-8");
 	return header;
@@ -222,7 +223,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a suitable HttpHeader.
      */
     public HttpHeader get416 (Throwable exception) {
-	HttpHeader header = getHeader (_416);
+	HttpHeaderWithContent header = getHeader (_416);
 	String page = HtmlPage.getPageHeader (con, _416) +
 	    "Request out of range: " +
 	    HtmlEscapeUtils.escapeHtml (exception.toString ()) +
@@ -236,7 +237,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a suitable HttpHeader.
      */
     public HttpHeader get417 (String expectation) {
-	HttpHeader header = getHeader (_417);
+	HttpHeaderWithContent header = getHeader (_417);
 	String page = HtmlPage.getPageHeader (con, _417) +
 	    "RabbIT does not handle the '" +
 	    HtmlEscapeUtils.escapeHtml (expectation) +
@@ -252,7 +253,7 @@ class StandardResponseHeaders implements HttpGenerator {
     public HttpHeader get500 (String url, Throwable exception) {
 	// in most cases we should have a header out already, but to be sure...
 	// normally this only thrashes the page... Too bad.
-	HttpHeader header = getHeader (_500);
+	HttpHeaderWithContent header = getHeader (_500);
 	Properties props = System.getProperties ();
 	HttpProxy proxy = getProxy ();
 	Config config = proxy.getConfig ();
@@ -303,7 +304,7 @@ class StandardResponseHeaders implements HttpGenerator {
      * @return a suitable HttpHeader.
      */
     public HttpHeader get504 (String uri, Throwable e) {
-	HttpHeader header = getHeader (_504);
+	HttpHeaderWithContent header = getHeader (_504);
 	try {
 	    boolean dnsError = (e instanceof UnknownHostException);
 	    URL u = new URL (uri);

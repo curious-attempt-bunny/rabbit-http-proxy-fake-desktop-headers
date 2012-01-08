@@ -2,6 +2,7 @@ package rabbit.proxy;
 
 import java.net.URL;
 import rabbit.http.HttpHeader;
+import rabbit.http.HttpHeaderWithContent;
 
 /** An interface describing the methods for http header generation.
  *
@@ -17,7 +18,7 @@ public interface HttpGenerator {
     /** Get a 200 Ok header
      * @return a 200 HttpHeader .
      */
-    HttpHeader get200 ();
+    HttpHeaderWithContent get200 ();
 
     /** Get a 206 Partial Content header. 
      * @param ifRange if the request is a range request.
