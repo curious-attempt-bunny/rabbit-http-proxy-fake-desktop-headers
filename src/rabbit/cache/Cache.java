@@ -1,6 +1,6 @@
 package rabbit.cache;
 
-import java.util.Collection;
+import java.io.File;
 import java.util.logging.Logger;
 
 /** A cache, mostly works like a map in lookup, insert and delete.
@@ -52,9 +52,9 @@ public interface Cache<K, V> {
      * @param real false if this is a temporary cache file, 
      *             true if it is a realized entry.
      * @param extension the cache entry extension.
-     * @return the file name of the new entry
+     * @return the file for the new entry
      */
-    String getEntryName (long id, boolean real, String extension);
+    File getEntryName (long id, boolean real, String extension);
 
     /** Reserve space for a CacheEntry with key o.
      * @param k the key for the CacheEntry.
@@ -91,7 +91,7 @@ public interface Cache<K, V> {
     /** Get the CacheEntries in the cache.
      * @return an Enumeration of the CacheEntries.
      */    
-    Collection<? extends CacheEntry<K, V>> getEntries ();
+    Iterable<? extends CacheEntry<K, V>> getEntries ();
 
     /** Make sure that the cache is written to the disk.
      */

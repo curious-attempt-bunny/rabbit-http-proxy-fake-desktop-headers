@@ -93,12 +93,7 @@ public class CacheStatus extends BaseMetaHandler {
 	    if (count < start || count > end)
 		continue;
 	    HttpHeader lheader = null;
-	    try {
-		lheader = lister.getKey ();
-	    } catch (CacheException e) {
-		logger.log (Level.WARNING, 
-			    "Failed to get key: " + lister, e);
-	    }
+	    lheader = lister.getKey ();
 	    if (lheader == null)
 		continue;
 	    // reading the data hook will cause lots of file reading... 

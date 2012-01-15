@@ -20,11 +20,6 @@ import org.khelekore.rnio.impl.Closer;
  */
 class FileData<T> implements Serializable {
     private static final long serialVersionUID = 1;
-    private long fileSize;
-
-    public long getFileSize () {
-	return fileSize;
-    }
     
     /** Read the data from disk. 
      * @param name the name of the file to read the data from
@@ -33,12 +28,11 @@ class FileData<T> implements Serializable {
      * @throws IOException if file reading fails
      * @return the object read
      */
-    protected T readData (String name, FileHandler<T> fh, Logger logger)
+    protected T readData (File name, FileHandler<T> fh, Logger logger)
 	throws IOException {
-	File f = new File (name);
-	if (!f.exists())
+	if (!name.exists())
 	    return null;
-	FileInputStream fis = new FileInputStream (f);
+	FileInputStream fis = new FileInputStream (name);
 	try {
 	    InputStream is = new GZIPInputStream (fis);
 	    try {
@@ -51,10 +45,9 @@ class FileData<T> implements Serializable {
 	}
     }
 
-    protected long writeData (String name, FileHandler<T> fh, T data,
+    protected long writeData (File name, FileHandler<T> fh, T data,
 			      Logger logger) throws IOException {
-	File f = new File (name);
-	FileOutputStream fos = new FileOutputStream (f);
+	FileOutputStream fos = new FileOutputStream (name);
 	try {
 	    OutputStream os = new GZIPOutputStream (fos);
 	    try {
@@ -65,7 +58,6 @@ class FileData<T> implements Serializable {
 	} finally {
 	    Closer.close (fos, logger);
 	}
-	fileSize = f.length ();
-	return fileSize;
+	return name.length ();
     }    
 }

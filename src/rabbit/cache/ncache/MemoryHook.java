@@ -20,7 +20,7 @@ class MemoryHook<V> extends FiledHook<V> {
     }
 
     @Override public <K> V getData (NCache<K, V> cache,
-				    NCacheEntry<K, V> entry,
+				    NCacheData<K, V> entry,
 				    Logger logger) {
 	return data;
     }

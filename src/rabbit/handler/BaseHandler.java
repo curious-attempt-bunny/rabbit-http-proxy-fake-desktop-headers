@@ -256,10 +256,8 @@ public class BaseHandler
 	if (entry == null || !mayCache)
 	    return;
 	Cache<HttpHeader, HttpHeader> cache = con.getProxy ().getCache ();
-	String entryName = cache.getEntryName (entry.getId (), false, null);
-	File f = new File (entryName);
-	long filesize = f.length ();
-	entry.setSize (filesize);
+	File entryName = cache.getEntryName (entry.getId (), false, null);
+	long filesize = entryName.length ();
 	String cl = response.getHeader ("Content-Length");
 	if (cl == null) {
 	    response.removeHeader ("Transfer-Encoding");
@@ -328,7 +326,7 @@ public class BaseHandler
 			      Cache<HttpHeader, HttpHeader> cache) 
 	throws CacheException {
 	HttpHeader oldRequest = old.getKey ();
-	HttpHeader oldResponse = old.getDataHook (cache);
+	HttpHeader oldResponse = old.getDataHook ();
 	String cr = oldResponse.getHeader ("Content-Range");
 	if (cr == null) {
 	    String cl = oldResponse.getHeader ("Content-Length");
@@ -362,13 +360,12 @@ public class BaseHandler
 
     private void setupPartial (CacheEntry<HttpHeader, HttpHeader> oldEntry,
 			       CacheEntry<HttpHeader, HttpHeader> entry,
-			       String entryName,
+			       File entryName,
 			       Cache<HttpHeader, HttpHeader> cache)
 	throws IOException {
 	if (oldEntry != null) {
-	    String oldName = cache.getEntryName (oldEntry.getId (), true, null);
-	    PartialCacher pc =
-		new PartialCacher (oldName, response);
+	    File oldName = cache.getEntryName (oldEntry.getId (), true, null);
+	    PartialCacher pc = new PartialCacher (oldName, response);
 	    cacheChannel = pc.getChannel ();
 	    try {
 		updateRange (oldEntry, pc, cache);
@@ -381,8 +378,7 @@ public class BaseHandler
 	    return;
 	}
 	entry.setDataHook (response);
-	PartialCacher pc =
-	    new PartialCacher (entryName, response);
+	PartialCacher pc = new PartialCacher (entryName, response);
 	cacheChannel = pc.getChannel ();
     }
 
@@ -397,7 +393,7 @@ public class BaseHandler
 		getLogger ().config ("Expiry =< 0 set on entry, will not cache");
 		return;
 	    }
-	    String entryName = cache.getEntryName (entry.getId (), false, null);
+	    File entryName = cache.getEntryName (entry.getId (), false, null);
 	    if (response.getStatusCode ().equals ("206")) {
 		CacheEntry<HttpHeader, HttpHeader> oldEntry = null;
 		try {
@@ -546,9 +542,8 @@ public class BaseHandler
 		cacheChannel.close ();
 		Cache<HttpHeader, HttpHeader> cache =
 		    con.getProxy ().getCache ();
-		String entryName = cache.getEntryName (entry.getId (), false, null);
-		File f = new File (entryName);
-		deleteFile (f);
+		File entryName = cache.getEntryName (entry.getId (), false, null);
+		deleteFile (entryName);
 		entry = null;
 	    } catch (IOException e) {
 		getLogger ().log (Level.WARNING,

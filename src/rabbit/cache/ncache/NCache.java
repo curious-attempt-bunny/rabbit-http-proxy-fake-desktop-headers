@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -23,6 +24,8 @@ import rabbit.cache.Cache;
 import rabbit.cache.CacheConfiguration;
 import rabbit.cache.CacheEntry;
 import rabbit.cache.CacheException;
+import rabbit.cache.utils.CacheConfigurationBase;
+import rabbit.cache.utils.CacheUtils;
 import rabbit.io.FileHelper;
 import rabbit.util.SProperties;
 
@@ -42,8 +45,6 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     private static final String DEFAULT_CLEAN_LOOP = "60";  // 1 minute
 
     private static final String CACHEINDEX = "cache.index"; // the indexfile.
-    private static final String TEMPDIR = "temp";
-    private static final int FILES_PER_DIR = 256;             // reasonable?
 
     private Configuration configuration = new Configuration ();
     private boolean changed = false;                  // have we changed?
@@ -52,9 +53,9 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     private long fileNo = 0;
     private long currentSize = 0;
-    private String dir = null;
-    private Map<FiledKey<K>, NCacheEntry<K, V>> htab = null;
-    private List<NCacheEntry<K, V>> vec = null;
+    private File dir = null;
+    private Map<FiledKey<K>, NCacheData<K, V>> htab = null;
+    private List<NCacheData<K, V>> vec = null;
 
     private File tempdir = null;
     private final Object dirLock = new Object ();
@@ -81,8 +82,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	throws IOException {
 	this.fhk = fhk;
 	this.fhv = fhv;
-	htab = new HashMap<FiledKey<K>, NCacheEntry<K, V>> ();
-	vec = new ArrayList<NCacheEntry<K, V>> ();
+	htab = new HashMap<FiledKey<K>, NCacheData<K, V>> ();
+	vec = new ArrayList<NCacheData<K, V>> ();
 	setup (props);
     }
 
@@ -98,16 +99,13 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	return configuration;
     }
 
-    private class Configuration implements CacheConfiguration {
-	private long maxSize = 0;
-	private long cacheTime = 0;
-
+    private class Configuration extends CacheConfigurationBase {
 	public URL getCacheDir () {
 	    r.lock ();
 	    try {
 		if (dir == null)
 		    return null;
-		return new File (dir).toURI ().toURL ();
+		return dir.toURI ().toURL ();
 	    } catch (MalformedURLException e) {
 		return null;
 	    } finally {
@@ -128,8 +126,8 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		    writeCacheIndex ();
 
 		// does new dir exist?
-		dir = newDir;
-		File dirtest = new File (dir);
+		dir = new File (newDir);
+		File dirtest = dir;
 		boolean readCache = true;
 		if (!dirtest.exists ()) {
 		    FileHelper.mkdirs (dirtest);
@@ -142,7 +140,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		}
 
 		synchronized (dirLock) {
-		    tempdir = new File (dirtest, TEMPDIR);
+		    tempdir = new File (dirtest, CacheUtils.TEMPDIR);
 		    if (!tempdir.exists ()) {
 			FileHelper.mkdirs (tempdir);
 			if (!tempdir.exists ()) {
@@ -159,39 +157,6 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    } finally {
 		w.unlock ();
 	    }
-	}
-
-	/** Get the maximum size for this cache.
-	 * @return the maximum size in bytes this cache.
-	 */
-	public synchronized long getMaxSize () {
-	    return maxSize;
-	}
-
-	/** Set the maximum size for this cache.
-	 * @param newMaxSize the new maximum size for the cache.
-	 */
-	public synchronized void setMaxSize (long newMaxSize) {
-	    maxSize = newMaxSize;
-	}
-
-	/** Get the number of miliseconds the cache stores things usually.
-	 *  This is the standard expiretime for objects, but you can set it for
-	 *  CacheEntries individially if you want to.
-	 *  NOTE 1: dont trust that an object will be in the cache this long.
-	 *  NOTE 2: dont trust that an object will be removed from the cache
-	 *          when it expires.
-	 * @return the number of miliseconds objects are stored normally.
-	 */
-	public synchronized long getCacheTime () {
-	    return cacheTime;
-	}
-
-	/** Set the standard expiry-time for CacheEntries
-	 * @param newCacheTime the number of miliseconds to keep objects normally.
-	 */
-	public synchronized void setCacheTime (long newCacheTime) {
-	    cacheTime = newCacheTime;
 	}
     }
 
@@ -237,12 +202,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      * @param e the NCacheEntry to check
      * @return true if the cache data is valid, false otherwise
      */
-    private boolean checkHook (NCacheEntry<K, V> e) {
-	FiledHook<V> hook = e.getRealDataHook ();
+    private boolean checkHook (NCacheData<K, V> e) {
+	FiledHook<V> hook = e.getDataHook ();
 	if (hook != null) {
-	    String entryName = getEntryName (e.getId (), true, "hook");
-	    File f = new File (entryName);
-	    if (!f.exists ())
+	    File entryName = getEntryName (e.getId (), true, "hook");
+	    if (!entryName.exists ())
 		return false;
 	}
 	// no hook is legal.
@@ -254,46 +218,21 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      * @return the CacheEntry or null (if not found).
      */
     public CacheEntry<K, V> getEntry (K k) throws CacheException {
-	NCacheEntry<K, V> ent;
-	r.lock ();
-	try {
-	    ent = htab.get (new MemoryKey<K> (k));
-	} finally {
-	    r.unlock ();
-	}
-	if (ent != null && !checkHook (ent)) {
+	NCacheData<K, V> cacheEntry = getCurrentData (k);
+	if (cacheEntry != null && !checkHook (cacheEntry)) {
 	    // bad entry...
-	    remove (ent.getKey ());
+	    remove (k);
 	}
 	/* If you want to implement LRU or something like that:
-	   if (ent != null)
-	       ent.setVisited (new Date ());
+	   if (cacheEntry != null)
+	       cacheEntry.setVisited (System.currentTimeMillis ());
 	*/
-	return ent;
+	return getEntry (cacheEntry);
     }
 
-    /** Get the file name for a cache entry.
-     * @param id the id of the cache entry
-     * @param real false if this is a temporary cache file,
-     *             true if it is a realized entry.
-     */
-    public String getEntryName (long id, boolean real, String extension) {
-	StringBuilder sb = new StringBuilder (50);
-	sb.append (dir);
-	sb.append (File.separator);
-	if (!real) {
-	    sb.append (TEMPDIR);
-	} else {
-	    long fdir = id / FILES_PER_DIR;
-	    sb.append (fdir);
-	}
-	sb.append (File.separator);
-	sb.append (id);
-	if (extension != null)
-	    sb.append ('.').append (extension);
-	return sb.toString ();
+    public File getEntryName (long id, boolean real, String extension) {
+	return CacheUtils.getEntryName (dir, id, real, extension);
     }
-
 
     /** Reserve space for a CacheEntry with key o.
      * @param k the key for the CacheEntry.
@@ -309,11 +248,9 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	} finally {
 	    w.unlock ();
 	}
-	// allocate the entry.
-	NCacheEntry<K, V> entry = new NCacheEntry<K, V> (k, newId);
-	entry.setExpires (System.currentTimeMillis () +
-			  configuration.getCacheTime ());
-	return entry;
+	long now = System.currentTimeMillis ();
+	long expires = now + configuration.getCacheTime ();
+	return new NCacheEntry<K, V> (newId, now, expires, 0, k, null);
     }
 
     /** Get the file handler for the keys.
@@ -341,56 +278,28 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
     }
 
     private void addEntry (NCacheEntry<K, V> ent) throws CacheException {
-	File cfile = new File (getEntryName (ent.getId (), false, null));
-	if (!cfile.exists()) {
+	File cfile = getEntryName (ent.getId (), false, null);
+	if (!cfile.exists())
 	    return;
-	}
 
-	long fdir = ent.getId () / FILES_PER_DIR;
-	File f = new File (dir, "" + fdir);
-	String newName = getEntryName (ent.getId (), true, null);
-	File nFile = new File (newName);
+	File newName = getEntryName (ent.getId (), true, null);
+	File cacheDir = newName.getParentFile ();
 	synchronized (dirLock) {
-	    if (f.exists ()) {
-		if (f.isFile ()) {
-		    logger.warning ("Wanted cachedir is a file: " + f);
-		}
-		// good situation...
-	    } else {
-		try {
-		    FileHelper.mkdirs (f);
-		} catch (IOException e) {
-		    logger.log (Level.WARNING,
-				"Could not create directory: " + f,
-				e);
-		}
-	    }
-	    if (!cfile.renameTo (nFile))
+	    ensureCacheDirIsValid (cacheDir);
+	    if (!cfile.renameTo (newName))
 		logger.severe ("Failed to renamve file from: " +
 			       cfile.getAbsolutePath () + " to" +
-			       nFile.getAbsolutePath ());
+			       newName.getAbsolutePath ());
 	}
-	cfile = new File (newName);
-	ent.setSize (cfile.length ());
-	ent.setCacheTime (System.currentTimeMillis ());
-
-	K realKey = ent.getKey ();
-	FiledKey<K> fk = new FiledKey<K> ();
-	try {
-	    storeHook (ent);
-	    fk.storeKey (this, ent, realKey, logger);
-	} catch (IOException e) {
-	    // TODO: do we need to clean anything up?
-	    throw new CacheException ("Failed to store data", e);
-	}
+	cfile = newName;
+	NCacheData<K, V> data = getData (ent, cfile);
 	w.lock ();
 	try {
-	    ent.setKey (fk);
-	    remove (realKey);
-	    htab.put (fk, ent);
+	    remove (ent.getKey ());
+	    htab.put (data.getKey (), data);
 	    currentSize +=
-		ent.getSize () + ent.getKeySize () + ent.getHookSize ();
-	    vec.add (ent);
+		data.getSize () + data.getKeySize () + data.getHookSize ();
+	    vec.add (data);
 	} finally {
 	    w.unlock ();
 	}
@@ -398,13 +307,17 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	changed = true;
     }
 
-    private void storeHook (NCacheEntry<K, V> nent)
-	throws IOException, CacheException {
-	V hook = nent.getDataHook (this);
-	if (hook != null) {
-	    FiledHook<V> fh = new FiledHook<V> ();
-	    fh.storeHook (this, nent, getHookFileHandler (), hook, logger);
-	    nent.setFiledDataHook (fh);
+    private void ensureCacheDirIsValid (File f) {
+	if (f.exists ()) {
+	    if (f.isFile ())
+		logger.warning ("Wanted cachedir is a file: " + f);
+	    // good situation...
+	} else {
+	    try {
+		FileHelper.mkdirs (f);
+	    } catch (IOException e) {
+		logWarning ("Could not create directory: " + f, e);
+	    }
 	}
     }
 
@@ -412,13 +325,20 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      */
     public void entryChanged (CacheEntry<K, V> ent, K newKey, V newHook)
 	throws CacheException {
-	NCacheEntry<K, V> nent = (NCacheEntry<K, V>)ent;
-	FiledHook<V> fh = new FiledHook<V> ();
+	NCacheData<K, V> data = getCurrentData (ent.getKey ());
+	if (data == null) {
+	    Thread.dumpStack ();
+	    logger.warning ("Failed to find changed entry so ignoring: " +
+			    ent.getId ());
+	    return;
+	}
 	try {
-	    fh.storeHook (this, nent, getHookFileHandler (), newHook, logger);
-	    nent.setFiledDataHook (fh);
-	    FiledKey<K> fk = new FiledKey<K> ();
-	    fk.storeKey (this, nent, newKey, logger);
+	    data.updateExpireAndSize (ent);
+	    long id = ent.getId ();
+	    FiledWithSize<FiledKey<K>> fkws = storeKey (newKey, id);
+	    data.setKey (fkws.t, fkws.size);
+	    FiledWithSize<FiledHook<V>> fhws = storeHook (newHook, id);
+	    data.setDataHook (fhws.t, fhws.size);
 	} catch (IOException e) {
 	    throw new CacheException ("Failed to update entry: entry: " + ent +
 				      ", newKey: " + newKey, e);
@@ -427,10 +347,20 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	}
     }
 
-    private void removeHook (String base, String extension) throws IOException {
-	String hookName = base + extension;
+    private NCacheData<K, V> getCurrentData (K key) {
+	MemoryKey<K> mkey = new MemoryKey<K> (key);
+	r.lock ();
+	try {
+	    return htab.get (mkey);
+	} finally {
+	    r.unlock ();
+	}
+    }
+
+    private void removeHook (File base, String extension) throws IOException {
+	String hookName = base.getName () + extension;
 	// remove possible hook before file...
-	File hfile = new File (hookName);
+	File hfile = new File (base.getParentFile (), hookName);
 	if (hfile.exists ())
 	    FileHelper.delete (hfile);
     }
@@ -439,7 +369,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      * @param k the key for the CacheEntry.
      */
     public void remove (K k) throws CacheException{
-	CacheEntry<K, V> r;
+	NCacheData<K, V> r;
 	w.lock ();
 	try {
 	    if (k == null) {
@@ -462,14 +392,12 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
 	if (r != null) {
 	    // this removes the key => htab.remove can not work..
-	    String entryName = getEntryName (r.getId (), true, null);
+	    File entryName = getEntryName (r.getId (), true, null);
 	    try {
 		removeHook (entryName, ".hook");
 		removeHook (entryName, ".key");
-		NCacheEntry<K, V> nent = (NCacheEntry<K, V>)r;
-		nent.setKey (null);
-		r.setDataHook (null);
-		File cfile = new File (entryName);
+		r.setDataHook (null, 0);
+		File cfile = entryName;
 		if (cfile.exists ()) {
 		    File p = cfile.getParentFile ();
 		    FileHelper.delete (cfile);
@@ -516,56 +444,93 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
      *  Note! some entries may be invalid if you have a corruct cache.
      * @return a Collection of the CacheEntries.
      */
-    public Collection<NCacheEntry<K, V>> getEntries () {
+    public Iterable<NCacheEntry<K, V>> getEntries () {
 	// Defensive copy so that nothing happen when the user iterates
 	r.lock ();
 	try {
-	    return new ArrayList<NCacheEntry<K, V>> (htab.values ());
+	    return new NCacheIterator (htab.values ());
 	} finally {
 	    r.unlock ();
 	}
     }
 
+    private class NCacheIterator 
+	implements Iterable<NCacheEntry<K, V>>, Iterator<NCacheEntry<K, V>> {
+	private Iterator<NCacheData<K, V>> dataIterator;
+
+	public NCacheIterator (Collection<NCacheData<K, V>> c) {
+	    dataIterator = new ArrayList<NCacheData<K, V>> (c).iterator ();
+	}
+	
+	public Iterator<NCacheEntry<K, V>> iterator () {
+	    return this;
+	}
+
+	public NCacheEntry<K, V> next () {
+	    try {
+		return getEntry (dataIterator.next ());
+	    } catch (CacheException e) {
+		throw new RuntimeException ("Failed to get entry", e);
+	    }
+	}
+
+	public boolean hasNext () {
+	    return dataIterator.hasNext ();
+	}
+
+	public void remove () {
+	    throw new UnsupportedOperationException ();
+	}
+    }
+
     /** Read the info from an old cache.
      */
-    @SuppressWarnings( "unchecked" )
     private void readCacheIndex () {
-	long fileNo;
-	long currentSize;
 	try {
-	    String name = dir + File.separator + CACHEINDEX;
-	    FileInputStream fis = new FileInputStream (name);
-	    ObjectInputStream is =
-		new ObjectInputStream (new GZIPInputStream (fis));
-	    fileNo = is.readLong ();
-	    currentSize = is.readLong ();
-	    int size = is.readInt ();
-	    Map<FiledKey<K>, NCacheEntry<K, V>> htab =
-		new HashMap<FiledKey<K>, NCacheEntry<K, V>> ((int)(size * 1.2));
-	    for (int i = 0; i < size; i++) {
-		FiledKey<K> fk = (FiledKey<K>)is.readObject ();
-		fk.setCache (this);
-		NCacheEntry<K, V> entry = (NCacheEntry<K, V>)is.readObject ();
-		entry.setKey (fk);
-		htab.put (fk, entry);
-	    }
-	    List<NCacheEntry<K, V>> vec =
-		(List<NCacheEntry<K, V>>)is.readObject ();
-	    is.close ();
-
-	    // Only set internal state if we managed to get it all.
-	    this.fileNo = fileNo;
-	    this.currentSize = currentSize;
-	    this.htab = htab;
-	    this.vec = vec;
+	    File index = new File (dir, CACHEINDEX);
+	    if (index.exists ())
+		readCacheIndex (index);
+	    else
+		logger.info ("No cache index found: " + index +
+			     ", treating as empty cache");
 	} catch (IOException e) {
-	    logger.log (Level.WARNING,
-			"Couldnt read " + dir + File.separator + CACHEINDEX +
-			", This is bad( but not serius).\nTreating as empty. ",
+	    logWarning ("Couldnt read " + dir + File.separator + CACHEINDEX +
+			". This is bad (but not serius).\nTreating as empty. ",
 			e);
 	} catch (ClassNotFoundException e) {
 	    logger.log (Level.SEVERE, "Couldn't find classes", e);
 	}
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private void readCacheIndex (File index)
+	throws IOException, ClassNotFoundException {
+	long fileNo;
+	long currentSize;
+	FileInputStream fis = new FileInputStream (index);
+	ObjectInputStream is =
+	    new ObjectInputStream (new GZIPInputStream (fis));
+	fileNo = is.readLong ();
+	currentSize = is.readLong ();
+	int size = is.readInt ();
+	Map<FiledKey<K>, NCacheData<K, V>> htab =
+	    new HashMap<FiledKey<K>, NCacheData<K, V>> ((int)(size * 1.2));
+	for (int i = 0; i < size; i++) {
+	    FiledKey<K> fk = (FiledKey<K>)is.readObject ();
+	    fk.setCache (this);
+	    NCacheData<K, V> entry = (NCacheData<K, V>)is.readObject ();
+	    htab.put (fk, entry);
+	}
+	List<NCacheData<K, V>> vec =
+	    (List<NCacheData<K, V>>)is.readObject ();
+	is.close ();
+
+	// Only set internal state if we managed to get it all.
+	this.fileNo = fileNo;
+	this.currentSize = currentSize;
+	this.htab = htab;
+	this.vec = vec;
+
     }
 
     /** Make sure that the cache is written to the disk.
@@ -589,7 +554,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		os.writeLong (fileNo);
 		os.writeLong (currentSize);
 		os.writeInt (htab.size ());
-		for (Map.Entry<FiledKey<K>, NCacheEntry<K, V>> me :
+		for (Map.Entry<FiledKey<K>, NCacheData<K, V>> me :
 			 htab.entrySet ()) {
 		    os.writeObject (me.getKey ());
 		    os.writeObject (me.getValue ());
@@ -600,8 +565,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    }
 	    os.close ();
 	} catch (IOException e) {
-	    logger.log (Level.WARNING,
-			"Couldnt write " + dir + File.separator + CACHEINDEX +
+	    logWarning ("Couldnt write " + dir + File.separator + CACHEINDEX +
 			", This is serious!\n",
 			e);
 	}
@@ -623,21 +587,22 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    // actually for a busy cache this will lag...
 	    // but I dont care for now...
 	    long milis = System.currentTimeMillis ();
-	    Collection<CacheEntry<K, V>> entries;
+	    Map<FiledKey<K>, NCacheData<K, V>> hc;
 	    r.lock ();
 	    try {
-		entries = new ArrayList<CacheEntry<K, V>> (htab.values ());
+		hc = new HashMap<FiledKey<K>, NCacheData<K, V>> (htab);
 	    } finally {
 		r.unlock ();
 	    }
-	    for (CacheEntry<K, V> ce : entries) {
+	    for (Map.Entry<FiledKey<K>, NCacheData<K, V>> ce : hc.entrySet ()) {
 		try {
-		    long exp = ce.getExpires ();
+		    long exp = ce.getValue ().getExpires ();
 		    if (exp < milis)
-			remove (ce.getKey ());
+			remove (ce.getKey ().getData ());
+		} catch (IOException e) {
+		    logWarning ("Failed to remove expired entry", e);
 		} catch (CacheException e) {
-		    logger.log (Level.WARNING,
-				"Failed to remove expired entry", e);
+		    logWarning ("Failed to remove expired entry", e);
 		}
 	    }
 
@@ -652,10 +617,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    while (getCurrentSize () > maxSize) {
 		w.lock ();
 		try {
-		    remove (vec.get (0).getKey ());
+		    remove (vec.get (0).getKey ().getData ());
+		} catch (IOException e) {
+		    logWarning ("Failed to remove entry", e);
 		} catch (CacheException e) {
-		    logger.log (Level.WARNING,
-				"Failed to remove entry", e);
+		    logWarning ("Failed to remove entry", e);
 		} finally {
 		    w.unlock ();
 		}
@@ -717,5 +683,68 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 
     public Logger getLogger () {
 	return logger;
+    }
+
+    private NCacheEntry<K, V> getEntry (NCacheData<K, V> data)
+	throws CacheException {
+	if (data == null)
+	    return null;
+	try {
+	    K keyData = data.getKey ().getData ();
+	    V hook = data.getDataHook ().getData (this, data, getLogger ());
+	    return new NCacheEntry<K, V> (data.getId (), data.getCacheTime (),
+					  data.getExpires (), data.getSize (), 
+					  keyData, hook);
+	} catch (IOException e) {
+	    throw new CacheException ("Failed to get: entry: " + data, e);
+	}
+    }
+
+    private NCacheData<K, V> getData (NCacheEntry<K, V> entry, 
+				      File cacheFile) 
+	throws CacheException {
+	long id = entry.getId ();
+	long size = cacheFile.length ();
+	try {
+	    FiledWithSize<FiledKey<K>> fkws = storeKey (entry.getKey (), id);
+	    FiledWithSize<FiledHook<V>> fhws =
+		storeHook (entry.getDataHook (), id);
+	    return new NCacheData<K, V> (id, entry.getCacheTime (),
+					 entry.getExpires (), size,
+					 fkws.t, fkws.size, fhws.t, fhws.size);
+	} catch (IOException e) {
+	    // TODO: do we need to clean anything up?
+	    throw new CacheException ("Failed to store data", e);
+	}
+    }
+
+    private FiledWithSize<FiledKey<K>> storeKey (K realKey, long id)
+	throws IOException {
+	FiledKey<K> fk = new FiledKey<K> ();
+	long size = fk.storeKey (this, id, realKey, logger);
+	return new FiledWithSize<FiledKey<K>> (fk, size);
+    }
+
+    private FiledWithSize<FiledHook<V>> storeHook (V hook, long id)
+	throws IOException {
+	if (hook == null)
+	    return null;
+	FiledHook<V> fh = new FiledHook<V> ();
+	long size = fh.storeHook (this, id, getHookFileHandler (), hook, logger);
+	return new FiledWithSize<FiledHook<V>> (fh, size);
+    }
+    
+    private static class FiledWithSize<T> {
+	private final T t;
+	private final long size;
+
+	public FiledWithSize (T t, long size) {
+	    this.t = t;
+	    this.size = size;
+	}
+    }
+
+    private void logWarning (String s, Exception e) {
+	logger.log (Level.WARNING, s, e);
     }
 }

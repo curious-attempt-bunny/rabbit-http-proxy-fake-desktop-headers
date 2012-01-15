@@ -320,7 +320,7 @@ public class Connection {
 
 	    rh.setEntry (cache.getEntry (request));
 	    if (rh.getEntry () != null)
-		rh.setDataHook (rh.getEntry ().getDataHook (proxy.getCache ()));
+		rh.setDataHook (rh.getEntry ().getDataHook ());
 	    checkNoStore (rh.getEntry ());
 	    // Check if cached item is too old
 	    if (!rh.getCond ().checkMaxStale (request, rh) && checkMaxAge (rh))

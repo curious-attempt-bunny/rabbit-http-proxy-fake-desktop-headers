@@ -312,16 +312,16 @@ public class ImageHandler extends BaseHandler {
 
     private void convertAndGetBest () throws IOException {
 	HttpProxy proxy = con.getProxy ();
-	String entryName =
+	File imageFile =
 	    proxy.getCache ().getEntryName (entry.getId (), false, null);
+	String imageName = imageFile.getName ();
 
 	if (getLogger ().isLoggable (Level.FINER))
 	    getLogger ().finer (request.getRequestURI () + 
-				": Trying to convert image: " + entryName);
-	File entry = new File (entryName);
-	ImageConversionResult icr = internalConvertImage (entry, entryName);
+				": Trying to convert image: " + imageName);
+	ImageConversionResult icr = internalConvertImage (imageFile, imageName);
 	try {
-	    convertedFile = selectImage (entry, icr);
+	    convertedFile = selectImage (imageFile, icr);
 	} finally {
 	    if (icr.convertedFile != null && icr.convertedFile.exists ())
 		deleteFile (icr.convertedFile);
@@ -342,7 +342,7 @@ public class ImageHandler extends BaseHandler {
 			  icr.origSize + "=" + 
 			  sRatio);
 	content.release ();
-	content = new FileResourceSource (entryName, con.getNioHandler (),
+	content = new FileResourceSource (imageFile, con.getNioHandler (),
 					  con.getProxy ().getBufferHandler ());
     }
 
@@ -381,8 +381,9 @@ public class ImageHandler extends BaseHandler {
     private ImageConversionResult 
     internalConvertImage (File input, String entryName) throws IOException {
 	long origSize = size;
-	File convertedFile = new File (entryName + ".c");
-	File typeFile = new File (entryName + ".type");
+	File p = input.getParentFile ();
+	File convertedFile = new File (p, entryName + ".c");
+	File typeFile = new File (p, entryName + ".type");
 	imageConverter.convertImage (input, convertedFile, 
 				     request.getRequestURI ());
 	return new ImageConversionResult (origSize, convertedFile, typeFile);

@@ -1,9 +1,9 @@
 package rabbit.cache.ncache;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import rabbit.cache.Cache;
-import rabbit.cache.CacheEntry;
 
 /** A class to store the cache entrys data hook on file. 
  *  A Http Header is a big thing so it is nice to write it to disk. 
@@ -19,9 +19,8 @@ class FiledHook<V> extends FileData<V> {
 	return "hook";
     }
 
-    private <K> String getFileName (Cache<K, V> cache, 
-				    CacheEntry<K, V> entry) {
-	return cache.getEntryName (entry.getId (), true, getExtension ());
+    private <K> File getFileName (Cache<K, V> cache, long id) {
+	return cache.getEntryName (id, true, getExtension ());
     }
     
     /** Get the hooked data. 
@@ -32,9 +31,9 @@ class FiledHook<V> extends FileData<V> {
      * @return the data read from the file cache
      * @throws IOException if reading the data fails
      */
-    public <K> V getData (NCache<K, V> cache, NCacheEntry<K, V> entry,
+    public <K> V getData (NCache<K, V> cache, NCacheData<K, V> entry,
 			  Logger logger) throws IOException {
-	return readData (getFileName (cache, entry),
+	return readData (getFileName (cache, entry.getId ()),
 			 cache.getHookFileHandler (), 
 			 logger);
     }
@@ -42,7 +41,7 @@ class FiledHook<V> extends FileData<V> {
     /** Set the hooked data. 
      * @param <K> the type of the keys used in the cache
      * @param cache the Caching storing the data
-     * @param entry the CacheEntry that holds the data
+     * @param id the id of the cache entry storing this data
      * @param fh the FileHandler used to do the data conversion
      * @param hook the data to store
      * @param logger the Logger to use
@@ -50,11 +49,11 @@ class FiledHook<V> extends FileData<V> {
      * @throws IOException if reading the data fails
      */
     protected <K> long storeHook (NCache<K, V> cache, 
-				  NCacheEntry<K, V> entry, 
+				  long id,
 				  FileHandler<V> fh, 
 				  V hook,
 				  Logger logger) 
 	throws IOException {
-	return writeData (getFileName (cache, entry), fh, hook, logger);
+	return writeData (getFileName (cache, id), fh, hook, logger);
     }    
 }

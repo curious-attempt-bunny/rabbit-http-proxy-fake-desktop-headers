@@ -1,5 +1,6 @@
 package rabbit.proxy;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -22,7 +23,7 @@ public class PartialCacher {
      * @param response the response header
      * @throws IOException if updating the cached resource fails
      */
-    public PartialCacher (String fileName, HttpHeader response) 
+    public PartialCacher (File fileName, HttpHeader response) 
 	throws IOException {
 	//Content-Range: 0-4/25\r\n
 	String cr = response.getHeader ("Content-Range");

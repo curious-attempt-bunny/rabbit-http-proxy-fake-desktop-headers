@@ -1,5 +1,6 @@
 package rabbit.cache.ncache;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -25,17 +26,17 @@ class FiledKey<K> extends FileData<K> {
     }
 
     protected <V> long storeKey (NCache<K, V> cache,
-				 NCacheEntry<K, V> entry, K key, 
+				 long id, K key, 
 				 Logger logger) 
 	throws IOException {
 	setCache (cache);
 	hashCode = key.hashCode ();
-	id = entry.getId ();
+	this.id = id;
 	return writeData (getFileName (), cache.getKeyFileHandler (),
 			  key, logger);
     }
 
-    private String getFileName () {
+    private File getFileName () {
 	return cache.getEntryName (id, true, getExtension ());
     }
 

@@ -1,12 +1,6 @@
 package rabbit.cache.ncache;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import rabbit.cache.Cache;
 import rabbit.cache.CacheEntry;
-import rabbit.cache.CacheException;
 
 /** A cached object.
  *
@@ -15,140 +9,40 @@ import rabbit.cache.CacheException;
  *
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
  */
-class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
-    private static final long serialVersionUID = 20050430;
-
+class NCacheEntry<K, V> extends NCacheElementBase implements CacheEntry<K, V> {
     /** @serial The key for the object usually a URL or a filename.*/
-    private FiledKey<K> key = null;
-    /** @serial The date this entry was cached. */
-    private long cachetime = -1;
-    /** @serial The date this entry expires.*/
-    private long expires = Long.MAX_VALUE;
-    /** @serial The number of bytes this object is.*/
-    private long size = 0;
-    /** @serial The unique id of the object.*/
-    private long id = 0;
+    private K key = null;
     /** @serial The hooked data of the cached object. */
-    private FiledHook<V> datahook;
-
-    /** Not to be used, for externalizable only. */
-    public NCacheEntry () {
-	// empty
-    }
+    private V datahook;
 
     /** Create a new CacheEntry for given key and filename
-     * @param key the key for the object.
      * @param id the identity of this entry
+     * @param cachetime the date this entry was cached
+     * @param expires the date this entry exipres
+     * @param size the number of bytes the actual cached resource is
+     * (excluding overhead)
+     * @param key the key for the object.
+     * @param datahook the additional data
      */
-    public NCacheEntry (K key, long id) {
-	this.key = new MemoryKey<K> (key);
-	this.id = id;
-    }
-
-    /** Set the key were holding data for
-     * @param key the key we have data for
-     */
-    void setKey (FiledKey<K> key) {
+    public NCacheEntry (long id, long cachetime, long expires,
+			long size, K key, V datahook) {
+	super (id, cachetime, expires, size);
 	this.key = key;
+	this.datahook = datahook;
     }
 
     /** Get the key were holding data for
      * @return the keyobject
      */
-    public K getKey () throws CacheException {
-	try {
-	    return key.getData ();
-	} catch (IOException e) {
-	    throw new CacheException ("Failed to get key data", e);
-	}
-    }
-
-    /** Get the date this object was cached.
-     * @return a date.
-     */
-    public long getCacheTime () {
-	return cachetime;
-    }
-
-    /** Set the date this object was cached.
-     * @param date the date.
-     */
-    public void setCacheTime (long date) {
-	cachetime = date;
-    }
-
-    /** Get the size of our file
-     * @return the size of our data
-     */
-    public long getSize () {
-	return size;
-    }
-
-    /** Get the size of the key
-     */
-    public long getKeySize () {
-	return key != null ? key.getFileSize () : 0;
-    }
-
-    /** Get the size of the hook
-     */
-    public long getHookSize () {
-	return datahook != null ? datahook.getFileSize () : 0;
-    }
-
-    /** Sets the size of our data
-     * @param size the new Size
-     */
-    public void setSize (long size) {
-	this.size = size;
-    }
-
-    /** Get the expiry-date of our file
-     * @return the expiry date of our data
-     */
-    public long getExpires () {
-	return expires;
-    }
-
-    /** Sets the expirydate of our data
-     * @param d the new expiry-date.
-     */
-    public void setExpires (long d) {
-	this.expires = d;
-    }
-
-    /** Get the id of our entry.
-     * @return the id of the entry.
-     */
-    public long getId () {
-	return id;
-    }
-
-    /** Get the real data hook.
-     * @return the FiledHook for the value
-     */
-    protected FiledHook<V> getRealDataHook () {
-	return datahook;
+    public K getKey () {
+	return key;
     }
 
     /** Get the hooked data.
-     * @param cache the NCache this entry lives in.
      * @return the the hooked data.
-     * @throws CacheException if the data hook could not be read
      */
-    public V getDataHook (Cache<K, V> cache) throws CacheException {
-	try {
-	    return datahook.getData ((NCache<K, V>)cache, this, cache.getLogger ());
-	} catch (IOException e) {
-	    throw new CacheException ("Failed to get data hook", e);
-	}
-    }
-
-    /** Set the hooked data.
-     * @param o the new filed hook
-     */
-    void setFiledDataHook (FiledHook<V> o) {
-	this.datahook = o;
+    public V getDataHook () {
+	return datahook;
     }
 
     /** Sets the data hook for this cache object.
@@ -156,30 +50,6 @@ class NCacheEntry<K, V> implements Externalizable, CacheEntry<K, V> {
      * @param o the new data.
      */
     public void setDataHook (V o) {
-	this.datahook = new MemoryHook<V> (o);
-    }
-
-    /** Read the cache entry from the object input.
-     */
-    @SuppressWarnings( "unchecked" )
-    public void readExternal (ObjectInput in)
-	throws IOException, ClassNotFoundException {
-	key = (FiledKey<K>)in.readObject ();
-	cachetime = in.readLong ();
-	expires = in.readLong ();
-	size = in.readLong ();
-	id = in.readLong ();
-	datahook = (FiledHook<V>)in.readObject ();
-    }
-
-    /** Write the object to the object output.
-     */
-    public void writeExternal (ObjectOutput out) throws IOException {
-	out.writeObject (key);
-	out.writeLong (cachetime);
-	out.writeLong (expires);
-	out.writeLong (size);
-	out.writeLong (id);
-	out.writeObject (datahook);
+	this.datahook = o;
     }
 }

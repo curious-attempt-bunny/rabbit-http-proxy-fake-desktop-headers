@@ -9,6 +9,13 @@ public class CacheException extends Exception {
     public static final long serialVersionUID = 1;
 
     /**
+     * @param message a message describing the real problem
+     */
+    public CacheException (String message) {
+	super (message);
+    }
+
+    /**
      * @param message the message string
      * @param cause the exception that really caused the problem
      */
