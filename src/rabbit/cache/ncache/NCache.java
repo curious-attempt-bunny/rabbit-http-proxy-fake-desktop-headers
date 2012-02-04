@@ -40,8 +40,6 @@ import rabbit.util.SProperties;
  */
 public class NCache<K, V> implements Cache<K, V>, Runnable {
     private static final String DIR = "/tmp/rabbit/cache";  // standard dir.
-    private static final String DEFAULT_SIZE  = "10";       // 10 MB.
-    private static final String DEFAULT_CACHE_TIME = "24";  // 1 day.
     private static final String DEFAULT_CLEAN_LOOP = "60";  // 1 minute
 
     private static final String CACHEINDEX = "cache.index"; // the indexfile.
@@ -656,23 +654,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	String cachedir =
 	    config.getProperty ("directory", DIR);
 	configuration.setCacheDir (cachedir);
-
-	String cmsize = config.getProperty ("maxsize", DEFAULT_SIZE);
-	try {
-	    // size is in MB
-	    configuration.setMaxSize (Long.parseLong (cmsize) * 1024 * 1024);
-	} catch (NumberFormatException e) {
-	    logger.warning ("Bad number for cache maxsize: '" + cmsize + "'");
-	}
-
-	String ctime = config.getProperty ("cachetime", DEFAULT_CACHE_TIME);
-	try {
-	    // time is given in hours
-	    configuration.setCacheTime (Long.parseLong (ctime) * 1000 * 60 * 60);
-	} catch (NumberFormatException e) {
-	    logger.warning ("Bad number for cache cachetime: '" + ctime + "'");
-	}
-
+	configuration.setup (logger, config);
 	String ct = config.getProperty ("cleanloop", DEFAULT_CLEAN_LOOP);
 	try {
 	    setCleanLoopTime (Integer.parseInt (ct) * 1000); // in seconds.

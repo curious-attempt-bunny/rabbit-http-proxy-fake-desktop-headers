@@ -17,8 +17,7 @@ class ConditionalChecker {
 
     boolean checkConditional (Connection con, HttpHeader header,
 			      RequestHandler rh,
-			      boolean mustRevalidate)
-	throws CacheException {
+			      boolean mustRevalidate) {
 	if (mustRevalidate)
 	    return setupRevalidation (con, header, rh);
 	return (checkVary (con, header, rh) ||
@@ -30,8 +29,7 @@ class ConditionalChecker {
     }
 
     private boolean checkVary (Connection con, HttpHeader req,
-			       RequestHandler rh)
-	throws CacheException {
+			       RequestHandler rh) {
 	CacheEntry<HttpHeader, HttpHeader> entry = rh.getEntry ();
 	if (entry == null)
 	    return false;

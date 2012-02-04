@@ -387,7 +387,14 @@ public class BaseHandler
     protected void addCache () {
 	if (mayCache && mayCacheFromSize ()) {
 	    Cache<HttpHeader, HttpHeader> cache = con.getProxy ().getCache ();
-	    entry = cache.newEntry (request);
+	    try {
+		entry = cache.newEntry (request);
+	    } catch (CacheException e) {
+		getLogger ().log (Level.WARNING,
+				  "Failed to create new entry for: " +
+				  request + ", will not cache",
+				  e);
+	    }
 	    setCacheExpiry ();
 	    if (entry == null) {
 		getLogger ().config ("Expiry =< 0 set on entry, will not cache");

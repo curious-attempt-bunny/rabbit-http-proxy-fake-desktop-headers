@@ -1,6 +1,8 @@
 package rabbit.cache;
 
 import java.net.URL;
+import java.util.logging.Logger;
+import rabbit.util.SProperties;
 
 /** A description of cache configuration.
  * @author <a href="mailto:robo@khelekore.org">Robert Olofsson</a>
@@ -34,4 +36,10 @@ public interface CacheConfiguration {
      * @return the location, null if no physical location is used.
      */
     URL getCacheDir ();
+
+    /** Set the internal state from the given properties
+     * @param logger the Logger to use for warnings or errors
+     * @param config the properties to use
+     */
+    void setup (Logger logger, SProperties config);
 }

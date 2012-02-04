@@ -59,8 +59,9 @@ public interface Cache<K, V> {
     /** Reserve space for a CacheEntry with key o.
      * @param k the key for the CacheEntry.
      * @return a new CacheEntry initialized for the cache.
+     * @throws CacheException upon failure to reserve a new entry.
      */
-    CacheEntry<K, V> newEntry (K k);
+    CacheEntry<K, V> newEntry (K k) throws CacheException;
 
     /** Insert a CacheEntry into the cache.
      * @param ent the CacheEntry to store.
