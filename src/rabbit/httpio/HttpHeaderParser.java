@@ -41,6 +41,15 @@ public class HttpHeaderParser implements LineListener {
 	lr = new LineReader (strictHttp);
     }
 
+    /** Restore the parser to its initial state
+     */
+    public void reset () {
+	header = null;
+	head = null;
+	append = false;
+	headerRead = false;
+    }
+
     /** Get the current header
      * @return the header as it looks at this moment
      */

@@ -55,6 +55,7 @@ public class HttpHeaderReader extends BaseSocketHandler
      * @throws IOException if a header can not be parsed
      */
     public void readHeader () throws IOException {
+	headerParser.reset ();
 	if (!getBufferHandle ().isEmpty ()) {
 	    ByteBuffer buffer = getBuffer ();
 	    startParseAt = buffer.position ();
