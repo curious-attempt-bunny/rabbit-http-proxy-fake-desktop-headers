@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -75,6 +76,7 @@ public class TestHttpHeaderReader {
 	testPartialHeader ();
 	testNonZeroStart ();
 	testNonZeroStartPartial ();
+	testLargeHeader ();
     }
 
     private void waitForFinish () {
@@ -163,6 +165,15 @@ public class TestHttpHeaderReader {
 	writeTo.write (rest);
     }
 
+    private void testLargeHeader () throws IOException {
+	HttpHeader header = getLargeHttpHeader ();
+	BufferHandle clientHandle = new CacheBufferHandle (bufferHandler);
+	HttpHeaderReader reader = getReader (clientHandle);
+	reader.readHeader ();
+	ByteBuffer buf = ByteBuffer.wrap (header.getBytes ());
+	writeTo.write (buf);
+    }
+
     private HttpHeaderReader getReader (BufferHandle clientHandle) {
 	listener.waitForReady ();
 	return new HttpHeaderReader (readFrom, clientHandle, nioHandler,
@@ -173,6 +184,16 @@ public class TestHttpHeaderReader {
 	HttpHeader header = getSimpleHttpHeader ();
 	ByteBuffer buf = ByteBuffer.wrap (header.getBytes ());
 	return new SimpleBufferHandle (buf);
+    }
+
+    private HttpHeader getLargeHttpHeader () {
+	HttpHeader header = getSimpleHttpHeader ();
+	char[] chars = new char[5000];
+	Arrays.fill (chars, 'A');
+	String val = new String (chars);
+	header.addHeader ("Large", val);
+	header.addHeader ("Last", "Last");
+	return header;
     }
 
     private HttpHeader getSimpleHttpHeader () {
