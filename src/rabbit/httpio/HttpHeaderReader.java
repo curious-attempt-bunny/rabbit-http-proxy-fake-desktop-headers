@@ -92,8 +92,11 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    // read http request
 	    // make sure we have room for reading.
 	    ByteBuffer buffer = getBuffer ();
-	    int pos = buffer.position ();
+	    int dataLimit = buffer.limit ();
+	    if (dataLimit == buffer.capacity ())
+		dataLimit = buffer.position ();
 	    buffer.limit (buffer.capacity ());
+	    buffer.position (dataLimit);
 	    int read = getChannel ().read (buffer);
 	    if (read == -1) {
 		buffer.position (buffer.limit ());
@@ -109,7 +112,7 @@ public class HttpHeaderReader extends BaseSocketHandler
 	    }
 	    tl.read (read);
 	    buffer.position (startParseAt);
-	    buffer.limit (read + pos);
+	    buffer.limit (read + dataLimit);
 	    parseBuffer (buffer);
 	} catch (BadHttpHeaderException e) {
 	    closeDown ();
