@@ -596,7 +596,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		try {
 		    long exp = ce.getValue ().getExpires ();
 		    if (exp < milis)
-			remove (ce.getKey ().getData ());
+			removeKey (ce.getKey ());
 		} catch (IOException e) {
 		    logWarning ("Failed to remove expired entry", e);
 		} catch (CacheException e) {
@@ -615,7 +615,7 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	    while (getCurrentSize () > maxSize) {
 		w.lock ();
 		try {
-		    remove (vec.get (0).getKey ().getData ());
+		    removeKey (vec.get (0).getKey ());
 		} catch (IOException e) {
 		    logWarning ("Failed to remove entry", e);
 		} catch (CacheException e) {
@@ -630,6 +630,11 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 		changed = false;
 	    }
 	}
+    }
+
+    private void removeKey (FiledKey<K> fk) throws IOException, CacheException {
+	fk.setCache (this);
+	remove (fk.getData ());
     }
 
     public void stop () {
@@ -672,7 +677,9 @@ public class NCache<K, V> implements Cache<K, V>, Runnable {
 	if (data == null)
 	    return null;
 	try {
-	    K keyData = data.getKey ().getData ();
+	    FiledKey<K> key = data.getKey ();
+	    key.setCache (this);
+	    K keyData = key.getData ();
 	    V hook = data.getDataHook ().getData (this, data, getLogger ());
 	    return new NCacheEntry<K, V> (data.getId (), data.getCacheTime (),
 					  data.getExpires (), data.getSize (), 
