@@ -195,6 +195,14 @@ public class Connection {
 	    requestVersion = "HTTP/0.9";
 	requestVersion = requestVersion.toUpperCase ();
 	request.addHeader ("Via", requestVersion + " RabbIT");
+	request.removeHeader("User-Agent");
+	request.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.5; rv:11.0) Gecko/20100101 Firefox/11.0");
+	request.removeHeader("Accept");
+	request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+	request.removeHeader("Accept-Encoding");
+	request.addHeader("Accept-Encoding", "gzip, deflate");
+	request.removeHeader("Accept-Language");
+	request.addHeader("Accept-Language", "en-us,en;q=0.5");
 
 	requestLine = request.getRequestLine ();
 	getCounter ().inc ("Requests");
